@@ -107,14 +107,7 @@ class Iem_wbb:
         self.savepacient_button.set_sensitive(True)
         self.changepacientbutton.set_sensitive(False)
 
-        for x in [self.axis, self.axis2, self.axis3]:
-            x.clear()
-            x.set_ylabel('AP')
-            x.set_xlabel('ML')
-            x.set_xlim(-433/2, 433/2)
-            x.set_ylim(-238/2, 238/2)
-            x.axhline(0, color='grey')
-            x.axvline(0, color='grey')
+        self.clear_charts()
 
         self.progressbar.set_fraction(0)
 
@@ -329,17 +322,11 @@ class Iem_wbb:
 
         self.is_pacient = True
 
-        #Clears graphs and label contents
+        #Clears charts and label contents
         self.pacient_label_in_load.set_text("")
         self.combo_box_set_exam.remove_all()
-        for x in [self.axis, self.axis2, self.axis3]:
-            x.clear()
-            x.set_ylabel('AP')
-            x.set_xlabel('ML')
-            x.set_xlim(-433/2, 433/2)
-            x.set_ylim(-238/2, 238/2)
-            x.axhline(0, color='grey')
-            x.axvline(0, color='grey')
+
+        self.clear_charts()
 
         #Fill the main window with pacient data
         self.ID_entry.set_text(self.pacient['ID'])
@@ -395,18 +382,20 @@ class Iem_wbb:
             self.cur.execute(select)
             row = self.cur.fetchall()
 
-            self.APs = []
-            self.MLs = []
-
-            for x in row[0][0]:
-                self.APs.append(float(x))
-            for x in row[0][1]:
-                self.MLs.append(float(x))
+            self.APs = np.zeros_like(row[0][0])
+            self.MLs = np.zeros_like(row[0][1])
+            for i in range(len(row[0][0])):
+                self.APs[i] = row[0][0][i]
+                self.MLs[i] = row[0][1][i]
 
             self.exam_date = row[0][2]
 
     def on_load_exam_button_clicked(self, widget):
         self.is_exam = False
+        dt = 0.040
+        tTotal = self.amostra * dt
+        tempo = np.arange(0, 30.72, 0.040)
+        print(len(tempo))
 
         max_absoluto_AP = calc.valorAbsoluto(min(self.APs), max(self.APs))
         max_absoluto_ML = calc.valorAbsoluto(min(self.MLs), max(self.MLs))
@@ -416,39 +405,67 @@ class Iem_wbb:
 
         print('max_absoluto_AP:',max_absoluto_AP,'max_absoluto_ML:',max_absoluto_ML)
 
-        for x in [self.axis, self.axis2, self.axis3]:
-            x.clear()
-            x.set_ylabel('AP')
-            x.set_xlabel('ML')
-            x.set_xlim(-433/2, 433/2)
-            x.set_ylim(-238/2, 238/2)
-            x.axhline(0, color='grey')
-            x.axvline(0, color='grey')
+        self.clear_charts()
 
-        self.axis.plot(self.MLs, self.APs,'.-',color='r')
-        self.canvas.draw()
-
-        APs_Processado, MLs_Processado = calc.geraAP_ML(self.APs, self.MLs)
-
+        APs_Processado, MLs_Processado, AP_, ML_ = calc.geraAP_ML(self.APs, self.MLs)
+        print("AP_ = ", AP_)
+        print("ML_ = ", ML_)
+        #RD
         dis_resultante_total = calc.distanciaResultante(APs_Processado, MLs_Processado)
+
+        #? Isto não faz sentido
         dis_resultante_AP = calc.distanciaResultanteParcial(APs_Processado)
         dis_resultante_ML = calc.distanciaResultanteParcial(MLs_Processado)
 
+        #MDIST
         dis_media = calc.distanciaMedia(dis_resultante_total)
 
-        dis_rms_total = calc.distRMS(dis_resultante_total)
-        dis_rms_AP = calc.distRMS(dis_resultante_AP)
-        dis_rms_ML = calc.distRMS(dis_resultante_ML)
+        #MDIST_AP
+        dis_mediaAP = calc.distanciaMedia_(APs_Processado)
+        #MDIST_ML
+        dis_mediaML = calc.distanciaMedia_(MLs_Processado)
 
+        print("MDIST = ", dis_media)
+        print("MDIST_AP = ", dis_mediaAP)
+        print("MDIST_ML = ", dis_mediaML)
+
+        #RDIST
+        dis_rms_total = calc.distRMS(dis_resultante_total)
+        #dis_rms_AP = calc.distRMS(dis_resultante_AP)
+        #dis_rms_ML = calc.distRMS(dis_resultante_ML)
+        #RDIST_AP
+        dis_rms_AP = calc.distRMS(APs_Processado)
+        #RDIST_AP
+        dis_rms_ML = calc.distRMS(MLs_Processado)
+
+        print("RDIST = ", dis_rms_total)
+        print("RDIST_AP = ", dis_rms_AP)
+        print("RDIST_ML = ", dis_rms_ML)
+
+        #totex_total = calc.totex(APs_Processado, MLs_Processado)
+        #TOTEX
         totex_total = calc.totex(APs_Processado, MLs_Processado)
+        #TOTEX_AP
         totex_AP = calc.totexParcial(APs_Processado)
+        #TOTEX_ML
         totex_ML = calc.totexParcial(MLs_Processado)
 
-        mvelo_total = calc.mVelo(totex_total, 20)
-        mvelo_AP = calc.mVelo(totex_AP, 20)
-        mvelo_ML =  calc.mVelo(totex_ML, 20)
+        print("TOTEX = ", totex_total)
+        print("TOTEX_AP = ", totex_AP)
+        print("TOTEX_ML = ", totex_ML)
 
-        self.entry_Mdist.set_text(str(dis_media))
+        #MVELO
+        mvelo_total = calc.mVelo(totex_total, tTotal)
+        #MVELO_AP
+        mvelo_AP = calc.mVelo(totex_AP, tTotal)
+        #MVELO_ML
+        mvelo_ML =  calc.mVelo(totex_ML, tTotal)
+
+        print("MVELO = ", mvelo_total)
+        print("MVELO_AP = ", mvelo_AP)
+        print("MVELO_ML = ", mvelo_ML)
+
+        '''self.entry_Mdist_TOTAL.set_text(str(dis_media))
 
         self.entry_Rdist_TOTAL.set_text(str(dis_rms_total))
         self.entry_Rdist_AP.set_text(str(dis_rms_AP))
@@ -460,21 +477,37 @@ class Iem_wbb:
 
         self.entry_MVELO_TOTAL.set_text(str(mvelo_total))
         self.entry_MVELO_AP.set_text(str(mvelo_AP))
-        self.entry_MVELO_ML.set_text(str(mvelo_ML))
+        self.entry_MVELO_ML.set_text(str(mvelo_ML))'''
 
-        max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
-        max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
+        #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
+        #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
 
-        max_absoluto_AP *=1.25
-        max_absoluto_ML *=1.25
+        max_absoluto_AP = np.absolute(APs_Processado).max()
+        max_absoluto_ML = np.absolute(MLs_Processado).max()
+
+        max_absoluto_AP *=1.05
+        max_absoluto_ML *=1.05
 
         print('max_absoluto_AP:', max_absoluto_AP, 'max_absoluto_ML:', max_absoluto_ML)
 
-        self.axis2.set_xlim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis2.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis2.plot(MLs_Processado, APs_Processado,'.-',color='g')
-        self.canvas2.draw()
-        self.is_exam = True
+        self.axis_0_OA.set_xlim(-max_absoluto_ML, max_absoluto_ML)
+        self.axis_0_OA.set_ylim(-max_absoluto_AP, max_absoluto_AP)
+        self.axis_0_OA.plot(MLs_Processado, APs_Processado,'.-',color='r')
+        self.canvas_0_OA.draw()
+
+        '''self.axis_0_OF.set_xlim(-max_absoluto_ML, max_absoluto_ML)
+        self.axis_0_OF.set_ylim(-max_absoluto_AP, max_absoluto_AP)
+        self.axis_0_OF.plot(MLs_Processado, APs_Processado,'.-',color='g')
+        self.canvas_0_OF.draw()'''
+
+        self.axis_1_AP_OA.set_ylim(-max_absoluto_AP, max_absoluto_AP)
+        self.axis_1_AP_OA.plot(tempo, APs_Processado,'-',color='b')
+        self.canvas_1_AP_OA.draw()
+
+        self.axis_1_ML_OA.set_ylim(-max_absoluto_ML, max_absoluto_ML)
+        self.axis_1_ML_OA.plot(tempo, MLs_Processado,'-',color='g')
+        self.canvas_1_ML_OA.draw()
+
 
     #Show new_device_window
     def on_new_device_activate(self, menuitem, data=None):
@@ -529,6 +562,7 @@ class Iem_wbb:
     def on_disconnect_activate(self, menuitem, data=None):
         if(self.wiimote):
             self.wiimote.close()
+            self.wiimote = None
             self.is_connected = False
             self.battery_label.set_text("Bateria:")
             self.status_image.set_from_file("./media/bt_red.png")
@@ -695,16 +729,25 @@ class Iem_wbb:
     def on_button_press_event(self, widget, event):
 
         if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS and event.button == 1:
-            if(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas):
+            if(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_0_OA):
                 print("Janela Avançada")
-                self.relative = self.boxOriginal
-                self.child = self.canvas
-            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas2):
-                self.relative = self.boxProcessado
-                self.child = self.canvas2
-            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas3):
-                self.relative = self.boxFourier
-                self.child = self.canvas3
+                self.relative = self.box_0_OA
+                self.child = self.canvas_0_OA
+            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_0_OF):
+                self.relative = self.box_0_OF
+                self.child = self.canvas_0_OF
+            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_AP_OA):
+                self.relative = self.box_1_AP_OA
+                self.child = self.canvas_1_AP_OA
+            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_AP_OF):
+                self.relative = self.box_1_AP_OF
+                self.child = self.canvas_1_AP_OF
+            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_ML_OA):
+                self.relative = self.box_1_ML_OA
+                self.child = self.canvas_1_ML_OA
+            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_ML_OF):
+                self.relative = self.box_1_ML_OF
+                self.child = self.canvas_1_ML_OF
 
             self.relative.remove(self.child)
             self.boxAdvanced.pack_start(self.child, expand=True, fill=True, padding=0)
@@ -803,14 +846,7 @@ class Iem_wbb:
     def on_start_capture_button_clicked(self, widget):
         self.stand_up_window.hide()
 
-        for x in [self.axis, self.axis2, self.axis3]:
-            x.clear()
-            x.set_ylabel('AP')
-            x.set_xlabel('ML')
-            x.set_xlim(-433/2, 433/2)
-            x.set_ylim(-238/2, 238/2)
-            x.axhline(0, color='grey')
-            x.axvline(0, color='grey')
+        self.clear_charts()
 
         self.amostra = 768
         self.MLs = np.zeros(self.amostra)
@@ -830,7 +866,6 @@ class Iem_wbb:
 
             readings = wbb.captura1(self.wiimote)
 
-
             peso += wbb.calcWeight(readings, self.WBB['Calibração'], wbb.escala_eu)
 
             CoP_x, CoP_y =  wbb.calCoP(readings, self.WBB['Calibração'], wbb.escala_eu)
@@ -842,9 +877,10 @@ class Iem_wbb:
                 pass
 
             t1 += dt
+
         peso = peso / self.amostra
         altura = float(self.pacient['Altura'])/100.
-        imc = peso/altura**2
+        imc = peso / altura**2
 
         self.points_entry.set_text(str(self.amostra))
 
@@ -857,8 +893,8 @@ class Iem_wbb:
         self.imc.set_max_length(5)
         self.save_exam_button.set_sensitive(True)
 
-        self.axis.plot(self.MLs, self.APs,'.-',color='r')
-        self.canvas.draw()
+        self.axis_0_OA.plot(self.MLs, self.APs,'.-',color='r')
+        self.canvas_0_OA.draw()
 
         APs_Processado, MLs_Processado, AP_, ML_ = calc.geraAP_ML(self.APs, self.MLs)
         print("AP_ = ", AP_)
@@ -918,7 +954,7 @@ class Iem_wbb:
         print("MVELO_AP = ", mvelo_AP)
         print("MVELO_ML = ", mvelo_ML)
 
-        self.entry_Mdist.set_text(str(dis_media))
+        self.entry_Mdist_TOTAL.set_text(str(dis_media))
 
         self.entry_Rdist_TOTAL.set_text(str(dis_rms_total))
         self.entry_Rdist_AP.set_text(str(dis_rms_AP))
@@ -943,10 +979,10 @@ class Iem_wbb:
 
         print('max_absoluto_AP:', max_absoluto_AP, 'max_absoluto_ML:', max_absoluto_ML)
 
-        self.axis2.set_xlim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis2.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis2.plot(MLs_Processado, APs_Processado,'.-',color='g')
-        self.canvas2.draw()
+        self.axis_0_OF.set_xlim(-max_absoluto_ML, max_absoluto_ML)
+        self.axis_0_OF.set_ylim(-max_absoluto_AP, max_absoluto_AP)
+        self.axis_0_OF.plot(MLs_Processado, APs_Processado,'.-',color='g')
+        self.canvas_0_OF.draw()
 
         self.save_exam_button.set_sensitive(True)
 
@@ -968,6 +1004,33 @@ class Iem_wbb:
         self.combo_box_set_exam.set_sensitive(True)
         self.load_exam_button.set_sensitive(True)
         self.save_exam_button.set_sensitive(False)
+
+    def clear_charts(self):
+        dt = 0.040
+        tTotal = self.amostra * dt
+
+        charts_estabilograma = [self.axis_0_OA, self.axis_0_OF]
+        charts_estatocinesigrama_AP = [self.axis_1_AP_OA, self.axis_1_AP_OF]
+        charts_estatocinesigrama_ML = [self.axis_1_ML_OA, self.axis_1_ML_OF]
+        charts = charts_estabilograma + charts_estatocinesigrama_AP + charts_estatocinesigrama_ML
+
+        for a in charts:
+            a.clear()
+            if a in charts_estabilograma:
+                a.set_ylabel('Anteroposterior (AP) mm', fontsize = 16)
+                a.set_xlabel('Mediolateral (ML) mm', fontsize = 16)
+                a.set_xlim(-433/2, 433/2)
+                a.set_ylim(-238/2, 238/2)
+                a.axhline(0, color='grey')
+                a.axvline(0, color='grey')
+            if a in charts_estatocinesigrama_AP+charts_estatocinesigrama_ML:
+                a.set_xlim(0, tTotal)
+                a.set_xlabel('Tempo (s)', fontsize = 16)
+            if a in charts_estatocinesigrama_AP:
+                a.set_ylabel('Amplitude AP (mm)', fontsize = 16)
+            if a in charts_estatocinesigrama_ML:
+                a.set_ylabel('Amplitude ML (mm)', fontsize = 16)
+
 
     def verify_bt(self):
         if(self.wiimote):
@@ -1048,7 +1111,7 @@ class Iem_wbb:
         self.boxProcessado = self.iemBuilder.get_object("boxProcessado")
         self.boxFourier = self.iemBuilder.get_object("boxFourier")
         self.boxAdvanced = self.iemBuilder.get_object("boxAdvanced")
-        self.main_box = self.iemBuilder.get_object("main_box")
+        main_box = self.iemBuilder.get_object("main_box")
 
         #Images
         self.login_image = self.iemBuilder.get_object("login_image")
@@ -1065,10 +1128,8 @@ class Iem_wbb:
         self.connect_button_in_search = self.commonBuilder.get_object("connect_button_in_search")
         self.connect_in_saved_button = self.commonBuilder.get_object("connect_in_saved_button")
         self.add_as_default_button_in_add_device = self.commonBuilder.get_object("add_as_default_button_in_add_device")
-        self.capture_button = self.iemBuilder.get_object("capture_button")
         self.savepacient_button = self.iemBuilder.get_object("savepacient_button")
         self.changepacientbutton = self.iemBuilder.get_object("changepacientbutton")
-        self.save_exam_button = self.iemBuilder.get_object("save_exam_button")
         self.load_exam_button = self.iemBuilder.get_object("load_exam_button")
 
         #Entrys
@@ -1078,7 +1139,7 @@ class Iem_wbb:
         self.ID_entry = self.iemBuilder.get_object("ID_entry")
         self.weight = self.iemBuilder.get_object("weight")
         self.imc = self.iemBuilder.get_object("imc")
-        self.entry_Mdist = self.iemBuilder.get_object("mdist_")
+        self.entry_Mdist_TOTAL = self.iemBuilder.get_object("mdist_t")
         self.entry_Rdist_AP = self.iemBuilder.get_object("rdist_ap")
         self.entry_Rdist_ML = self.iemBuilder.get_object("rdist_ml")
         self.entry_Rdist_TOTAL = self.iemBuilder.get_object("rdist_t")
@@ -1104,7 +1165,7 @@ class Iem_wbb:
         self.combo_box_in_search = self.commonBuilder.get_object("combo_box_in_search")
         self.combobox_in_load_pacient = self.iemBuilder.get_object("combobox_in_load_pacient")
 
-        #Delete-events
+        #Events
         self.login_window.connect('destroy', Gtk.main_quit)
         self.register_window.connect("delete-event", self.close_register_window)
         self.search_device_window.connect("delete-event", self.main_window_delete_event)
@@ -1121,41 +1182,99 @@ class Iem_wbb:
         self.pacient_label_in_load = self.iemBuilder.get_object("pacient_label_in_load")
 
         #Charts
+        fig = plt.figure(dpi=50)
+        fig.suptitle("Olhos Abertos", fontsize=20)
+        self.axis_0_OA = fig.add_subplot(111)
+        fig2 = plt.figure(dpi=50)
+        fig2.suptitle("Olhos Fechados", fontsize=20)
+        self.axis_0_OF = fig2.add_subplot(111)
 
-        self.fig = plt.figure(dpi=50)
-        self.fig.suptitle('Original', fontsize=20)
-        self.fig2 = plt.figure(dpi=50)
-        self.fig2.suptitle('Processado', fontsize=20)
-        self.fig3 = plt.figure(dpi=50)
-        self.fig3.suptitle('Transformada de Fourier', fontsize=20)
-        self.axis = self.fig.add_subplot(111)
-        self.axis2 = self.fig2.add_subplot(111)
-        self.axis3 = self.fig3.add_subplot(111)
+        fig3 = plt.figure(dpi=50)
+        fig3.suptitle("Amplitude AP - Olhos Abertos", fontsize=20)
+        self.axis_1_AP_OA = fig3.add_subplot(111)
+        fig4 = plt.figure(dpi=50)
+        fig4.suptitle("Amplitude ML - Olhos Abertos", fontsize=20)
+        self.axis_1_ML_OA = fig4.add_subplot(111)
+        fig5 = plt.figure(dpi=50)
+        fig5.suptitle("Amplitude AP - Olhos Fechados", fontsize=20)
+        self.axis_1_AP_OF = fig5.add_subplot(111)
+        fig6 = plt.figure(dpi=50)
+        fig6.suptitle("Amplitude ML - Olhos Fechados", fontsize=20)
+        self.axis_1_ML_OF = fig6.add_subplot(111)
 
-        for a in [self.axis, self.axis2, self.axis3]:
-            a.set_ylabel('AP', fontsize = 16)
-            a.set_xlabel('ML', fontsize = 16)
-            a.set_xlim(-433/2, 433/2)
-            a.set_ylim(-238/2, 238/2)
-            a.axhline(0, color='grey')
-            a.axvline(0, color='grey')
+        self.clear_charts()
 
-        self.canvas = FigureCanvas(self.fig)
-        self.boxOriginal.pack_start(self.canvas, expand=True, fill=True, padding=0)
-        self.canvas2 = FigureCanvas(self.fig2)
-        self.boxProcessado.pack_start(self.canvas2, expand=True, fill=True, padding=0)
-        self.canvas3 = FigureCanvas(self.fig3)
-        self.boxFourier.pack_start(self.canvas3, expand=True, fill=True, padding=0)
+        self.canvas_0_OA = FigureCanvas(fig)
+        self.box_0_OA = Gtk.Box()
+        self.box_0_OA.pack_start(self.canvas_0_OA, expand=True, fill=True, padding=0)
+        self.canvas_0_OF = FigureCanvas(fig2)
+        self.box_0_OF = Gtk.Box()
+        self.box_0_OF.pack_start(self.canvas_0_OF, expand=True, fill=True, padding=0)
+
+        self.canvas_1_AP_OA = FigureCanvas(fig3)
+        self.box_1_AP_OA = Gtk.Box()
+        self.box_1_AP_OA.pack_start(self.canvas_1_AP_OA, expand=True, fill=True, padding=0)
+        self.canvas_1_ML_OA = FigureCanvas(fig4)
+        self.box_1_ML_OA = Gtk.Box()
+        self.box_1_ML_OA.pack_start(self.canvas_1_ML_OA, expand=True, fill=True, padding=0)
+        self.canvas_1_AP_OF = FigureCanvas(fig5)
+        self.box_1_AP_OF = Gtk.Box()
+        self.box_1_AP_OF.pack_start(self.canvas_1_AP_OF, expand=True, fill=True, padding=0)
+        self.canvas_1_ML_OF = FigureCanvas(fig6)
+        self.box_1_ML_OF = Gtk.Box()
+        self.box_1_ML_OF.pack_start(self.canvas_1_ML_OF, expand=True, fill=True, padding=0)
+
+        boxes = [self.box_0_OA, self.box_0_OF, self.box_1_AP_OA, self.box_1_AP_OF, self.box_1_ML_OA, self.box_1_ML_OF]
+        for b in boxes:
+            b.connect('button-press-event', self.on_button_press_event)
+
+        #Notebooks
+        main_notebook = Gtk.Notebook()
+        main_notebook.set_vexpand(True)
+        
+        estatocinesigrama = Gtk.Box()
+        estatocinesigrama.set_spacing(10)
+        estatocinesigrama.set_homogeneous(True)
+        estatocinesigrama.add(self.box_0_OA)
+        estatocinesigrama.add(self.box_0_OF)
+        
+        estabilograma_OA = Gtk.Box()
+        estabilograma_OA.pack_start(self.box_1_AP_OA, expand=True, fill=True, padding=5)
+        estabilograma_OA.pack_start(self.box_1_ML_OA, expand=True, fill=True, padding=5)
+        estabilograma_OF = Gtk.Box()
+        estabilograma_OF.pack_start(self.box_1_AP_OF, expand=True, fill=True, padding=5)
+        estabilograma_OF.pack_start(self.box_1_ML_OF, expand=True, fill=True, padding=5)
+        estabilograma = Gtk.VBox()
+        estabilograma.set_spacing(10)
+        estabilograma.set_homogeneous(True)
+        estabilograma.add(estabilograma_OA)
+        estabilograma.add(estabilograma_OF)
+        
+        main_notebook.append_page(estatocinesigrama, Gtk.Label("Estatocinesigrama"))
+        main_notebook.append_page(estabilograma, Gtk.Label("Estabilograma"))
+        main_box.add(main_notebook)
+        button_box = Gtk.ButtonBox()
+        button_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
+        self.capture_button = Gtk.Button("Capturar")
+        self.capture_button.set_sensitive(False)
+        self.capture_button.connect('clicked', self.on_capture_button_clicked)
+        self.save_exam_button = Gtk.Button("Salvar exame")
+        self.capture_button.connect('clicked', self.on_save_exam_button_clicked)
+        self.save_exam_button.set_sensitive(False)
+        button_box.add(self.capture_button)
+        button_box.add(self.save_exam_button)
+        main_box.add(button_box)
 
         #StatusBar
-        self.status_image = self.builder.get_object("status_image")
+        self.status_image = self.iemBuilder.get_object("status_image")
         self.status_image.set_from_file('./media/bt_red.png')
-        self.status_label = self.builder.get_object("status_label")
-        self.battery_label = self.builder.get_object("battery_label")
-        self.progress_bar = self.builder.get_object("progress_bar")
+        self.status_label = self.iemBuilder.get_object("status_label")
+        self.battery_label = self.iemBuilder.get_object("battery_label")
+        self.progressbar = self.iemBuilder.get_object("progressbar")
 
         ''' Login '''
         #self.login_window.show_all()
+        self.main_window.maximize()
         self.main_window.show_all()
 
 if __name__ == "__main__":
