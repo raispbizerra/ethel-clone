@@ -501,11 +501,11 @@ class Iem_wbb:
         self.canvas_0_OF.draw()'''
 
         self.axis_1_AP_OA.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis_1_AP_OA.plot(tempo, APs_Processado,'-',color='b')
+        self.axis_1_AP_OA.plot(tempo, APs_Processado, color='k')
         self.canvas_1_AP_OA.draw()
 
         self.axis_1_ML_OA.set_ylim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis_1_ML_OA.plot(tempo, MLs_Processado,'-',color='g')
+        self.axis_1_ML_OA.plot(tempo, MLs_Processado,color='m')
         self.canvas_1_ML_OA.draw()
 
 
@@ -577,7 +577,7 @@ class Iem_wbb:
         self.nt.home()
         self.boxAdvanced.remove(self.child)
         self.boxAdvanced.remove(self.nt)
-        self.relative.pack_start(self.child, expand=True, fill=True, padding=0)
+        self.parent.pack_start(self.child, expand=True, fill=True, padding=0)
         self.advanced_graphs_window.hide()
         return True
 
@@ -729,27 +729,29 @@ class Iem_wbb:
     def on_button_press_event(self, widget, event):
 
         if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS and event.button == 1:
-            if(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_0_OA):
-                print("Janela Avançada")
-                self.relative = self.box_0_OA
+            '''if(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_0_OA):
+                self.parent = self.box_0_OA
                 self.child = self.canvas_0_OA
             elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_0_OF):
-                self.relative = self.box_0_OF
+                self.parent = self.box_0_OF
                 self.child = self.canvas_0_OF
             elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_AP_OA):
-                self.relative = self.box_1_AP_OA
+                self.parent = self.box_1_AP_OA
                 self.child = self.canvas_1_AP_OA
             elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_AP_OF):
-                self.relative = self.box_1_AP_OF
+                self.parent = self.box_1_AP_OF
                 self.child = self.canvas_1_AP_OF
             elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_ML_OA):
-                self.relative = self.box_1_ML_OA
+                self.parent = self.box_1_ML_OA
                 self.child = self.canvas_1_ML_OA
             elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_ML_OF):
-                self.relative = self.box_1_ML_OF
-                self.child = self.canvas_1_ML_OF
+                self.parent = self.box_1_ML_OF
+                self.child = self.canvas_1_ML_OF'''
 
-            self.relative.remove(self.child)
+            self.child = Gtk.get_event_widget(event)
+            self.parent = self.child.get_parent()
+
+            self.parent.remove(self.child)
             self.boxAdvanced.pack_start(self.child, expand=True, fill=True, padding=0)
             self.nt = NavigationToolbar(self.child, self.advanced_graphs_window)
             self.boxAdvanced.pack_start(self.nt, expand=False, fill=True, padding=0)
@@ -1071,7 +1073,7 @@ class Iem_wbb:
         self.exam_date = None
         self.battery = None
         self.child = None
-        self.relative = None
+        self.parent = None
         self.nt = None
         self.wiimote = None
         self.is_pacient = False
