@@ -86,7 +86,6 @@ class Iem_wbb:
         self.pacient = {}
         self.is_pacient = False
 
-        self.ID_entry.set_text('')
         self.name_entry.set_text('')
         self.sex_combobox.set_active_id()
         self.age_entry.set_text('')
@@ -329,7 +328,6 @@ class Iem_wbb:
         self.clear_charts()
 
         #Fill the main window with pacient data
-        self.ID_entry.set_text(self.pacient['ID'])
         self.name_entry.set_text(self.pacient['Nome'])
         self.age_entry.set_text(self.pacient['Idade'])
         self.height_entry.set_text(self.pacient['Altura'])
@@ -774,16 +772,11 @@ class Iem_wbb:
         else:
             height = height.replace(',', '.', 1)
             self.savepacient_button.set_sensitive(False)
-            self.name_entry.set_editable(False)
-            self.age_entry.set_editable(False)
-            self.height_entry.set_editable(False)
             self.height_entry.set_text(height)
-            self.ID_entry.set_editable(False)
             self.name_entry.set_sensitive(False)
             self.sex_combobox.set_sensitive(False)
             self.age_entry.set_sensitive(False)
             self.height_entry.set_sensitive(False)
-            self.ID_entry.set_sensitive(False)
             self.capture_button.set_sensitive(True)
             if not self.modifying:
                 self.cur.execute("INSERT INTO pacients (name, sex, age, height) VALUES (%s, %s, %s, %s);",(name, sex, age, height))
@@ -792,7 +785,6 @@ class Iem_wbb:
                 row = self.cur.fetchall()
                 ID = row[0][0]
                 self.pacient = {'Nome': name, 'ID': ID, 'Sexo': sex, 'Idade': age, 'Altura': height}
-                self.ID_entry.set_text(str(ID))
             else:
                 self.cur.execute("UPDATE pacients SET sex = (%s), age = (%s), height = (%s), name = (%s) WHERE id = (%s);", (sex, age, height, name, pacient['ID']))
                 self.conn.commit()
@@ -810,7 +802,6 @@ class Iem_wbb:
         self.name_entry.set_editable(True)
         self.age_entry.set_editable(True)
         self.height_entry.set_editable(True)
-        self.ID_entry.set_editable(True)
         self.name_entry.set_sensitive(True)
         self.sex_combobox.set_sensitive(True)
         self.age_entry.set_sensitive(True)
@@ -1123,7 +1114,6 @@ class Iem_wbb:
         self.name_entry = self.iemBuilder.get_object("name_entry")
         self.age_entry = self.iemBuilder.get_object("age_entry")
         self.height_entry = self.iemBuilder.get_object("height_entry")
-        self.ID_entry = self.iemBuilder.get_object("ID_entry")
         self.weight = self.iemBuilder.get_object("weight")
         self.imc = self.iemBuilder.get_object("imc")
         self.entry_Mdist_TOTAL = self.iemBuilder.get_object("mdist_t")

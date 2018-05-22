@@ -536,6 +536,17 @@
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="new_device_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="resource">Novo</property>
+    <property name="use_fallback">True</property>
+  </object>
+  <object class="GtkImage" id="search_device_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="resource">Buscar</property>
+  </object>
   <object class="GtkApplicationWindow" id="main_window">
     <property name="can_focus">False</property>
     <property name="window_position">center</property>
@@ -544,6 +555,9 @@
     <property name="icon">../media/cadeado.png</property>
     <property name="gravity">static</property>
     <signal name="destroy" handler="on_main_window_destroy" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -768,18 +782,6 @@
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">ID:</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Nome:</property>
                                   </object>
                                   <packing>
@@ -861,20 +863,6 @@
                                 <property name="can_focus">False</property>
                                 <property name="orientation">vertical</property>
                                 <property name="spacing">10</property>
-                                <child>
-                                  <object class="GtkEntry" id="ID_entry">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="editable">False</property>
-                                    <property name="input_purpose">digits</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
                                 <child>
                                   <object class="GtkEntry" id="name_entry">
                                     <property name="visible">True</property>
@@ -1652,16 +1640,5 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="new_device_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="resource">Novo</property>
-    <property name="use_fallback">True</property>
-  </object>
-  <object class="GtkImage" id="search_device_image">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="resource">Buscar</property>
   </object>
 </interface>
