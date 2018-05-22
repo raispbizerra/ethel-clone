@@ -393,9 +393,8 @@ class Iem_wbb:
     def on_load_exam_button_clicked(self, widget):
         self.is_exam = False
         dt = 0.040
-        tTotal = self.amostra * dt
-        tempo = np.arange(0, 30.72, 0.040)
-        print(len(tempo))
+        tTotal = len(self.APs) * dt
+        tempo = np.arange(0, tTotal, 0.040)
 
         max_absoluto_AP = calc.valorAbsoluto(min(self.APs), max(self.APs))
         max_absoluto_ML = calc.valorAbsoluto(min(self.MLs), max(self.MLs))
@@ -465,7 +464,9 @@ class Iem_wbb:
         print("MVELO_AP = ", mvelo_AP)
         print("MVELO_ML = ", mvelo_ML)
 
-        '''self.entry_Mdist_TOTAL.set_text(str(dis_media))
+        self.entry_Mdist_TOTAL.set_text(str(dis_media))
+        self.entry_Mdist_AP.set_text(str(dis_mediaAP))
+        self.entry_Mdist_ML.set_text(str(dis_mediaML))
 
         self.entry_Rdist_TOTAL.set_text(str(dis_rms_total))
         self.entry_Rdist_AP.set_text(str(dis_rms_AP))
@@ -477,7 +478,7 @@ class Iem_wbb:
 
         self.entry_MVELO_TOTAL.set_text(str(mvelo_total))
         self.entry_MVELO_AP.set_text(str(mvelo_AP))
-        self.entry_MVELO_ML.set_text(str(mvelo_ML))'''
+        self.entry_MVELO_ML.set_text(str(mvelo_ML))
 
         #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
         #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
@@ -508,6 +509,7 @@ class Iem_wbb:
         self.axis_1_ML_OA.plot(tempo, MLs_Processado,color='m')
         self.canvas_1_ML_OA.draw()
 
+        self.points_entry.set_text(str(len(self.APs)))
 
     #Show new_device_window
     def on_new_device_activate(self, menuitem, data=None):
@@ -729,25 +731,6 @@ class Iem_wbb:
     def on_button_press_event(self, widget, event):
 
         if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS and event.button == 1:
-            '''if(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_0_OA):
-                self.parent = self.box_0_OA
-                self.child = self.canvas_0_OA
-            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_0_OF):
-                self.parent = self.box_0_OF
-                self.child = self.canvas_0_OF
-            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_AP_OA):
-                self.parent = self.box_1_AP_OA
-                self.child = self.canvas_1_AP_OA
-            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_AP_OF):
-                self.parent = self.box_1_AP_OF
-                self.child = self.canvas_1_AP_OF
-            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_ML_OA):
-                self.parent = self.box_1_ML_OA
-                self.child = self.canvas_1_ML_OA
-            elif(Gtk.get_event_widget(Gtk.get_current_event()) == self.canvas_1_ML_OF):
-                self.parent = self.box_1_ML_OF
-                self.child = self.canvas_1_ML_OF'''
-
             self.child = Gtk.get_event_widget(event)
             self.parent = self.child.get_parent()
 
@@ -957,6 +940,8 @@ class Iem_wbb:
         print("MVELO_ML = ", mvelo_ML)
 
         self.entry_Mdist_TOTAL.set_text(str(dis_media))
+        self.entry_Mdist_AP.set_text(str(dis_mediaAP))
+        self.entry_Mdist_ML.set_text(str(dis_mediaML))
 
         self.entry_Rdist_TOTAL.set_text(str(dis_rms_total))
         self.entry_Rdist_AP.set_text(str(dis_rms_AP))
@@ -1009,7 +994,7 @@ class Iem_wbb:
 
     def clear_charts(self):
         dt = 0.040
-        tTotal = self.amostra * dt
+        tTotal = len(self.APs) * dt
 
         charts_estabilograma = [self.axis_0_OA, self.axis_0_OF]
         charts_estatocinesigrama_AP = [self.axis_1_AP_OA, self.axis_1_AP_OF]
@@ -1057,17 +1042,17 @@ class Iem_wbb:
     def __init__(self):
 
         #Connecting to DB
-        self.conn = psycopg2.connect("dbname=iem_wbb host=localhost user=postgres password=wiibalanceboard")
+        self.conn = psycopg2.connect("dbname=iem_wbb host=localhost user=postgres password=postgres")
         #Opening DB cursor
         self.cur = self.conn.cursor()
 
-        self.APs = []
-        self.MLs = []
-        self.WBB = {}
 
         self.amostra = 768
         self.balance_CoP_x = np.zeros(self.amostra)
         self.balance_CoP_y = np.zeros(self.amostra)
+        self.APs = np.zeros(self.amostra)
+        self.MLs = np.zeros(self.amostra)
+        self.WBB = {}
 
         self.user_ID = None
         self.exam_date = None
@@ -1142,6 +1127,8 @@ class Iem_wbb:
         self.weight = self.iemBuilder.get_object("weight")
         self.imc = self.iemBuilder.get_object("imc")
         self.entry_Mdist_TOTAL = self.iemBuilder.get_object("mdist_t")
+        self.entry_Mdist_AP = self.iemBuilder.get_object("mdist_ap")
+        self.entry_Mdist_ML = self.iemBuilder.get_object("mdist_ml")
         self.entry_Rdist_AP = self.iemBuilder.get_object("rdist_ap")
         self.entry_Rdist_ML = self.iemBuilder.get_object("rdist_ml")
         self.entry_Rdist_TOTAL = self.iemBuilder.get_object("rdist_t")
@@ -1248,7 +1235,6 @@ class Iem_wbb:
         estabilograma_OF.pack_start(self.box_1_ML_OF, expand=True, fill=True, padding=5)
         estabilograma = Gtk.VBox()
         estabilograma.set_spacing(10)
-        estabilograma.set_homogeneous(True)
         estabilograma.add(estabilograma_OA)
         estabilograma.add(estabilograma_OF)
         

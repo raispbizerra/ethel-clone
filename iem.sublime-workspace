@@ -1,0 +1,896 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"ca",
+				"capture_button"
+			],
+			[
+				"pl",
+				"paralel"
+			],
+			[
+				"st",
+				"start"
+			],
+			[
+				"calc",
+				"calc_square"
+			],
+			[
+				"po",
+				"pos_j"
+			],
+			[
+				"pos",
+				"pos_i"
+			],
+			[
+				"as",
+				"async_call"
+			],
+			[
+				"return",
+				"return_dict"
+			],
+			[
+				"I",
+				"i"
+			],
+			[
+				"N",
+				"nThreads"
+			],
+			[
+				"REMO",
+				"remove_all"
+			],
+			[
+				"pacien",
+				"pacient"
+			],
+			[
+				"combo",
+				"combo_box_set_exam"
+			],
+			[
+				"pac",
+				"pac_id"
+			],
+			[
+				"mac",
+				"device_mac_in_new"
+			],
+			[
+				"gra",
+				"grab_focus"
+			],
+			[
+				"nam",
+				"device_name_in_new"
+			],
+			[
+				"F",
+				"Fourier"
+			],
+			[
+				"Tr",
+				"Transformada"
+			],
+			[
+				"Process",
+				"Processado"
+			],
+			[
+				"a",
+				"axis"
+			],
+			[
+				"Win",
+				"window"
+			],
+			[
+				"ma",
+				"maiores"
+			],
+			[
+				"s",
+				"sr"
+			],
+			[
+				"n",
+				"nThreads"
+			],
+			[
+				"NUM",
+				"number"
+			],
+			[
+				"rep",
+				"repeat"
+			],
+			[
+				"T",
+				"T_SERIAL"
+			],
+			[
+				"m",
+				"maiores"
+			],
+			[
+				"max",
+				"maximos"
+			],
+			[
+				"ra",
+				"range_start"
+			],
+			[
+				"rang",
+				"range_end"
+			],
+			[
+				"time",
+				"timeit"
+			],
+			[
+				"main",
+				"main_window"
+			],
+			[
+				"la",
+				"status_label"
+			],
+			[
+				"STO",
+				"STOCK_SAVE"
+			],
+			[
+				"set_fr",
+				"set_fraction"
+			],
+			[
+				"prog",
+				"progressbar"
+			],
+			[
+				"cur",
+				"cur"
+			],
+			[
+				"des",
+				"desconectar"
+			],
+			[
+				"co",
+				"conexao"
+			],
+			[
+				"arqui",
+				"arquivo_menu"
+			],
+			[
+				"tes",
+				"test_pontos"
+			],
+			[
+				"but",
+				"button_box"
+			],
+			[
+				"cl",
+				"clicked"
+			],
+			[
+				"pack",
+				"pack_start"
+			],
+			[
+				"calibration_by_p",
+				"calibration_by_points_image"
+			],
+			[
+				"cali",
+				"Calibration"
+			],
+			[
+				"cu",
+				"current_image"
+			],
+			[
+				"Fa",
+				"False"
+			],
+			[
+				"blu",
+				"bluetooth"
+			],
+			[
+				"range",
+				"range_start"
+			],
+			[
+				"se",
+				"sequential_total"
+			],
+			[
+				"re",
+				"readings"
+			],
+			[
+				"bala",
+				"balance_y"
+			],
+			[
+				"ba",
+				"balance_x"
+			],
+			[
+				"A",
+				"Altura"
+			],
+			[
+				"Cop",
+				"CoP_y"
+			],
+			[
+				"Co",
+				"CoP_x"
+			],
+			[
+				"balance_C",
+				"balance_CoP_y"
+			],
+			[
+				"axi",
+				"axis_all"
+			],
+			[
+				"ro",
+				"rows"
+			],
+			[
+				"is_",
+				"is_default"
+			],
+			[
+				"W",
+				"WBB"
+			],
+			[
+				"fre",
+				"freeMatrix"
+			],
+			[
+				"mini",
+				"minimos"
+			],
+			[
+				"y",
+				"y_balance"
+			],
+			[
+				"x",
+				"x_balance"
+			],
+			[
+				"att",
+				"attach"
+			],
+			[
+				"sen",
+				"sensores"
+			],
+			[
+				"bo",
+				"box1"
+			],
+			[
+				"canvas",
+				"canvas4"
+			],
+			[
+				"box",
+				"box1"
+			],
+			[
+				"menu",
+				"menu_calibracao_arquivo"
+			],
+			[
+				"show",
+				"show_all"
+			],
+			[
+				"cal",
+				"calibration_by_points"
+			],
+			[
+				"for",
+				"format_secondary_text"
+			],
+			[
+				"main_",
+				"main_quit"
+			],
+			[
+				"calibratio",
+				"calibration_window"
+			],
+			[
+				"res",
+				"ResponseType"
+			],
+			[
+				"label",
+				"label_teste"
+			],
+			[
+				"sca",
+				"scale_button"
+			],
+			[
+				"test_",
+				"test_cal_2"
+			],
+			[
+				"set_f",
+				"set_from_file"
+			],
+			[
+				"lo",
+				"login_image"
+			],
+			[
+				"cle",
+				"clear_all_calibration_window"
+			],
+			[
+				"remove",
+				"remove_all"
+			],
+			[
+				"use",
+				"user_ID"
+			],
+			[
+				"None",
+				"None"
+			],
+			[
+				"conn",
+				"connect"
+			],
+			[
+				"start",
+				"start_calibration_button"
+			],
+			[
+				"is",
+				"is_valid_email"
+			],
+			[
+				"is_adm",
+				"is_admPass"
+			],
+			[
+				"mai",
+				"main_window"
+			],
+			[
+				"sav",
+				"saved_devices_window"
+			],
+			[
+				"sear",
+				"search_device_window"
+			],
+			[
+				"me",
+				"message_dialog_window"
+			],
+			[
+				"M",
+				"main"
+			],
+			[
+				"f",
+				"filename"
+			],
+			[
+				"ban",
+				"banco_rai_auditoria"
+			],
+			[
+				"con",
+				"conta2"
+			],
+			[
+				"CON",
+				"conta1"
+			],
+			[
+				"seria",
+				"SERIAL"
+			],
+			[
+				"num",
+				"num_conta"
+			],
+			[
+				"S",
+				"saldo"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "iem-wbb.py",
+			"settings":
+			{
+				"buffer_size": 48680,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "calibration.py",
+			"settings":
+			{
+				"buffer_size": 27381,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/rai/iem-wbb/scb.py",
+			"settings":
+			{
+				"buffer_size": 42329,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Packages/Python/Python.sublime-build",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				]
+			],
+			[
+				"Packages/Python/Python.sublime-build",
+				""
+			]
+		],
+		[
+			[
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				],
+				[
+					"Packages/Python 3/Python3.sublime-build",
+					""
+				]
+			],
+			[
+				"Packages/Python 3/Python3.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 154.0,
+		"last_filter": "buil",
+		"selected_items":
+		[
+			[
+				"buil",
+				"Build With: Python"
+			],
+			[
+				"",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 392.0
+	},
+	"console":
+	{
+		"height": 131.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '6f4c264a24d933ce70df5dedcf1dcaee' + 'ebe013ee18cced0ef93d5f746d80ef60'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/rai/Documentos/iem-wbb",
+		"/home/rai/Documentos/iem-wbb/.idea",
+		"/home/rai/Documentos/iem-wbb/__pycache__",
+		"/home/rai/Documentos/iem-wbb/src"
+	],
+	"file_history":
+	[
+		"/home/rai/.config/sublime-text-3/Packages/User/python3.sublime-build",
+		"/home/rai/.config/sublime-text-3/Packages/Package Control/Package Control.sublime-settings",
+		"/home/rai/iem-wbb/sbc.py",
+		"/home/rai/.config/sublime-text-3/Packages/User/Package Control.sublime-settings",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/threads/teste1.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/threads/teste.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/calculos.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/paralelo1.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/serial.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/pools.py",
+		"/home/rai/Downloads/cep1.sql",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/paralelo2.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/threads/thread_test.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/threads/multiproc_test.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/desempenho.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/threads/thread-add-random.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/threads/threadtools.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/threads/thread-add-synch.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/threads/thread-count-wait1.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/threads/thread-count.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/threads/thread-count-mutex.py",
+		"/home/rai/iem-wbb/iem-wbb.py",
+		"/home/rai/Documentos/transaction.sql",
+		"/home/rai/iem-wbb/src/scripts.sql",
+		"/home/rai/iem-wbb/peso.py",
+		"/home/rai/iem-wbb/calibration.py",
+		"/home/rai/iem-wbb/src/wbb_balanca.py",
+		"/home/rai/iem-wbb/src/calculos.py",
+		"/home/rai/Documentos/iem-wbb/iem-wbb.py",
+		"/home/rai/iem-wbb/src/wbb_calitera.py",
+		"/home/rai/iem-wbb/src/iem-wbb.glade",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/paralelo.py",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/paralelo.c",
+		"/home/rai/Área de Trabalho/tulio.py",
+		"/home/rai/Área de Trabalho/joinThreads.py",
+		"/home/rai/iem-wbb/README.md",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/saida.txt",
+		"/home/rai/Documentos/PROCESSAMENTO PARALELO/saida.out",
+		"/home/rai/Downloads/Exercicio_base.py",
+		"/home/rai/Downloads/Projeto_Raí_Tulio.c",
+		"/home/rai/Área de Trabalho/teste.py",
+		"/home/rai/Downloads/Exercicio_base.c",
+		"/home/rai/Downloads/Exercicio_paralelo.c",
+		"/home/rai/Documentos/exercicio_omp.c",
+		"/home/rai/iem-wbb/src/conexao.py",
+		"/home/rai/iem-wbb/src/threadBT.py",
+		"/home/rai/Área de Trabalho/cwiid/libcwiid/state.c",
+		"/home/rai/Área de Trabalho/thread.py",
+		"/home/rai/Área de Trabalho/bt.py",
+		"/home/rai/Documentos/exercicio.c",
+		"/home/rai/Área de Trabalho/bt_new.py",
+		"/home/rai/Área de Trabalho/cwiid/wmgui/interface.c",
+		"/home/rai/Área de Trabalho/cwiid/wmgui/callbacks.c",
+		"/home/rai/Área de Trabalho/Simple TreeView with ListStore.py",
+		"/home/rai/Área de Trabalho/soma.py",
+		"/home/rai/Área de Trabalho/menu.py",
+		"/home/rai/Downloads/embedding_in_tk_canvas_sgskip.py",
+		"/home/rai/Downloads/wbb_balanca.py",
+		"/home/rai/Documentos/iem-wbb/src/wbb_balanca.py",
+		"/home/rai/Downloads/wbb_calitera.py",
+		"/home/rai/wii-sensors/scalesgui.py",
+		"/home/rai/Área de Trabalho/janela.py",
+		"/home/rai/iem-wbb/src/ManipularArquivo.py",
+		"/home/rai/sorteio.py",
+		"/home/rai/iem-wbb/src/__init__.py",
+		"/home/rai/Área de Trabalho/icon.py",
+		"/home/rai/iem-wbb/src/iem-wbb.py",
+		"/home/rai/iem-wbb/calculos.py",
+		"/home/rai/iem-wbb/scripts.sql",
+		"/home/rai/iem-wbb/ManipularArquivo.py",
+		"/home/rai/Área de Trabalho/cellrenderer.py",
+		"/home/rai/Área de Trabalho/drawingarea.py",
+		"/home/rai/Área de Trabalho/basictreeview.py",
+		"/home/rai/iem-wbb/salting.py",
+		"/home/rai/iem-wbb/Pacients/1 - Raí Bizerra/Raí Bizerra.xls",
+		"/home/rai/run.sh",
+		"/home/rai/Área de Trabalho/100/get_data.py",
+		"/home/rai/Área de Trabalho/10/get_data.py",
+		"/home/rai/Área de Trabalho/1/get_data.py",
+		"/home/rai/Documentos/BDII/pgbench-tools/init/resultdb.sql",
+		"/home/rai/Documentos/BDII/pgbench-tools/tests/select.sql",
+		"/home/rai/Documentos/BDII/pgbench-tools/benchwarmer",
+		"/home/rai/Documentos/exercicio.py",
+		"/home/rai/Área de Trabalho/untitled.py",
+		"/home/rai/Área de Trabalho/aquanut.py",
+		"/home/rai/iem-wbb/conexao.py",
+		"/home/rai/Documentos/BDII/pgbench-tools/tests/insert.sql",
+		"/home/rai/Documentos/BDII/pgbench-tools/tests/insert-size.sql",
+		"/home/rai/.cache/.fr-WzOJp7/pydns-2.3.6/tests/test.py",
+		"/home/rai/iem-wbb/iem-wbb.glade",
+		"/home/rai/Área de Trabalho/aquanut.glade",
+		"/home/rai/URI/1245.in",
+		"/home/rai/Documentos/BDII/pgbench-tools/tests/nobranch.sql",
+		"/home/rai/URI/1245.py",
+		"/home/rai/URI/1330.c",
+		"/home/rai/Documentos/BDII/pgbench-tools/runset",
+		"/home/rai/Documentos/iem-wbb/conexao.py",
+		"/home/rai/Downloads/MOTIM.cpp",
+		"/home/rai/Documentos/BDII/pgbench-tools/newset",
+		"/home/rai/Documentos/BDII/pgbench-tools/results/index.htm",
+		"/home/rai/Documentos/BDII/pgbench-tools/log-to-csv",
+		"/home/rai/Documentos/BDII/pgbench-tools/kill_pg",
+		"/home/rai/Documentos/BDII/pgbench-tools/csv2gnuplot",
+		"/home/rai/Documentos/BDII/pgbench-tools/dirty-plot",
+		"/home/rai/Documentos/BDII/pgbench-tools/init/insertsize.sql",
+		"/home/rai/Downloads/pgbench-tools/set-times",
+		"/home/rai/Documentos/BDII/get_data.py",
+		"/home/rai/Downloads/pgbench-tools/tests/select.sql",
+		"/home/rai/Documentos/BDII/pgbench-tools/reports/summary.sql",
+		"/home/rai/Documentos/BDII/pgbench-tools/reports/report.sql",
+		"/home/rai/Documentos/iem-wbb/test.sql",
+		"/home/rai/Documentos/BDII/get_data.c",
+		"/home/rai/Documentos/BDII/1-1-10-10.out",
+		"/var/lib/postgresql/pgbench-tools/benchwarmer",
+		"/var/lib/postgresql/pgbench-tools/runset",
+		"/home/rai/Downloads/pgbench-tools/runset",
+		"/var/lib/postgresql/pgbench-tools/tests/select.sql",
+		"/home/rai/Downloads/pgbench-tools/benchwarmer",
+		"/home/rai/Downloads/pgbench-tools/templates/header.html",
+		"/home/rai/Downloads/pgbench-tools/templates/footer.html",
+		"/home/rai/Downloads/pgbench-tools/init/resultdb.sql",
+		"/home/rai/Downloads/pgbench-tools/init/insertsize.sql",
+		"/home/rai/Downloads/transferenciaTrigger.sql",
+		"/home/rai/Downloads/Transferência SQL.sql",
+		"/home/rai/Downloads/2607.sql",
+		"/home/rai/Downloads/2606.sql"
+	],
+	"find":
+	{
+		"height": 49.0
+	},
+	"find_in_files":
+	{
+		"height": 129.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"self.main_grid",
+			"self",
+			"Gtk.Label(\"Estabilograma\")",
+			"main_box",
+			" =",
+			"Pango",
+			"calibration_by_points_window",
+			"main_window",
+			"iemBuilder",
+			"iemGladeFile"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"Estatocinesigrama",
+			"builder",
+			"gladeFile"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "iem-wbb.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 48680,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								189,
+								726
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "calibration.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 27381,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								450,
+								450
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/home/rai/iem-wbb/scb.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 42329,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								42329,
+								41496
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 15562.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 66.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/Python/Python.sublime-build",
+	"project": "iem.sublime-project",
+	"replace":
+	{
+		"height": 69.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 228.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
