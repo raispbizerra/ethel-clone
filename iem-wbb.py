@@ -92,9 +92,6 @@ class Iem_wbb:
         self.height_entry.set_text('')
         self.weight.set_text('')
         self.imc.set_text('')
-        self.name_entry.set_editable(True)
-        self.age_entry.set_editable(True)
-        self.height_entry.set_editable(True)
         self.name_entry.set_sensitive(True)
         self.age_entry.set_sensitive(True)
         self.height_entry.set_sensitive(True)
@@ -382,14 +379,16 @@ class Iem_wbb:
 
             self.APs = np.zeros_like(row[0][0])
             self.MLs = np.zeros_like(row[0][1])
+
             for i in range(len(row[0][0])):
                 self.APs[i] = row[0][0][i]
                 self.MLs[i] = row[0][1][i]
 
             self.exam_date = row[0][2]
+            self.exam_type = row[0][3]
+            print(self.exam_date, self.exam_type)
 
     def on_load_exam_button_clicked(self, widget):
-        self.is_exam = False
         dt = 0.040
         tTotal = len(self.APs) * dt
         tempo = np.arange(0, tTotal, 0.040)
@@ -411,8 +410,8 @@ class Iem_wbb:
         dis_resultante_total = calc.distanciaResultante(APs_Processado, MLs_Processado)
 
         #? Isto não faz sentido
-        dis_resultante_AP = calc.distanciaResultanteParcial(APs_Processado)
-        dis_resultante_ML = calc.distanciaResultanteParcial(MLs_Processado)
+        #dis_resultante_AP = calc.distanciaResultanteParcial(APs_Processado)
+        #dis_resultante_ML = calc.distanciaResultanteParcial(MLs_Processado)
 
         #MDIST
         dis_media = calc.distanciaMedia(dis_resultante_total)
@@ -462,21 +461,29 @@ class Iem_wbb:
         print("MVELO_AP = ", mvelo_AP)
         print("MVELO_ML = ", mvelo_ML)
 
-        self.entry_Mdist_TOTAL.set_text(str(dis_media))
-        self.entry_Mdist_AP.set_text(str(dis_mediaAP))
-        self.entry_Mdist_ML.set_text(str(dis_mediaML))
+        metricas = [dis_mediaAP, dis_mediaML, dis_media, dis_rms_AP, dis_rms_ML, dis_rms_total, totex_AP, totex_ML, totex_total, mvelo_AP, mvelo_ML, mvelo_total]
 
-        self.entry_Rdist_TOTAL.set_text(str(dis_rms_total))
-        self.entry_Rdist_AP.set_text(str(dis_rms_AP))
-        self.entry_Rdist_ML.set_text(str(dis_rms_ML))
+        for x in range(1, 2):
+            for y in range(1, 13):
+                self.grid1.get_child_at(x, y).set_text(str(round(metricas[y-1], 6)))
+        
+        '''
+        self.entry_Mdist_TOTAL_OA.set_text(str(dis_media))
+        self.entry_Mdist_AP_OA.set_text(str(dis_mediaAP))
+        self.entry_Mdist_ML_OA.set_text(str(dis_mediaML))
 
-        self.entry_TOTEX_TOTAL.set_text(str(totex_total))
-        self.entry_TOTEX_AP.set_text(str(totex_AP))
-        self.entry_TOTEX_ML.set_text(str(totex_ML))
+        self.entry_Rdist_TOTAL_OA.set_text(str(dis_rms_total))
+        self.entry_Rdist_AP_OA.set_text(str(dis_rms_AP))
+        self.entry_Rdist_ML_OA.set_text(str(dis_rms_ML))
 
-        self.entry_MVELO_TOTAL.set_text(str(mvelo_total))
-        self.entry_MVELO_AP.set_text(str(mvelo_AP))
-        self.entry_MVELO_ML.set_text(str(mvelo_ML))
+        self.entry_TOTEX_TOTAL_OA.set_text(str(totex_total))
+        self.entry_TOTEX_AP_OA.set_text(str(totex_AP))
+        self.entry_TOTEX_ML_OA.set_text(str(totex_ML))
+
+        self.entry_MVELO_TOTAL_OA.set_text(str(mvelo_total))
+        self.entry_MVELO_AP_OA.set_text(str(mvelo_AP))
+        self.entry_MVELO_ML_OA.set_text(str(mvelo_ML))
+        '''
 
         #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
         #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
@@ -499,13 +506,14 @@ class Iem_wbb:
         self.axis_0_OF.plot(MLs_Processado, APs_Processado,'.-',color='g')
         self.canvas_0_OF.draw()'''
 
-        self.axis_1_AP_OA.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis_1_AP_OA.plot(tempo, APs_Processado, color='k')
-        self.canvas_1_AP_OA.draw()
+        self.maximo = max([max_absoluto_AP, max_absoluto_ML, max(dis_resultante_total)])
 
-        self.axis_1_ML_OA.set_ylim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis_1_ML_OA.plot(tempo, MLs_Processado,color='m')
-        self.canvas_1_ML_OA.draw()
+        self.axis_1_OA.set_ylim(-self.maximo, self.maximo)
+        self.axis_1_OA.plot(tempo, APs_Processado, color='k', label='APs')
+        self.axis_1_OA.plot(tempo, MLs_Processado, color='m', label='MLs')
+        self.axis_1_OA.plot(tempo, dis_resultante_total, color='g', label='DRT')
+        self.axis_1_OA.legend()
+        self.canvas_1_OA.draw()
 
         self.points_entry.set_text(str(len(self.APs)))
 
@@ -727,16 +735,19 @@ class Iem_wbb:
         self.new_device_window.hide()
 
     def on_button_press_event(self, widget, event):
-
+        
         if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS and event.button == 1:
             self.child = Gtk.get_event_widget(event)
             self.parent = self.child.get_parent()
-
             self.parent.remove(self.child)
             self.boxAdvanced.pack_start(self.child, expand=True, fill=True, padding=0)
             self.nt = NavigationToolbar(self.child, self.advanced_graphs_window)
             self.boxAdvanced.pack_start(self.nt, expand=False, fill=True, padding=0)
+            self.advanced_graphs_window.fullscreen()
+            self.advanced_graphs_window.set_resizable(True)
             self.advanced_graphs_window.show()
+            print(self.child)
+
 
     def on_cancel_in_standup_clicked(self, widget):
         self.stand_up_window.hide()
@@ -799,9 +810,6 @@ class Iem_wbb:
     def on_changepacientbutton_clicked(self, widget):
         self.modifying = True
         self.savepacient_button.set_sensitive(True)
-        self.name_entry.set_editable(True)
-        self.age_entry.set_editable(True)
-        self.height_entry.set_editable(True)
         self.name_entry.set_sensitive(True)
         self.sex_combobox.set_sensitive(True)
         self.age_entry.set_sensitive(True)
@@ -822,7 +830,7 @@ class Iem_wbb:
     def on_start_capture_button_clicked(self, widget):
         self.stand_up_window.hide()
 
-        self.clear_charts()
+        #self.clear_charts()
 
         self.amostra = 768
         self.MLs = np.zeros(self.amostra)
@@ -834,6 +842,7 @@ class Iem_wbb:
         t1 = ptime.time() + dt
         #print(self.amostra)
         #print(type(self.amostra))
+
         for i in range(self.amostra):
 
             while(Gtk.events_pending()):
@@ -930,21 +939,23 @@ class Iem_wbb:
         print("MVELO_AP = ", mvelo_AP)
         print("MVELO_ML = ", mvelo_ML)
 
-        self.entry_Mdist_TOTAL.set_text(str(dis_media))
-        self.entry_Mdist_AP.set_text(str(dis_mediaAP))
-        self.entry_Mdist_ML.set_text(str(dis_mediaML))
+        '''
+        self.entry_Mdist_TOTAL_OA.set_text(str(dis_media))
+        self.entry_Mdist_AP_OA.set_text(str(dis_mediaAP))
+        self.entry_Mdist_ML_OA.set_text(str(dis_mediaML))
 
-        self.entry_Rdist_TOTAL.set_text(str(dis_rms_total))
-        self.entry_Rdist_AP.set_text(str(dis_rms_AP))
-        self.entry_Rdist_ML.set_text(str(dis_rms_ML))
+        self.entry_Rdist_TOTAL_OA.set_text(str(dis_rms_total))
+        self.entry_Rdist_AP_OA.set_text(str(dis_rms_AP))
+        self.entry_Rdist_ML_OA.set_text(str(dis_rms_ML))
 
-        self.entry_TOTEX_TOTAL.set_text(str(totex_total))
-        self.entry_TOTEX_AP.set_text(str(totex_AP))
-        self.entry_TOTEX_ML.set_text(str(totex_ML))
+        self.entry_TOTEX_TOTAL_OA.set_text(str(totex_total))
+        self.entry_TOTEX_AP_OA.set_text(str(totex_AP))
+        self.entry_TOTEX_ML_OA.set_text(str(totex_ML))
 
-        self.entry_MVELO_TOTAL.set_text(str(mvelo_total))
-        self.entry_MVELO_AP.set_text(str(mvelo_AP))
-        self.entry_MVELO_ML.set_text(str(mvelo_ML))
+        self.entry_MVELO_TOTAL_OA.set_text(str(mvelo_total))
+        self.entry_MVELO_AP_OA.set_text(str(mvelo_AP))
+        self.entry_MVELO_ML_OA.set_text(str(mvelo_ML))
+        '''
 
         #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
         #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
@@ -987,28 +998,22 @@ class Iem_wbb:
         dt = 0.040
         tTotal = len(self.APs) * dt
 
-        charts_estabilograma = [self.axis_0_OA, self.axis_0_OF]
-        charts_estatocinesigrama_AP = [self.axis_1_AP_OA, self.axis_1_AP_OF]
-        charts_estatocinesigrama_ML = [self.axis_1_ML_OA, self.axis_1_ML_OF]
-        charts = charts_estabilograma + charts_estatocinesigrama_AP + charts_estatocinesigrama_ML
+        charts_estatocinesigrama = [self.axis_0_OA, self.axis_0_OF]
+        charts_estabilograma = [self.axis_1_OA, self.axis_1_OF]
 
-        for a in charts:
+        for a in charts_estatocinesigrama:
             a.clear()
-            if a in charts_estabilograma:
-                a.set_ylabel('Anteroposterior (AP) mm', fontsize = 16)
-                a.set_xlabel('Mediolateral (ML) mm', fontsize = 16)
-                a.set_xlim(-433/2, 433/2)
-                a.set_ylim(-238/2, 238/2)
-                a.axhline(0, color='grey')
-                a.axvline(0, color='grey')
-            if a in charts_estatocinesigrama_AP+charts_estatocinesigrama_ML:
-                a.set_xlim(0, tTotal)
-                a.set_xlabel('Tempo (s)', fontsize = 16)
-            if a in charts_estatocinesigrama_AP:
-                a.set_ylabel('Amplitude AP (mm)', fontsize = 16)
-            if a in charts_estatocinesigrama_ML:
-                a.set_ylabel('Amplitude ML (mm)', fontsize = 16)
+            a.set_ylabel('Anteroposterior (AP) mm')
+            a.set_xlabel('Mediolateral (ML) mm')
+            a.set_xlim(-433/2, 433/2)
+            a.set_ylim(-238/2, 238/2)
+            a.axhline(0, color='grey')
+            a.axvline(0, color='grey')
 
+        for a in charts_estabilograma:
+            a.set_xlim(0, tTotal)
+            a.set_ylabel('Amplitude')
+            a.set_xlabel('Tempo (s)')
 
     def verify_bt(self):
         if(self.wiimote):
@@ -1030,6 +1035,18 @@ class Iem_wbb:
 
         return True
 
+    def resize(self, widget):
+        w, h = self.main_window.get_size()
+        w1 = 800 * w // 1366
+        charts = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
+        for c in charts:
+            #w1 = c.get_allocation().width
+            c.set_size_request(w1, w1//2)
+
+    def load_chart(self, widget):
+        pass
+
+
     def __init__(self):
 
         #Connecting to DB
@@ -1037,7 +1054,7 @@ class Iem_wbb:
         #Opening DB cursor
         self.cur = self.conn.cursor()
 
-
+        self.exam_type = ['OA', 'OF']
         self.amostra = 768
         self.balance_CoP_x = np.zeros(self.amostra)
         self.balance_CoP_y = np.zeros(self.amostra)
@@ -1109,6 +1126,10 @@ class Iem_wbb:
         self.savepacient_button = self.iemBuilder.get_object("savepacient_button")
         self.changepacientbutton = self.iemBuilder.get_object("changepacientbutton")
         self.load_exam_button = self.iemBuilder.get_object("load_exam_button")
+        self.button_load_chart_0 = self.iemBuilder.get_object("button_load_chart_0")
+        self.button_load_chart_1 = self.iemBuilder.get_object("button_load_chart_1")
+        self.button_load_chart_2 = self.iemBuilder.get_object("button_load_chart_2")
+        self.button_load_chart_3 = self.iemBuilder.get_object("button_load_chart_3")
 
         #Entrys
         self.name_entry = self.iemBuilder.get_object("name_entry")
@@ -1116,18 +1137,18 @@ class Iem_wbb:
         self.height_entry = self.iemBuilder.get_object("height_entry")
         self.weight = self.iemBuilder.get_object("weight")
         self.imc = self.iemBuilder.get_object("imc")
-        self.entry_Mdist_TOTAL = self.iemBuilder.get_object("mdist_t")
-        self.entry_Mdist_AP = self.iemBuilder.get_object("mdist_ap")
-        self.entry_Mdist_ML = self.iemBuilder.get_object("mdist_ml")
-        self.entry_Rdist_AP = self.iemBuilder.get_object("rdist_ap")
-        self.entry_Rdist_ML = self.iemBuilder.get_object("rdist_ml")
-        self.entry_Rdist_TOTAL = self.iemBuilder.get_object("rdist_t")
-        self.entry_TOTEX_AP = self.iemBuilder.get_object("totex_ap")
-        self.entry_TOTEX_ML = self.iemBuilder.get_object("totex_ml")
-        self.entry_TOTEX_TOTAL = self.iemBuilder.get_object("totex_t")
-        self.entry_MVELO_AP = self.iemBuilder.get_object("mvelo_ap")
-        self.entry_MVELO_ML = self.iemBuilder.get_object("mvelo_ml")
-        self.entry_MVELO_TOTAL = self.iemBuilder.get_object("mvelo_t")
+        self.entry_Mdist_TOTAL_OA = self.iemBuilder.get_object("mdist_t_oa")
+        self.entry_Mdist_AP_OA = self.iemBuilder.get_object("mdist_ap_oa")
+        self.entry_Mdist_ML_OA = self.iemBuilder.get_object("mdist_ml_oa")
+        self.entry_Rdist_AP_OA = self.iemBuilder.get_object("rdist_ap_oa")
+        self.entry_Rdist_ML_OA = self.iemBuilder.get_object("rdist_ml_oa")
+        self.entry_Rdist_TOTAL_OA = self.iemBuilder.get_object("rdist_t_oa")
+        self.entry_TOTEX_AP_OA = self.iemBuilder.get_object("totex_ap_oa")
+        self.entry_TOTEX_ML_OA = self.iemBuilder.get_object("totex_ml_oa")
+        self.entry_TOTEX_TOTAL_OA = self.iemBuilder.get_object("totex_t_oa")
+        self.entry_MVELO_AP_OA = self.iemBuilder.get_object("mvelo_ap_oa")
+        self.entry_MVELO_ML_OA = self.iemBuilder.get_object("mvelo_ml_oa")
+        self.entry_MVELO_TOTAL_OA = self.iemBuilder.get_object("mvelo_t_oa")
         self.points_entry = self.iemBuilder.get_object("points_entry")
 
         self.username_entry_in_login = self.iemBuilder.get_object("username_entry_in_login")
@@ -1143,6 +1164,10 @@ class Iem_wbb:
         self.combo_box_in_saved = self.commonBuilder.get_object("combo_box_in_saved")
         self.combo_box_in_search = self.commonBuilder.get_object("combo_box_in_search")
         self.combobox_in_load_pacient = self.iemBuilder.get_object("combobox_in_load_pacient")
+        self.combo_box_text_load_chart_0 = self.iemBuilder.get_object("combo_box_text_load_chart_0")
+        self.combo_box_text_load_chart_1 = self.iemBuilder.get_object("combo_box_text_load_chart_1")
+        self.combo_box_text_load_chart_2 = self.iemBuilder.get_object("combo_box_text_load_chart_2")
+        self.combo_box_text_load_chart_3 = self.iemBuilder.get_object("combo_box_text_load_chart_3")
 
         #Events
         self.login_window.connect('destroy', Gtk.main_quit)
@@ -1161,75 +1186,96 @@ class Iem_wbb:
         self.pacient_label_in_load = self.iemBuilder.get_object("pacient_label_in_load")
 
         #Charts
-        fig = plt.figure(dpi=50)
-        fig.suptitle("Olhos Abertos", fontsize=20)
-        self.axis_0_OA = fig.add_subplot(111)
-        fig2 = plt.figure(dpi=50)
-        fig2.suptitle("Olhos Fechados", fontsize=20)
-        self.axis_0_OF = fig2.add_subplot(111)
+        #self.fig = plt.figure(dpi=50)
+        self.fig = plt.figure()
+        #self.fig.suptitle("Olhos Abertos", fontsize=20)
+        self.fig.suptitle("Olhos Abertos")
+        self.axis_0_OA = self.fig.add_subplot(111)
+        #self.fig2 = plt.figure(dpi=50)
+        self.fig2 = plt.figure()
+        #self.fig2.suptitle("Olhos Fechados", fontsize=20)
+        self.fig2.suptitle("Olhos Fechados")
+        self.axis_0_OF = self.fig2.add_subplot(111)
 
-        fig3 = plt.figure(dpi=50)
-        fig3.suptitle("Amplitude AP - Olhos Abertos", fontsize=20)
-        self.axis_1_AP_OA = fig3.add_subplot(111)
-        fig4 = plt.figure(dpi=50)
-        fig4.suptitle("Amplitude ML - Olhos Abertos", fontsize=20)
-        self.axis_1_ML_OA = fig4.add_subplot(111)
-        fig5 = plt.figure(dpi=50)
-        fig5.suptitle("Amplitude AP - Olhos Fechados", fontsize=20)
-        self.axis_1_AP_OF = fig5.add_subplot(111)
-        fig6 = plt.figure(dpi=50)
-        fig6.suptitle("Amplitude ML - Olhos Fechados", fontsize=20)
-        self.axis_1_ML_OF = fig6.add_subplot(111)
+        #self.fig3 = plt.figure(dpi=50)
+        #self.fig3.suptitle("Amplitude - Olhos Abertos", fontsize=20)
+        self.fig3 = plt.figure()
+        self.fig3.suptitle("Amplitude - Olhos Abertos")
+        self.axis_1_OA = self.fig3.add_subplot(111)
+        #self.fig5 = plt.figure(dpi=50)
+        #self.fig5.suptitle("Amplitude - Olhos Fechados", fontsize=20)
+        self.fig5 = plt.figure()
+        self.fig5.suptitle("Amplitude - Olhos Fechados")
+        self.axis_1_OF = self.fig5.add_subplot(111)
 
         self.clear_charts()
 
-        self.canvas_0_OA = FigureCanvas(fig)
+        self.canvas_0_OA = FigureCanvas(self.fig)
         self.box_0_OA = Gtk.Box()
         self.box_0_OA.pack_start(self.canvas_0_OA, expand=True, fill=True, padding=0)
-        self.canvas_0_OF = FigureCanvas(fig2)
+        self.canvas_0_OF = FigureCanvas(self.fig2)
         self.box_0_OF = Gtk.Box()
         self.box_0_OF.pack_start(self.canvas_0_OF, expand=True, fill=True, padding=0)
 
-        self.canvas_1_AP_OA = FigureCanvas(fig3)
-        self.box_1_AP_OA = Gtk.Box()
-        self.box_1_AP_OA.pack_start(self.canvas_1_AP_OA, expand=True, fill=True, padding=0)
-        self.canvas_1_ML_OA = FigureCanvas(fig4)
-        self.box_1_ML_OA = Gtk.Box()
-        self.box_1_ML_OA.pack_start(self.canvas_1_ML_OA, expand=True, fill=True, padding=0)
-        self.canvas_1_AP_OF = FigureCanvas(fig5)
-        self.box_1_AP_OF = Gtk.Box()
-        self.box_1_AP_OF.pack_start(self.canvas_1_AP_OF, expand=True, fill=True, padding=0)
-        self.canvas_1_ML_OF = FigureCanvas(fig6)
-        self.box_1_ML_OF = Gtk.Box()
-        self.box_1_ML_OF.pack_start(self.canvas_1_ML_OF, expand=True, fill=True, padding=0)
+        self.canvas_1_OA = FigureCanvas(self.fig3)
+        self.box_1_OA = Gtk.Box()
+        self.box_1_OA.pack_start(self.canvas_1_OA, expand=True, fill=True, padding=0)
+        self.canvas_1_OF = FigureCanvas(self.fig5)
+        self.box_1_OF = Gtk.Box()
+        self.box_1_OF.pack_start(self.canvas_1_OF, expand=True, fill=True, padding=0)
 
-        boxes = [self.box_0_OA, self.box_0_OF, self.box_1_AP_OA, self.box_1_AP_OF, self.box_1_ML_OA, self.box_1_ML_OF]
+        boxes = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
         for b in boxes:
             b.connect('button-press-event', self.on_button_press_event)
 
+        #ScrolledWindows
+        '''
+        self.estatocinesigrama_sw_0 = self.iemBuilder.get_object("estatocinesigrama_sw_0")
+        self.estatocinesigrama_sw_1 = self.iemBuilder.get_object("estatocinesigrama_sw_1") 
+        self.estabilograma_sw_0 = self.iemBuilder.get_object("estabilograma_sw_0")
+        self.estabilograma_sw_1 = self.iemBuilder.get_object("estabilograma_sw_1")
+        
+        self.estatocinesigrama_sw_0.add(self.box_0_OA)
+        self.estatocinesigrama_sw_1.add(self.box_0_OF)
+        self.estabilograma_sw_0.add(self.box_1_OA)
+        self.estabilograma_sw_1.add(self.box_1_OF)
+        
+        self.sw1 = self.iemBuilder.get_object('sw1')
+        self.sw1.add(self.box_0_OA)
+        self.sw1.add(self.box_0_OF)
+
+        '''
         #Notebooks
         main_notebook = Gtk.Notebook()
         main_notebook.set_vexpand(True)
         
-        estatocinesigrama = Gtk.Box()
-        estatocinesigrama.set_spacing(10)
-        estatocinesigrama.set_homogeneous(True)
-        estatocinesigrama.add(self.box_0_OA)
-        estatocinesigrama.add(self.box_0_OF)
+        box_choose_0 = Gtk.HBox()
+        self.button_load_chart_0 = Gtk.Button("Carregar Exame")
+        self.combo_box_load_chart_0 = Gtk.ComboBoxText()
+        self.combo_box_load_chart_0.connect('changed', self.load_chart)
+        box_choose_0.add(self.combo_box_load_chart_0)
+        box_choose_0.add(self.button_load_chart_0)
+
+        #box_0 = Gtk.VBox()
+        estatocinesigrama_sc = Gtk.ScrolledWindow()
+        estatocinesigrama_box = Gtk.VBox()
+        estatocinesigrama_box.set_spacing(10)
+        estatocinesigrama_box.add(self.box_0_OA)
+        estatocinesigrama_box.add(self.box_0_OF)
+        estatocinesigrama_sc.add(estatocinesigrama_box)
+
+        #box_0.add(box_choose_0)
+        #box_0.add(estatocinesigrama_sc)
+
+        estabilograma_sc = Gtk.ScrolledWindow()
+        estabilograma_box = Gtk.VBox()
+        estabilograma_box.add(self.box_1_OA)
+        estabilograma_box.add(self.box_1_OF)
+        estabilograma_box.set_spacing(10)
+        estabilograma_sc.add(estabilograma_box)
         
-        estabilograma_OA = Gtk.Box()
-        estabilograma_OA.pack_start(self.box_1_AP_OA, expand=True, fill=True, padding=5)
-        estabilograma_OA.pack_start(self.box_1_ML_OA, expand=True, fill=True, padding=5)
-        estabilograma_OF = Gtk.Box()
-        estabilograma_OF.pack_start(self.box_1_AP_OF, expand=True, fill=True, padding=5)
-        estabilograma_OF.pack_start(self.box_1_ML_OF, expand=True, fill=True, padding=5)
-        estabilograma = Gtk.VBox()
-        estabilograma.set_spacing(10)
-        estabilograma.add(estabilograma_OA)
-        estabilograma.add(estabilograma_OF)
-        
-        main_notebook.append_page(estatocinesigrama, Gtk.Label("Estatocinesigrama"))
-        main_notebook.append_page(estabilograma, Gtk.Label("Estabilograma"))
+        main_notebook.append_page(estatocinesigrama_sc, Gtk.Label("Estatocinesigrama"))
+        main_notebook.append_page(estabilograma_sc, Gtk.Label("Estabilograma"))
         main_box.add(main_notebook)
         button_box = Gtk.ButtonBox()
         button_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
@@ -1242,6 +1288,20 @@ class Iem_wbb:
         button_box.add(self.capture_button)
         button_box.add(self.save_exam_button)
         main_box.add(button_box)
+        
+        #Grid 
+        self.grid1 = self.iemBuilder.get_object("grid1")
+        #for x in ["mdist_", "rdist_", "totex_", "mvelo_"]:
+            #for y in ["ap_", "ml_", "total_"]:
+        m = 1
+        for x in range(12):
+            self.grid1.attach(Gtk.Entry.new(), 2, m, 1, 1)
+            self.grid1.get_child_at(2, m).set_text('0.000000')
+            self.grid1.get_child_at(2, m).set_editable(False)
+            self.grid1.get_child_at(2, m).set_width_chars(8)
+            m += 1
+
+        #self.grid1.set_sensitive(False)
 
         #StatusBar
         self.status_image = self.iemBuilder.get_object("status_image")
@@ -1253,6 +1313,7 @@ class Iem_wbb:
         ''' Login '''
         #self.login_window.show_all()
         self.main_window.maximize()
+        self.main_window.connect('check-resize', self.resize)
         self.main_window.show_all()
 
 if __name__ == "__main__":

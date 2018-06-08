@@ -735,11 +735,14 @@
             <property name="margin_top">10</property>
             <property name="margin_bottom">10</property>
             <property name="orientation">vertical</property>
+            <property name="baseline_position">top</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_top">10</property>
+                <property name="spacing">10</property>
+                <property name="baseline_position">top</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">True</property>
@@ -1076,12 +1079,37 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="main_box">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
+                    <property name="spacing">10</property>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Tipo de Exame</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="main_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -1095,134 +1123,43 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="row_spacing">10</property>
-                    <property name="column_homogeneous">True</property>
+                    <property name="column_spacing">10</property>
                     <child>
                       <object class="GtkLabel" id="label_rdist">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">RDIST</property>
+                        <property name="label" translatable="yes">RDIST_AP</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
+                        <property name="top_attach">4</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label_totex">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">TOTEX</property>
+                        <property name="label" translatable="yes">TOTEX_AP</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">3</property>
+                        <property name="top_attach">7</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label_mvelo">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">MVELO</property>
+                        <property name="label" translatable="yes">MVELO_AP</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">4</property>
+                        <property name="top_attach">10</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="rdist_ap">
+                      <object class="GtkEntry" id="rdist_ap_oa">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="editable">False</property>
-                        <property name="width_chars">8</property>
-                        <property name="max_width_chars">10</property>
-                        <property name="text" translatable="yes">0.000000</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="rdist_ml">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="editable">False</property>
-                        <property name="width_chars">8</property>
-                        <property name="max_width_chars">10</property>
-                        <property name="text" translatable="yes">0.000000</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="rdist_t">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="editable">False</property>
-                        <property name="width_chars">8</property>
-                        <property name="max_width_chars">10</property>
-                        <property name="text" translatable="yes">0.000000</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="totex_ap">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="editable">False</property>
-                        <property name="width_chars">8</property>
-                        <property name="max_width_chars">10</property>
-                        <property name="text" translatable="yes">0.000000</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="totex_ml">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="editable">False</property>
-                        <property name="width_chars">8</property>
-                        <property name="max_width_chars">10</property>
-                        <property name="text" translatable="yes">0.000000</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="totex_t">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="editable">False</property>
-                        <property name="width_chars">8</property>
-                        <property name="max_width_chars">10</property>
-                        <property name="text" translatable="yes">0.000000</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="mvelo_ap">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
                         <property name="width_chars">8</property>
@@ -1235,9 +1172,8 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="mvelo_ml">
+                      <object class="GtkEntry" id="totex_ap_oa">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
                         <property name="width_chars">8</property>
@@ -1245,22 +1181,22 @@
                         <property name="text" translatable="yes">0.000000</property>
                       </object>
                       <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">4</property>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">7</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="mvelo_t">
+                      <object class="GtkEntry" id="mvelo_ap_oa">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
+                        <property name="editable">False</property>
                         <property name="width_chars">8</property>
                         <property name="max_width_chars">10</property>
                         <property name="text" translatable="yes">0.000000</property>
                       </object>
                       <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">4</property>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">10</property>
                       </packing>
                     </child>
                     <child>
@@ -1271,13 +1207,12 @@
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">5</property>
+                        <property name="top_attach">13</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkEntry" id="points_entry">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="halign">start</property>
                         <property name="editable">False</property>
@@ -1286,14 +1221,14 @@
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="top_attach">5</property>
+                        <property name="top_attach">13</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label_mdist">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">MDIST</property>
+                        <property name="label" translatable="yes">MDIST_AP</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -1304,7 +1239,7 @@
                       <object class="GtkLabel" id="label_ap">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">AP</property>
+                        <property name="label" translatable="yes">OA</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1315,7 +1250,7 @@
                       <object class="GtkLabel" id="label_ml">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">ML</property>
+                        <property name="label" translatable="yes">OF</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -1323,50 +1258,8 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label_t">
+                      <object class="GtkEntry" id="mdist_ap_oa">
                         <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">TOTAL</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="mdist_t">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="editable">False</property>
-                        <property name="width_chars">8</property>
-                        <property name="max_width_chars">10</property>
-                        <property name="text" translatable="yes">0.000000</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">3</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="mdist_ml">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="editable">False</property>
-                        <property name="width_chars">8</property>
-                        <property name="max_width_chars">10</property>
-                        <property name="text" translatable="yes">0.000000</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="mdist_ap">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
                         <property name="width_chars">8</property>
@@ -1377,6 +1270,248 @@
                         <property name="left_attach">1</property>
                         <property name="top_attach">1</property>
                       </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_mdist1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">MDIST_ML</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="mdist_ml_oa">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="text" translatable="yes">0.000000</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="mdist_t_oa">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="text" translatable="yes">0.000000</property>
+                        <property name="caps_lock_warning">False</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_mdist2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">MDIST_TOTAL</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_rdist1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">RDIST_ML</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_rdist2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">RDIST_TOTAL</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_totex1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">TOTEX_ML</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">8</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_totex2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">TOTEX_TOTAL</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">9</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_mvelo1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">MVELO_ML</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">11</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_mvelo2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">MVELO_TOTAL</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">12</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="mvelo_ml_oa">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="text" translatable="yes">0.000000</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">11</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="mvelo_t_oa">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="text" translatable="yes">0.000000</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">12</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="rdist_ml_oa">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="text" translatable="yes">0.000000</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="rdist_t_oa">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="text" translatable="yes">0.000000</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="totex_ml_oa">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="text" translatable="yes">0.000000</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">8</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="totex_t_oa">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                        <property name="width_chars">8</property>
+                        <property name="max_width_chars">10</property>
+                        <property name="text" translatable="yes">0.000000</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">9</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Métricas</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                     <child>
                       <placeholder/>
@@ -1504,7 +1639,7 @@
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">True</property>
+                <property name="fill">False</property>
                 <property name="position">3</property>
               </packing>
             </child>
@@ -1523,8 +1658,6 @@
     <property name="title" translatable="yes">Janela Avançada</property>
     <property name="resizable">False</property>
     <property name="window_position">center-always</property>
-    <property name="default_width">800</property>
-    <property name="default_height">600</property>
     <property name="icon">../media/cadeado.png</property>
     <property name="gravity">center</property>
     <property name="transient_for">main_window</property>
