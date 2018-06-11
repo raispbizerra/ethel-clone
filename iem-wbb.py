@@ -12,13 +12,14 @@ from gi.repository import Gtk, Gdk, GLib
 import calculos as calc
 import conexao as connect
 import ManipularArquivo as manArq
+import bancoDeDados as bd
+import psycopg2
 
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas
 from matplotlib.backends.backend_gtk3 import NavigationToolbar2GTK3 as NavigationToolbar
 
-import psycopg2
 
 from bluetooth.btcommon import is_valid_address as iva
 from validate_email import validate_email
@@ -377,6 +378,8 @@ class Iem_wbb:
             self.cur.execute(select)
             row = self.cur.fetchall()
 
+            print(row)
+
             self.APs = np.zeros_like(row[0][0])
             self.MLs = np.zeros_like(row[0][1])
 
@@ -385,8 +388,8 @@ class Iem_wbb:
                 self.MLs[i] = row[0][1][i]
 
             self.exam_date = row[0][2]
-            self.exam_type = row[0][3]
-            print(self.exam_date, self.exam_type)
+            #self.exam_type = row[0][3]
+            #print(self.exam_date, self.exam_type)
 
     def on_load_exam_button_clicked(self, widget):
         dt = 0.040
@@ -500,6 +503,12 @@ class Iem_wbb:
         self.axis_0_OA.set_ylim(-max_absoluto_AP, max_absoluto_AP)
         self.axis_0_OA.plot(MLs_Processado, APs_Processado,'.-',color='r')
         self.canvas_0_OA.draw()
+
+        w1 = self.box_0_OA.get_allocation().width
+
+        h1 = max_absoluto_AP*w1//max_absoluto_ML
+        
+        #self.box_0_OA.set_size_request(w1, h1)
 
         '''self.axis_0_OF.set_xlim(-max_absoluto_ML, max_absoluto_ML)
         self.axis_0_OF.set_ylim(-max_absoluto_AP, max_absoluto_AP)
@@ -743,10 +752,13 @@ class Iem_wbb:
             self.boxAdvanced.pack_start(self.child, expand=True, fill=True, padding=0)
             self.nt = NavigationToolbar(self.child, self.advanced_graphs_window)
             self.boxAdvanced.pack_start(self.nt, expand=False, fill=True, padding=0)
-            self.advanced_graphs_window.fullscreen()
             self.advanced_graphs_window.set_resizable(True)
+            self.advanced_graphs_window.maximize()
             self.advanced_graphs_window.show()
             print(self.child)
+
+        if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 3:
+            pass
 
 
     def on_cancel_in_standup_clicked(self, widget):
@@ -797,7 +809,7 @@ class Iem_wbb:
                 ID = row[0][0]
                 self.pacient = {'Nome': name, 'ID': ID, 'Sexo': sex, 'Idade': age, 'Altura': height}
             else:
-                self.cur.execute("UPDATE pacients SET sex = (%s), age = (%s), height = (%s), name = (%s) WHERE id = (%s);", (sex, age, height, name, pacient['ID']))
+                self.cur.execute("UPDATE pacients SET sex = (%s), age = (%s), height = (%s), name = (%s) WHERE id = (%s);", (sex, age, height, name, self.pacient['ID']))
                 self.conn.commit()
                 self.pacient['Nome'] = name
                 self.pacient['Sexo'] = sex
@@ -830,7 +842,7 @@ class Iem_wbb:
     def on_start_capture_button_clicked(self, widget):
         self.stand_up_window.hide()
 
-        #self.clear_charts()
+        self.clear_charts()
 
         self.amostra = 768
         self.MLs = np.zeros(self.amostra)
@@ -839,6 +851,7 @@ class Iem_wbb:
 
         dt = 0.040
         tTotal = self.amostra * dt
+        tempo = np.arange(0, tTotal, dt)
         t1 = ptime.time() + dt
         #print(self.amostra)
         #print(type(self.amostra))
@@ -877,9 +890,6 @@ class Iem_wbb:
         self.imc.set_text(str(imc))
         self.imc.set_max_length(5)
         self.save_exam_button.set_sensitive(True)
-
-        self.axis_0_OA.plot(self.MLs, self.APs,'.-',color='r')
-        self.canvas_0_OA.draw()
 
         APs_Processado, MLs_Processado, AP_, ML_ = calc.geraAP_ML(self.APs, self.MLs)
         print("AP_ = ", AP_)
@@ -939,6 +949,12 @@ class Iem_wbb:
         print("MVELO_AP = ", mvelo_AP)
         print("MVELO_ML = ", mvelo_ML)
 
+        metricas = [dis_mediaAP, dis_mediaML, dis_media, dis_rms_AP, dis_rms_ML, dis_rms_total, totex_AP, totex_ML, totex_total, mvelo_AP, mvelo_ML, mvelo_total]
+
+        for x in range(1, 2):
+            for y in range(1, 13):
+                self.grid1.get_child_at(x, y).set_text(str(round(metricas[y-1], 6)))
+
         '''
         self.entry_Mdist_TOTAL_OA.set_text(str(dis_media))
         self.entry_Mdist_AP_OA.set_text(str(dis_mediaAP))
@@ -968,16 +984,35 @@ class Iem_wbb:
 
         print('max_absoluto_AP:', max_absoluto_AP, 'max_absoluto_ML:', max_absoluto_ML)
 
-        self.axis_0_OF.set_xlim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis_0_OF.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis_0_OF.plot(MLs_Processado, APs_Processado,'.-',color='g')
-        self.canvas_0_OF.draw()
+        self.axis_0_OA.set_xlim(-max_absoluto_ML, max_absoluto_ML)
+        self.axis_0_OA.set_ylim(-max_absoluto_AP, max_absoluto_AP)
+        self.axis_0_OA.plot(MLs_Processado, APs_Processado,'.-',color='r')
+        self.canvas_0_OA.draw()
+
+        h1 = max_absoluto_AP*800 // max_absoluto_ML
+
+        self.box_0_OA.set_size_request(800, h1)
+
+        '''
+        charts = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
+        for c in charts:
+            #w1 = c.get_allocation().width
+        '''
+
+        self.maximo = max([max_absoluto_AP, max_absoluto_ML, max(dis_resultante_total)])
+
+        self.axis_1_OA.set_ylim(-self.maximo, self.maximo)
+        self.axis_1_OA.plot(tempo, APs_Processado, color='k', label='APs')
+        self.axis_1_OA.plot(tempo, MLs_Processado, color='m', label='MLs')
+        self.axis_1_OA.plot(tempo, dis_resultante_total, color='g', label='DRT')
+        self.axis_1_OA.legend()
+        self.canvas_1_OA.draw()
 
         self.save_exam_button.set_sensitive(True)
 
     def on_save_exam_button_clicked(self, widget):
         self.cur.execute("INSERT INTO exams (APs, MLs, pac_id, usr_id) VALUES (%s, %s, %s, %s)", (list(self.APs), list(self.MLs), self.pacient['ID'], self.user_ID))
-        self.cur.execute("UPDATE pacients SET weight = %f, imc = %f WHERE id = %d;" % (float(self.pacient['Peso']), float(self.pacient['IMC']), int(self.pacient['ID'])))
+        #self.cur.execute("UPDATE pacients SET weight = %f, imc = %f WHERE id = %d;" % (float(self.pacient['Peso']), float(self.pacient['IMC']), int(self.pacient['ID'])))
         self.conn.commit()
 
         self.combo_box_set_exam.remove_all()
@@ -1011,6 +1046,7 @@ class Iem_wbb:
             a.axvline(0, color='grey')
 
         for a in charts_estabilograma:
+            a.clear()
             a.set_xlim(0, tTotal)
             a.set_ylabel('Amplitude')
             a.set_xlabel('Tempo (s)')
@@ -1036,6 +1072,7 @@ class Iem_wbb:
         return True
 
     def resize(self, widget):
+        #print(self.)
         w, h = self.main_window.get_size()
         w1 = 800 * w // 1366
         charts = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
@@ -1043,16 +1080,20 @@ class Iem_wbb:
             #w1 = c.get_allocation().width
             c.set_size_request(w1, w1//2)
 
+
     def load_chart(self, widget):
         pass
 
 
     def __init__(self):
+        self.conn, self.cur = bd.open_BD("iem_wbb", "localhost", "postgres", "postgres")
 
+        '''
         #Connecting to DB
         self.conn = psycopg2.connect("dbname=iem_wbb host=localhost user=postgres password=postgres")
         #Opening DB cursor
         self.cur = self.conn.cursor()
+        '''
 
         self.exam_type = ['OA', 'OF']
         self.amostra = 768
@@ -1130,6 +1171,8 @@ class Iem_wbb:
         self.button_load_chart_1 = self.iemBuilder.get_object("button_load_chart_1")
         self.button_load_chart_2 = self.iemBuilder.get_object("button_load_chart_2")
         self.button_load_chart_3 = self.iemBuilder.get_object("button_load_chart_3")
+        self.capture_button = self.iemBuilder.get_object("capture_button")
+        self.save_exam_button = self.iemBuilder.get_object("save_exam_button")
 
         #Entrys
         self.name_entry = self.iemBuilder.get_object("name_entry")
@@ -1212,16 +1255,19 @@ class Iem_wbb:
 
         self.canvas_0_OA = FigureCanvas(self.fig)
         self.box_0_OA = Gtk.Box()
+        self.box_0_OA = self.iemBuilder.get_object('box_0_OA')
         self.box_0_OA.pack_start(self.canvas_0_OA, expand=True, fill=True, padding=0)
         self.canvas_0_OF = FigureCanvas(self.fig2)
-        self.box_0_OF = Gtk.Box()
+        #self.box_0_OF = Gtk.Box()
+        self.box_0_OF = self.iemBuilder.get_object('box_0_OF')
         self.box_0_OF.pack_start(self.canvas_0_OF, expand=True, fill=True, padding=0)
-
         self.canvas_1_OA = FigureCanvas(self.fig3)
-        self.box_1_OA = Gtk.Box()
+        #self.box_1_OA = Gtk.Box()
+        self.box_1_OA = self.iemBuilder.get_object('box_1_OA')
         self.box_1_OA.pack_start(self.canvas_1_OA, expand=True, fill=True, padding=0)
         self.canvas_1_OF = FigureCanvas(self.fig5)
-        self.box_1_OF = Gtk.Box()
+        #self.box_1_OF = Gtk.Box()
+        self.box_1_OF = self.iemBuilder.get_object('box_1_OF')
         self.box_1_OF.pack_start(self.canvas_1_OF, expand=True, fill=True, padding=0)
 
         boxes = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
@@ -1246,6 +1292,7 @@ class Iem_wbb:
 
         '''
         #Notebooks
+        '''
         main_notebook = Gtk.Notebook()
         main_notebook.set_vexpand(True)
         
@@ -1288,7 +1335,8 @@ class Iem_wbb:
         button_box.add(self.capture_button)
         button_box.add(self.save_exam_button)
         main_box.add(button_box)
-        
+        '''
+
         #Grid 
         self.grid1 = self.iemBuilder.get_object("grid1")
         #for x in ["mdist_", "rdist_", "totex_", "mvelo_"]:
@@ -1301,7 +1349,7 @@ class Iem_wbb:
             self.grid1.get_child_at(2, m).set_width_chars(8)
             m += 1
 
-        #self.grid1.set_sensitive(False)
+        self.clear_charts()
 
         #StatusBar
         self.status_image = self.iemBuilder.get_object("status_image")
@@ -1315,6 +1363,7 @@ class Iem_wbb:
         self.main_window.maximize()
         self.main_window.connect('check-resize', self.resize)
         self.main_window.show_all()
+
 
 if __name__ == "__main__":
 
