@@ -549,10 +549,9 @@
   </object>
   <object class="GtkApplicationWindow" id="main_window">
     <property name="can_focus">False</property>
-    <property name="hexpand">True</property>
-    <property name="vexpand">True</property>
-    <property name="resizable">False</property>
     <property name="window_position">center</property>
+    <property name="default_width">1366</property>
+    <property name="default_height">760</property>
     <property name="destroy_with_parent">True</property>
     <property name="hide_titlebar_when_maximized">True</property>
     <property name="icon">../media/cadeado.png</property>
@@ -1126,10 +1125,10 @@
                                         <property name="spacing">10</property>
                                         <child>
                                           <object class="GtkBox" id="box_0_OA">
-                                            <property name="width_request">750</property>
-                                            <property name="height_request">375</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
+                                            <property name="halign">center</property>
+                                            <property name="valign">center</property>
                                             <property name="orientation">vertical</property>
                                             <child>
                                               <placeholder/>
@@ -1137,16 +1136,16 @@
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
-                                            <property name="fill">True</property>
+                                            <property name="fill">False</property>
                                             <property name="position">0</property>
                                           </packing>
                                         </child>
                                         <child>
                                           <object class="GtkBox" id="box_0_OF">
-                                            <property name="width_request">750</property>
-                                            <property name="height_request">375</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
+                                            <property name="halign">center</property>
+                                            <property name="valign">center</property>
                                             <property name="orientation">vertical</property>
                                             <child>
                                               <placeholder/>
@@ -1154,7 +1153,7 @@
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
-                                            <property name="fill">True</property>
+                                            <property name="fill">False</property>
                                             <property name="position">1</property>
                                           </packing>
                                         </child>
@@ -1191,10 +1190,10 @@
                                         <property name="spacing">10</property>
                                         <child>
                                           <object class="GtkBox" id="box_1_OA">
-                                            <property name="width_request">750</property>
-                                            <property name="height_request">375</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
+                                            <property name="halign">center</property>
+                                            <property name="valign">center</property>
                                             <property name="orientation">vertical</property>
                                             <child>
                                               <placeholder/>
@@ -1208,10 +1207,10 @@
                                         </child>
                                         <child>
                                           <object class="GtkBox" id="box_1_OF">
-                                            <property name="width_request">750</property>
-                                            <property name="height_request">375</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
+                                            <property name="halign">center</property>
+                                            <property name="valign">center</property>
                                             <property name="orientation">vertical</property>
                                             <child>
                                               <placeholder/>

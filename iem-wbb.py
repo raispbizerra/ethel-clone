@@ -504,9 +504,9 @@ class Iem_wbb:
         self.axis_0_OA.plot(MLs_Processado, APs_Processado,'.-',color='r')
         self.canvas_0_OA.draw()
 
-        w1 = self.box_0_OA.get_allocation().width
+        #w1 = self.box_0_OA.get_allocation().width
 
-        h1 = max_absoluto_AP*w1//max_absoluto_ML
+        #h1 = max_absoluto_AP*w1//max_absoluto_ML
         
         #self.box_0_OA.set_size_request(w1, h1)
 
@@ -755,7 +755,6 @@ class Iem_wbb:
             self.advanced_graphs_window.set_resizable(True)
             self.advanced_graphs_window.maximize()
             self.advanced_graphs_window.show()
-            print(self.child)
 
         if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 3:
             pass
@@ -989,9 +988,9 @@ class Iem_wbb:
         self.axis_0_OA.plot(MLs_Processado, APs_Processado,'.-',color='r')
         self.canvas_0_OA.draw()
 
-        h1 = max_absoluto_AP*800 // max_absoluto_ML
+        #h1 = max_absoluto_AP*800 // max_absoluto_ML
 
-        self.box_0_OA.set_size_request(800, h1)
+        #self.box_0_OA.set_size_request(800, h1)
 
         '''
         charts = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
@@ -1073,8 +1072,9 @@ class Iem_wbb:
 
     def resize(self, widget):
         #print(self.)
-        w, h = self.main_window.get_size()
-        w1 = 800 * w // 1366
+        w, h = widget.get_size()
+        print(w, h)
+        w1 = 750 * w // 1366
         charts = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
         for c in charts:
             #w1 = c.get_allocation().width
@@ -1274,80 +1274,15 @@ class Iem_wbb:
         for b in boxes:
             b.connect('button-press-event', self.on_button_press_event)
 
-        #ScrolledWindows
-        '''
-        self.estatocinesigrama_sw_0 = self.iemBuilder.get_object("estatocinesigrama_sw_0")
-        self.estatocinesigrama_sw_1 = self.iemBuilder.get_object("estatocinesigrama_sw_1") 
-        self.estabilograma_sw_0 = self.iemBuilder.get_object("estabilograma_sw_0")
-        self.estabilograma_sw_1 = self.iemBuilder.get_object("estabilograma_sw_1")
-        
-        self.estatocinesigrama_sw_0.add(self.box_0_OA)
-        self.estatocinesigrama_sw_1.add(self.box_0_OF)
-        self.estabilograma_sw_0.add(self.box_1_OA)
-        self.estabilograma_sw_1.add(self.box_1_OF)
-        
-        self.sw1 = self.iemBuilder.get_object('sw1')
-        self.sw1.add(self.box_0_OA)
-        self.sw1.add(self.box_0_OF)
-
-        '''
-        #Notebooks
-        '''
-        main_notebook = Gtk.Notebook()
-        main_notebook.set_vexpand(True)
-        
-        box_choose_0 = Gtk.HBox()
-        self.button_load_chart_0 = Gtk.Button("Carregar Exame")
-        self.combo_box_load_chart_0 = Gtk.ComboBoxText()
-        self.combo_box_load_chart_0.connect('changed', self.load_chart)
-        box_choose_0.add(self.combo_box_load_chart_0)
-        box_choose_0.add(self.button_load_chart_0)
-
-        #box_0 = Gtk.VBox()
-        estatocinesigrama_sc = Gtk.ScrolledWindow()
-        estatocinesigrama_box = Gtk.VBox()
-        estatocinesigrama_box.set_spacing(10)
-        estatocinesigrama_box.add(self.box_0_OA)
-        estatocinesigrama_box.add(self.box_0_OF)
-        estatocinesigrama_sc.add(estatocinesigrama_box)
-
-        #box_0.add(box_choose_0)
-        #box_0.add(estatocinesigrama_sc)
-
-        estabilograma_sc = Gtk.ScrolledWindow()
-        estabilograma_box = Gtk.VBox()
-        estabilograma_box.add(self.box_1_OA)
-        estabilograma_box.add(self.box_1_OF)
-        estabilograma_box.set_spacing(10)
-        estabilograma_sc.add(estabilograma_box)
-        
-        main_notebook.append_page(estatocinesigrama_sc, Gtk.Label("Estatocinesigrama"))
-        main_notebook.append_page(estabilograma_sc, Gtk.Label("Estabilograma"))
-        main_box.add(main_notebook)
-        button_box = Gtk.ButtonBox()
-        button_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
-        self.capture_button = Gtk.Button("Capturar")
-        self.capture_button.set_sensitive(False)
-        self.capture_button.connect('clicked', self.on_capture_button_clicked)
-        self.save_exam_button = Gtk.Button("Salvar exame")
-        self.capture_button.connect('clicked', self.on_save_exam_button_clicked)
-        self.save_exam_button.set_sensitive(False)
-        button_box.add(self.capture_button)
-        button_box.add(self.save_exam_button)
-        main_box.add(button_box)
-        '''
-
         #Grid 
         self.grid1 = self.iemBuilder.get_object("grid1")
         #for x in ["mdist_", "rdist_", "totex_", "mvelo_"]:
             #for y in ["ap_", "ml_", "total_"]:
-        m = 1
-        for x in range(12):
+        for m in range(1, 13):
             self.grid1.attach(Gtk.Entry.new(), 2, m, 1, 1)
             self.grid1.get_child_at(2, m).set_text('0.000000')
             self.grid1.get_child_at(2, m).set_editable(False)
             self.grid1.get_child_at(2, m).set_width_chars(8)
-            m += 1
 
         self.clear_charts()
 
@@ -1360,8 +1295,8 @@ class Iem_wbb:
 
         ''' Login '''
         #self.login_window.show_all()
-        self.main_window.maximize()
-        self.main_window.connect('check-resize', self.resize)
+        #self.main_window.maximize()
+        self.resize(self.main_window)
         self.main_window.show_all()
 
 
