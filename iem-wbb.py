@@ -7,7 +7,7 @@ sys.path.append('media')
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk, Gdk, GLib, Pango
 
 import calculos as calc
 import conexao as connect
@@ -374,11 +374,9 @@ class Iem_wbb:
 
         if(ID != "None"):
             #Selects the active row from table exams
-            select = "SELECT aps, mls, date FROM exams WHERE id = %s" % (ID)
+            select = "SELECT aps, mls, date, type FROM exams WHERE id = %s" % (ID)
             self.cur.execute(select)
             row = self.cur.fetchall()
-
-            print(row)
 
             self.APs = np.zeros_like(row[0][0])
             self.MLs = np.zeros_like(row[0][1])
@@ -387,9 +385,11 @@ class Iem_wbb:
                 self.APs[i] = row[0][0][i]
                 self.MLs[i] = row[0][1][i]
 
+            print(row)
+
             self.exam_date = row[0][2]
-            #self.exam_type = row[0][3]
-            #print(self.exam_date, self.exam_type)
+            self.exam_type = row[0][3]
+            print(type(self.exam_date), self.exam_type)
 
     def on_load_exam_button_clicked(self, widget):
         dt = 0.040
@@ -1078,12 +1078,185 @@ class Iem_wbb:
         charts = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
         for c in charts:
             #w1 = c.get_allocation().width
-            c.set_size_request(w1, w1//2)
+            c.set_size_request(w1, w1//2 + 100)
 
+    def on_cbt_pacient_0_changed(self, widget):
+        #Gets the active row ID at pacients_combobox
+        self.ID_0 = widget.get_active_id()
+        self.ID_0 = str(self.ID_0)
+        print(self.ID_0)
 
-    def load_chart(self, widget):
-        pass
+    def on_cbt_pacient_1_changed(self, widget):
+        #Gets the active row self.ID at pacients_combobox
+        self.ID_1 = widget.get_active_id()
+        self.ID_1 = str(self.ID_1)
+        print(self.ID_1)
 
+    def on_select_exam_button_clicked(self, widget):
+        popover = Gtk.Popover()
+        calendar = Gtk.Calendar()
+        calendar.clear_marks()
+        calendar.connect('day-selected', self.onCalendarDaySelected)
+        box = Gtk.VBox()
+        
+        columns = ["Data", "Tipo"]
+        self.listmodel = Gtk.ListStore(str, str)
+        view = Gtk.TreeView(model=self.listmodel)
+        for i, column in enumerate(columns):
+            cell = Gtk.CellRendererText()
+            if i == 0:
+                cell.props.weight_set = True
+                cell.props.weight = Pango.Weight.BOLD
+            col = Gtk.TreeViewColumn(column, cell, text=i)
+            view.append_column(col)
+
+        view.get_selection().connect("changed", self.on_view_changed)
+
+        button = Gtk.Button('Carregar')
+        button.connect('clicked', self.load_exam_clicked)
+        label = Gtk.Label('Exames:')
+        label.set_justify(Gtk.Justification.CENTER)
+        popover.add(box)
+        box.set_spacing(10)
+        box.add(calendar)
+        box.add(label)
+        box.add(view)
+        box.add(button)
+        popover.set_relative_to(widget)
+        popover.show_all()
+
+    def load_exam_clicked(self, widget):
+        self.axis_0_OA.clear()
+
+        select = "SELECT aps, mls, type FROM exams WHERE pac_id = %s and date::time = %s" % (self.ID_0, self.examDate)
+        self.cur.execute(select)
+        row = self.cur.fetchall()
+
+        self.APs = np.zeros_like(row[0][0])
+        self.MLs = np.zeros_like(row[0][1])
+
+        for i in range(len(row[0][0])):
+            self.APs[i] = row[0][0][i]
+            self.MLs[i] = row[0][1][i]
+
+        dt = 0.040
+        tTotal = len(self.APs) * dt
+        tempo = np.arange(0, tTotal, 0.040)
+
+        max_absoluto_AP = calc.valorAbsoluto(min(self.APs), max(self.APs))
+        max_absoluto_ML = calc.valorAbsoluto(min(self.MLs), max(self.MLs))
+
+        max_absoluto_AP *= 1.25
+        max_absoluto_ML *= 1.25
+
+        print('max_absoluto_AP:',max_absoluto_AP,'max_absoluto_ML:',max_absoluto_ML)
+
+        self.clear_charts()
+
+        APs_Processado, MLs_Processado, AP_, ML_ = calc.geraAP_ML(self.APs, self.MLs)
+        print("AP_ = ", AP_)
+        print("ML_ = ", ML_)
+        #RD
+        dis_resultante_total = calc.distanciaResultante(APs_Processado, MLs_Processado)
+
+        #? Isto não faz sentido
+        #dis_resultante_AP = calc.distanciaResultanteParcial(APs_Processado)
+        #dis_resultante_ML = calc.distanciaResultanteParcial(MLs_Processado)
+
+        #MDIST
+        dis_media = calc.distanciaMedia(dis_resultante_total)
+
+        #MDIST_AP
+        dis_mediaAP = calc.distanciaMedia_(APs_Processado)
+        #MDIST_ML
+        dis_mediaML = calc.distanciaMedia_(MLs_Processado)
+
+        print("MDIST = ", dis_media)
+        print("MDIST_AP = ", dis_mediaAP)
+        print("MDIST_ML = ", dis_mediaML)
+
+        #RDIST
+        dis_rms_total = calc.distRMS(dis_resultante_total)
+        #dis_rms_AP = calc.distRMS(dis_resultante_AP)
+        #dis_rms_ML = calc.distRMS(dis_resultante_ML)
+        #RDIST_AP
+        dis_rms_AP = calc.distRMS(APs_Processado)
+        #RDIST_AP
+        dis_rms_ML = calc.distRMS(MLs_Processado)
+
+        print("RDIST = ", dis_rms_total)
+        print("RDIST_AP = ", dis_rms_AP)
+        print("RDIST_ML = ", dis_rms_ML)
+
+        #totex_total = calc.totex(APs_Processado, MLs_Processado)
+        #TOTEX
+        totex_total = calc.totex(APs_Processado, MLs_Processado)
+        #TOTEX_AP
+        totex_AP = calc.totexParcial(APs_Processado)
+        #TOTEX_ML
+        totex_ML = calc.totexParcial(MLs_Processado)
+
+        print("TOTEX = ", totex_total)
+        print("TOTEX_AP = ", totex_AP)
+        print("TOTEX_ML = ", totex_ML)
+
+        #MVELO
+        mvelo_total = calc.mVelo(totex_total, tTotal)
+        #MVELO_AP
+        mvelo_AP = calc.mVelo(totex_AP, tTotal)
+        #MVELO_ML
+        mvelo_ML =  calc.mVelo(totex_ML, tTotal)
+
+        print("MVELO = ", mvelo_total)
+        print("MVELO_AP = ", mvelo_AP)
+        print("MVELO_ML = ", mvelo_ML)
+
+        metricas = [dis_mediaAP, dis_mediaML, dis_media, dis_rms_AP, dis_rms_ML, dis_rms_total, totex_AP, totex_ML, totex_total, mvelo_AP, mvelo_ML, mvelo_total]
+
+        for x in range(1, 2):
+            for y in range(1, 13):
+                self.grid1.get_child_at(x, y).set_text(str(round(metricas[y-1], 6)))
+
+        max_absoluto_AP = np.absolute(APs_Processado).max()
+        max_absoluto_ML = np.absolute(MLs_Processado).max()
+
+        max_absoluto_AP *=1.05
+        max_absoluto_ML *=1.05
+
+        print('max_absoluto_AP:', max_absoluto_AP, 'max_absoluto_ML:', max_absoluto_ML)
+        if(row[0][2] == 'OA'):
+            self.fig.suptitle("Olhos Abertos")
+        elif(row[0][2] == 'OF'):
+            self.fig.suptitle('Olhos Fechados')
+
+        self.axis_0_OA.set_xlim(-max_absoluto_ML, max_absoluto_ML)
+        self.axis_0_OA.set_ylim(-max_absoluto_AP, max_absoluto_AP)
+        self.axis_0_OA.plot(MLs_Processado, APs_Processado,'.-',color='r')
+        self.canvas_0_OA.draw()
+
+        self.points_entry.set_text(str(len(self.APs)))
+        
+
+    def on_view_changed(self, selection):
+        (model, iter) = selection.get_selected()
+        self.examDate = '\'' + model[iter][0] + '\''
+        return True
+
+    def onCalendarDaySelected(self, calendar):
+        self.listmodel.clear()
+
+        if(self.ID_0):
+            y, m, d = calendar.get_date()
+            m += 1
+            data = str(y) + '-' + str(m) + '-' + str(d)
+            self.cur.execute("SELECT date::time, type FROM exams WHERE pac_id = (%s) and date::date = %s", (self.ID_0, data))
+            rows = self.cur.fetchall()
+            for row in rows:
+                e = []
+                for r in row:
+                    e.append(str(r))
+                self.listmodel.append(e)
+            calendar.get_parent().show_all()
 
     def __init__(self):
         self.conn, self.cur = bd.open_BD("iem_wbb", "localhost", "postgres", "postgres")
@@ -1173,6 +1346,7 @@ class Iem_wbb:
         self.button_load_chart_3 = self.iemBuilder.get_object("button_load_chart_3")
         self.capture_button = self.iemBuilder.get_object("capture_button")
         self.save_exam_button = self.iemBuilder.get_object("save_exam_button")
+        self.save_exam_button = self.iemBuilder.get_object("save_exam_button")
 
         #Entrys
         self.name_entry = self.iemBuilder.get_object("name_entry")
@@ -1207,10 +1381,16 @@ class Iem_wbb:
         self.combo_box_in_saved = self.commonBuilder.get_object("combo_box_in_saved")
         self.combo_box_in_search = self.commonBuilder.get_object("combo_box_in_search")
         self.combobox_in_load_pacient = self.iemBuilder.get_object("combobox_in_load_pacient")
-        self.combo_box_text_load_chart_0 = self.iemBuilder.get_object("combo_box_text_load_chart_0")
-        self.combo_box_text_load_chart_1 = self.iemBuilder.get_object("combo_box_text_load_chart_1")
-        self.combo_box_text_load_chart_2 = self.iemBuilder.get_object("combo_box_text_load_chart_2")
-        self.combo_box_text_load_chart_3 = self.iemBuilder.get_object("combo_box_text_load_chart_3")
+        self.cbt_pacient_0 = self.iemBuilder.get_object("cbt_pacient_0")
+        self.cbt_pacient_1 = self.iemBuilder.get_object("cbt_pacient_1")
+
+        self.cbt_pacient_0.remove_all()
+        self.cbt_pacient_1.remove_all()
+        self.cur.execute("SELECT id, name FROM pacients ORDER BY id;")
+        rows = self.cur.fetchall()
+        for row in rows:
+            self.cbt_pacient_1.append(str(row[0]),row[1])
+            self.cbt_pacient_0.append(str(row[0]),row[1])
 
         #Events
         self.login_window.connect('destroy', Gtk.main_quit)
@@ -1232,23 +1412,23 @@ class Iem_wbb:
         #self.fig = plt.figure(dpi=50)
         self.fig = plt.figure()
         #self.fig.suptitle("Olhos Abertos", fontsize=20)
-        self.fig.suptitle("Olhos Abertos")
+        #self.fig.suptitle("Olhos Abertos")
         self.axis_0_OA = self.fig.add_subplot(111)
         #self.fig2 = plt.figure(dpi=50)
         self.fig2 = plt.figure()
         #self.fig2.suptitle("Olhos Fechados", fontsize=20)
-        self.fig2.suptitle("Olhos Fechados")
+        #self.fig2.suptitle("Olhos Fechados")
         self.axis_0_OF = self.fig2.add_subplot(111)
 
         #self.fig3 = plt.figure(dpi=50)
         #self.fig3.suptitle("Amplitude - Olhos Abertos", fontsize=20)
         self.fig3 = plt.figure()
-        self.fig3.suptitle("Amplitude - Olhos Abertos")
+        #self.fig3.suptitle("Amplitude - Olhos Abertos")
         self.axis_1_OA = self.fig3.add_subplot(111)
         #self.fig5 = plt.figure(dpi=50)
         #self.fig5.suptitle("Amplitude - Olhos Fechados", fontsize=20)
         self.fig5 = plt.figure()
-        self.fig5.suptitle("Amplitude - Olhos Fechados")
+        #self.fig5.suptitle("Amplitude - Olhos Fechados")
         self.axis_1_OF = self.fig5.add_subplot(111)
 
         self.clear_charts()
