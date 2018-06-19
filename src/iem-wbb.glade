@@ -8,12 +8,6 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-connect</property>
   </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixel_size">20</property>
-    <property name="icon_name">calendar</property>
-  </object>
   <object class="GtkListStore" id="liststore1">
     <columns>
       <!-- column-name Data -->
@@ -1194,68 +1188,15 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="orientation">vertical</property>
+                                        <property name="spacing">10</property>
                                         <child>
-                                          <object class="GtkBox">
+                                          <object class="GtkBox" id="box0">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="halign">center</property>
                                             <property name="valign">center</property>
-                                            <property name="orientation">vertical</property>
                                             <child>
-                                              <object class="GtkBox">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="hexpand">True</property>
-                                                <child>
-                                                  <object class="GtkComboBoxText" id="cbt_pacient_0">
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">False</property>
-                                                    <signal name="changed" handler="on_cbt_pacient_0_changed" swapped="no"/>
-                                                  </object>
-                                                  <packing>
-                                                    <property name="expand">False</property>
-                                                    <property name="fill">True</property>
-                                                    <property name="position">0</property>
-                                                  </packing>
-                                                </child>
-                                                <child>
-                                                  <object class="GtkButton">
-                                                    <property name="label" translatable="yes">Selecionar Exame </property>
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">True</property>
-                                                    <property name="receives_default">True</property>
-                                                    <property name="image">image1</property>
-                                                    <property name="image_position">right</property>
-                                                    <property name="always_show_image">True</property>
-                                                    <signal name="clicked" handler="on_select_exam_button_clicked" swapped="no"/>
-                                                  </object>
-                                                  <packing>
-                                                    <property name="expand">False</property>
-                                                    <property name="fill">True</property>
-                                                    <property name="position">1</property>
-                                                  </packing>
-                                                </child>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">0</property>
-                                              </packing>
-                                            </child>
-                                            <child>
-                                              <object class="GtkBox" id="box_0_OA">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="orientation">vertical</property>
-                                                <child>
-                                                  <placeholder/>
-                                                </child>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">1</property>
-                                              </packing>
+                                              <placeholder/>
                                             </child>
                                           </object>
                                           <packing>
@@ -1265,66 +1206,13 @@
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkBox">
+                                          <object class="GtkBox" id="box1">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="halign">center</property>
                                             <property name="valign">center</property>
-                                            <property name="orientation">vertical</property>
                                             <child>
-                                              <object class="GtkBox">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="hexpand">True</property>
-                                                <child>
-                                                  <object class="GtkComboBoxText" id="cbt_pacient_1">
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">False</property>
-                                                    <signal name="changed" handler="on_cbt_pacient_1_changed" swapped="no"/>
-                                                  </object>
-                                                  <packing>
-                                                    <property name="expand">False</property>
-                                                    <property name="fill">True</property>
-                                                    <property name="position">0</property>
-                                                  </packing>
-                                                </child>
-                                                <child>
-                                                  <object class="GtkButton">
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">True</property>
-                                                    <property name="receives_default">True</property>
-                                                    <property name="always_show_image">True</property>
-                                                    <child>
-                                                      <placeholder/>
-                                                    </child>
-                                                  </object>
-                                                  <packing>
-                                                    <property name="expand">False</property>
-                                                    <property name="fill">True</property>
-                                                    <property name="position">1</property>
-                                                  </packing>
-                                                </child>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">0</property>
-                                              </packing>
-                                            </child>
-                                            <child>
-                                              <object class="GtkBox" id="box_0_OF">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="orientation">vertical</property>
-                                                <child>
-                                                  <placeholder/>
-                                                </child>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="position">1</property>
-                                              </packing>
+                                              <placeholder/>
                                             </child>
                                           </object>
                                           <packing>
@@ -1365,7 +1253,7 @@
                                         <property name="orientation">vertical</property>
                                         <property name="spacing">10</property>
                                         <child>
-                                          <object class="GtkBox" id="box_1_OA">
+                                          <object class="GtkBox" id="box2">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="halign">center</property>
@@ -1382,7 +1270,7 @@
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkBox" id="box_1_OF">
+                                          <object class="GtkBox" id="box3">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="halign">center</property>
