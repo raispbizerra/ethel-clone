@@ -499,30 +499,30 @@ class Iem_wbb:
 
         print('max_absoluto_AP:', max_absoluto_AP, 'max_absoluto_ML:', max_absoluto_ML)
 
-        self.axis_0_OA.set_xlim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis_0_OA.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis_0_OA.plot(MLs_Processado, APs_Processado,'.-',color='r')
-        self.canvas_0_OA.draw()
+        self.axis_0.set_xlim(-max_absoluto_ML, max_absoluto_ML)
+        self.axis_0.set_ylim(-max_absoluto_AP, max_absoluto_AP)
+        self.axis_0.plot(MLs_Processado, APs_Processado,'.-',color='r')
+        self.canvas_0.draw()
 
-        #w1 = self.box_0_OA.get_allocation().width
+        #w1 = self.box_0.get_allocation().width
 
         #h1 = max_absoluto_AP*w1//max_absoluto_ML
         
-        #self.box_0_OA.set_size_request(w1, h1)
+        #self.box_0.set_size_request(w1, h1)
 
-        '''self.axis_0_OF.set_xlim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis_0_OF.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis_0_OF.plot(MLs_Processado, APs_Processado,'.-',color='g')
-        self.canvas_0_OF.draw()'''
+        '''self.axis_1.set_xlim(-max_absoluto_ML, max_absoluto_ML)
+        self.axis_1.set_ylim(-max_absoluto_AP, max_absoluto_AP)
+        self.axis_1.plot(MLs_Processado, APs_Processado,'.-',color='g')
+        self.canvas_1.draw()'''
 
         self.maximo = max([max_absoluto_AP, max_absoluto_ML, max(dis_resultante_total)])
 
-        self.axis_1_OA.set_ylim(-self.maximo, self.maximo)
-        self.axis_1_OA.plot(tempo, APs_Processado, color='k', label='APs')
-        self.axis_1_OA.plot(tempo, MLs_Processado, color='m', label='MLs')
-        self.axis_1_OA.plot(tempo, dis_resultante_total, color='g', label='DRT')
-        self.axis_1_OA.legend()
-        self.canvas_1_OA.draw()
+        self.axis_2.set_ylim(-self.maximo, self.maximo)
+        self.axis_2.plot(tempo, APs_Processado, color='k', label='APs')
+        self.axis_2.plot(tempo, MLs_Processado, color='m', label='MLs')
+        self.axis_2.plot(tempo, dis_resultante_total, color='g', label='DRT')
+        self.axis_2.legend()
+        self.canvas_2.draw()
 
         self.points_entry.set_text(str(len(self.APs)))
 
@@ -917,29 +917,29 @@ class Iem_wbb:
         #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
         #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
 
-        self.axis_0_OA.set_xlim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis_0_OA.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis_0_OA.plot(MLs_Processado, APs_Processado,'.-',color='r')
-        self.canvas_0_OA.draw()
+        self.axis_0.set_xlim(-max_absoluto_ML, max_absoluto_ML)
+        self.axis_0.set_ylim(-max_absoluto_AP, max_absoluto_AP)
+        self.axis_0.plot(MLs_Processado, APs_Processado,'.-',color='r')
+        self.canvas_0.draw()
 
         #h1 = max_absoluto_AP*800 // max_absoluto_ML
 
-        #self.box_0_OA.set_size_request(800, h1)
+        #self.box_0.set_size_request(800, h1)
 
         '''
-        charts = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
+        charts = [self.box_0, self.box_1, self.box_2, self.box_3]
         for c in charts:
             #w1 = c.get_allocation().width
         '''
 
         self.maximo = max([max_absoluto_AP, max_absoluto_ML, max(dis_resultante_total)])
 
-        self.axis_1_OA.set_ylim(-self.maximo, self.maximo)
-        self.axis_1_OA.plot(tempo, APs_Processado, color='k', label='APs')
-        self.axis_1_OA.plot(tempo, MLs_Processado, color='m', label='MLs')
-        self.axis_1_OA.plot(tempo, dis_resultante_total, color='g', label='DRT')
-        self.axis_1_OA.legend()
-        self.canvas_1_OA.draw()
+        self.axis_2.set_ylim(-self.maximo, self.maximo)
+        self.axis_2.plot(tempo, APs_Processado, color='k', label='APs')
+        self.axis_2.plot(tempo, MLs_Processado, color='m', label='MLs')
+        self.axis_2.plot(tempo, dis_resultante_total, color='g', label='DRT')
+        self.axis_2.legend()
+        self.canvas_2.draw()
 
         self.save_exam_button.set_sensitive(True)
 
@@ -966,8 +966,8 @@ class Iem_wbb:
         dt = 0.040
         tTotal = len(self.APs) * dt
 
-        charts_estatocinesigrama = [self.axis_0_OA, self.axis_0_OF]
-        charts_estabilograma = [self.axis_1_OA, self.axis_1_OF]
+        charts_estatocinesigrama = [self.axis_0, self.axis_1]
+        charts_estabilograma = [self.axis_2, self.axis_3]
 
         for a in charts_estatocinesigrama:
             a.clear()
@@ -1007,8 +1007,8 @@ class Iem_wbb:
         return True
 
     def resize(self, widget):
-        w1 = 600
-        charts = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
+        w1 = 575
+        charts = [self.box_0, self.box_1, self.box_2, self.box_3]
         for c in charts:
             c.set_size_request(w1, w1)
 
@@ -1018,7 +1018,13 @@ class Iem_wbb:
 
         if(tv == self.view_0):
             b = self.chart_button_0
-
+        elif(tv == self.view_1):
+            b = self.chart_button_1
+        elif(tv == self.view_2):
+            b = self.chart_button_2
+        elif(tv == self.view_3):
+            b = self.chart_button_3
+        
         b.set_sensitive(False)
         self.exam = None
         if(model[iter][0][0].isdigit()):
@@ -1029,7 +1035,14 @@ class Iem_wbb:
 
     def on_load_chart(self, widget):
         if(widget == self.chart_button_0):
-            a, c, x = self.axis_0_OA, self.canvas_0_OA, 1
+            f, a, c, x, tipo = self.fig, self.axis_0, self.canvas_0, 1, 0
+        elif(widget == self.chart_button_1):
+            f, a, c, x, tipo = self.fig_1, self.axis_1, self.canvas_1, 2, 0
+        elif(widget == self.chart_button_2):
+            f, a, c, x, tipo = self.fig_2, self.axis_2, self.canvas_2, 1, 1
+        elif(widget == self.chart_button_3):
+            f, a, c, x, tipo = self.fig_3, self.axis_3, self.canvas_3, 2, 1
+
         if(self.exam):
             self.APs = np.zeros_like(self.exam[0][0])
             self.MLs = np.zeros_like(self.exam[0][1])
@@ -1105,20 +1118,36 @@ class Iem_wbb:
             max_absoluto_AP = np.absolute(APs_Processado).max()
             max_absoluto_ML = np.absolute(MLs_Processado).max()
 
-
             max_absoluto_AP *=1.05
             max_absoluto_ML *=1.05
 
-            max_absoluto = max(max_absoluto_AP, max_absoluto_ML)
+            self.max_absoluto_0 = max([self.max_absoluto_0, max_absoluto_AP, max_absoluto_ML])
+            self.max_absoluto_1 = max([max(dis_resultante_total), max_absoluto_AP, max_absoluto_ML])
 
-            metricas = [dis_mediaAP, dis_mediaML, dis_media, dis_rms_AP, dis_rms_ML, dis_rms_total, totex_AP, totex_ML, totex_total, mvelo_AP, mvelo_ML, mvelo_total]
+            metricas = [dis_mediaAP, dis_mediaML, dis_media, 
+            dis_rms_AP, dis_rms_ML, dis_rms_total, totex_AP, 
+            totex_ML, totex_total, mvelo_AP, mvelo_ML, mvelo_total]
 
-            for y in range(1, 13):
-                self.grid1.get_child_at(x, y).set_text(str(round(metricas[y-1], 6)))
+            for y in range(len(metricas)):
+                self.grid1.get_child_at(x, y+1).set_text(str(round(metricas[y], 6)))
 
-            a.set_xlim(-max_absoluto, max_absoluto)
-            a.set_ylim(-max_absoluto, max_absoluto)
-            a.plot(MLs_Processado, APs_Processado,'.-',color='r')
+            print(self.t)
+            if(self.t == 'OA'):
+                f.suptitle("Olhos Abertos")
+            elif(self.t == 'OF'):
+                f.suptitle("Olhos Fechados")
+
+            if(tipo == 0):
+                a.set_xlim(-self.max_absoluto_0, self.max_absoluto_0)
+                a.set_ylim(-self.max_absoluto_0, self.max_absoluto_0)
+                a.plot(MLs_Processado, APs_Processado,'.-',color='r')
+            elif(tipo == 1):
+                a.set_ylim(-self.max_absoluto_1, self.max_absoluto_1)
+                a.plot(tempo, APs_Processado, '.-', color='k', label='APs')
+                a.plot(tempo, MLs_Processado, color='m', label='MLs')
+                a.plot(tempo, dis_resultante_total, color='g', label='DRT')
+                a.legend()
+
             c.draw()
 
     def __init__(self):
@@ -1131,7 +1160,8 @@ class Iem_wbb:
         self.cur = self.conn.cursor()
         '''
 
-        self.date_0 = ""
+        self.max_absoluto_0 = 0.0
+        self.max_absoluto_1 = 0.0
 
         self.exam_type = ['OA', 'OF']
         self.amostra = 768
@@ -1215,8 +1245,6 @@ class Iem_wbb:
         self.button_load_chart_3 = self.iemBuilder.get_object("button_load_chart_3")
         self.capture_button = self.iemBuilder.get_object("capture_button")
         self.save_exam_button = self.iemBuilder.get_object("save_exam_button")
-        self.chart_button_0 = Gtk.Button("Carregar")
-        self.chart_button_0.set_sensitive(False)
 
         #Entrys
         self.name_entry = self.iemBuilder.get_object("name_entry")
@@ -1269,48 +1297,37 @@ class Iem_wbb:
         self.pacient_label_in_load = self.iemBuilder.get_object("pacient_label_in_load")
 
         #Charts
-        #self.fig = plt.figure(dpi=50)
         self.fig = plt.figure()
-        #self.fig.suptitle("Olhos Abertos", fontsize=20)
-        #self.fig.suptitle("Olhos Abertos")
-        self.axis_0_OA = self.fig.add_subplot(111)
-        #self.fig2 = plt.figure(dpi=50)
-        self.fig2 = plt.figure()
-        #self.fig2.suptitle("Olhos Fechados", fontsize=20)
-        #self.fig2.suptitle("Olhos Fechados")
-        self.axis_0_OF = self.fig2.add_subplot(111)
+        self.axis_0 = self.fig.add_subplot(111)
+        
+        self.fig_1 = plt.figure()
+        self.axis_1 = self.fig_1.add_subplot(111)
 
-        #self.fig3 = plt.figure(dpi=50)
-        #self.fig3.suptitle("Amplitude - Olhos Abertos", fontsize=20)
-        self.fig3 = plt.figure()
-        #self.fig3.suptitle("Amplitude - Olhos Abertos")
-        self.axis_1_OA = self.fig3.add_subplot(111)
-        #self.fig5 = plt.figure(dpi=50)
-        #self.fig5.suptitle("Amplitude - Olhos Fechados", fontsize=20)
-        self.fig5 = plt.figure()
-        #self.fig5.suptitle("Amplitude - Olhos Fechados")
-        self.axis_1_OF = self.fig5.add_subplot(111)
+        self.fig_2 = plt.figure()
+        self.axis_2 = self.fig_2.add_subplot(111)
+
+        self.fig_3 = plt.figure()
+        self.axis_3 = self.fig_3.add_subplot(111)
 
         self.clear_charts()
 
-        self.canvas_0_OA = FigureCanvas(self.fig)
-        self.box_0_OA = Gtk.Box()
-        #self.box_0_OA = self.iemBuilder.get_object('box_0_OA')
-        self.box_0_OA.pack_start(self.canvas_0_OA, expand=True, fill=True, padding=0)
-        self.canvas_0_OF = FigureCanvas(self.fig2)
-        self.box_0_OF = Gtk.Box()
-        #self.box_0_OF = self.iemBuilder.get_object('box_0_OF')
-        self.box_0_OF.pack_start(self.canvas_0_OF, expand=True, fill=True, padding=0)
-        self.canvas_1_OA = FigureCanvas(self.fig3)
-        self.box_1_OA = Gtk.Box()
-        #self.box_1_OA = self.iemBuilder.get_object('box_1_OA')
-        self.box_1_OA.pack_start(self.canvas_1_OA, expand=True, fill=True, padding=0)
-        self.canvas_1_OF = FigureCanvas(self.fig5)
-        self.box_1_OF = Gtk.Box()
-        #self.box_1_OF = self.iemBuilder.get_object('box_1_OF')
-        self.box_1_OF.pack_start(self.canvas_1_OF, expand=True, fill=True, padding=0)
+        self.canvas_0 = FigureCanvas(self.fig)
+        self.box_0 = Gtk.Box()
+        self.box_0.pack_start(self.canvas_0, expand=True, fill=True, padding=0)
 
-        boxes = [self.box_0_OA, self.box_0_OF, self.box_1_OA, self.box_1_OF]
+        self.canvas_1 = FigureCanvas(self.fig_1)
+        self.box_1 = Gtk.Box()
+        self.box_1.pack_start(self.canvas_1, expand=True, fill=True, padding=0)
+
+        self.canvas_2 = FigureCanvas(self.fig_2)
+        self.box_2 = Gtk.Box()
+        self.box_2.pack_start(self.canvas_2, expand=True, fill=True, padding=0)
+
+        self.canvas_3 = FigureCanvas(self.fig_3)
+        self.box_3 = Gtk.Box()
+        self.box_3.pack_start(self.canvas_3, expand=True, fill=True, padding=0)
+
+        boxes = [self.box_0, self.box_1, self.box_2, self.box_3]
         for b in boxes:
             b.connect('button-press-event', self.on_button_press_event)
 
@@ -1327,48 +1344,68 @@ class Iem_wbb:
         self.clear_charts()
 
         #TreeViews
-        store = Gtk.TreeStore(str)
-        self.cur.execute("SELECT * FROM pacients;")
-        p = self.cur.fetchall()
-        for pac in p:
-            nome = store.append(None, [pac[1]])
-            self.cur.execute("SELECT date::date FROM exams WHERE pac_id = %s;" % (pac[0]))
-            d = self.cur.fetchall()
-            for dat in list(set(d)):
-                data = store.append(nome, [str(dat[0])])
-                self.cur.execute("SELECT date::time FROM exams WHERE date::date = %s and pac_id = %s;" % ('\''+str(dat[0])+'\'', pac[0]))
-                h = self.cur.fetchall()
-                for hr in h:
-                    store.append(data, [str(hr[0])])
-
-
-        # the treeview shows the model
-        # create a treeview on the model store
         self.view_0 = Gtk.TreeView()
-        self.view_0.set_model(store)
-        self.view_0.get_selection().connect("changed", self.on_view_changed)
-        # the cellrenderer for the column - text
-        renderer_exams = Gtk.CellRendererText()
-        # the column is created
-        column_exams = Gtk.TreeViewColumn(
-            "Exames por Paciente", renderer_exams, text=0)
-        # and it is appended to the treeview
-        self.view_0.append_column(column_exams)
+        self.view_1 = Gtk.TreeView()
+        self.view_2 = Gtk.TreeView()
+        self.view_3 = Gtk.TreeView()
+        views = [self.view_0, self.view_1, self.view_2, self.view_3]
 
-        # the exams are sortable by author
-        column_exams.set_sort_column_id(0)
+        for v in views:
+            store = Gtk.TreeStore(str)
+            self.cur.execute("SELECT * FROM pacients ORDER BY name;")
+            p = self.cur.fetchall()
+            for pac in p:
+                nome = store.append(None, [pac[1]])
+                self.cur.execute("SELECT date::date FROM exams WHERE pac_id = %s;" % (pac[0]))
+                d = self.cur.fetchall()
+                for dat in list(set(d)):
+                    data = store.append(nome, [str(dat[0])])
+                    self.cur.execute("SELECT date::time FROM exams WHERE date::date = %s and pac_id = %s;" % ('\''+str(dat[0])+'\'', pac[0]))
+                    h = self.cur.fetchall()
+                    for hr in h:
+                        store.append(data, [str(hr[0])])
+
+            # the treeview shows the model
+            # create a treeview on the model store
+            v.set_model(store)
+            v.get_selection().connect("changed", self.on_view_changed)
+            # the cellrenderer for the column - text
+            renderer_exams = Gtk.CellRendererText()
+            # the column is created
+            column_exams = Gtk.TreeViewColumn(
+                "Exames por Paciente", renderer_exams, text=0)
+            # and it is appended to the treeview
+            v.append_column(column_exams)
+
+            # the exams are sortable by author
+            column_exams.set_sort_column_id(0)
 
         # add the treeview to the window
-        box = Gtk.VBox()
-        box.set_homogeneous(False)
-        box.add(self.view_0)
-        self.chart_button_0.set_valign(Gtk.Align.CENTER)
-        self.chart_button_0.set_halign(Gtk.Align.BASELINE)
-        self.chart_button_0.connect('clicked', self.on_load_chart)
-        box.add(self.chart_button_0)
-        self.box0.set_spacing(10)
-        self.box0.add(box)
-        self.box0.add(self.box_0_OA)
+        self.chart_button_0 = Gtk.Button("Carregar")
+        self.chart_button_1 = Gtk.Button("Carregar")
+        self.chart_button_2 = Gtk.Button("Carregar")
+        self.chart_button_3 = Gtk.Button("Carregar")
+
+        buttons = [self.chart_button_0, self.chart_button_1, self.chart_button_2, self.chart_button_3]
+        chart_boxes = [self.box_0, self.box_1, self.box_2, self.box_3]
+        boxes = [self.box0, self.box1, self.box2, self.box3]
+
+        for i in range(len(buttons)):
+            box = Gtk.VBox()
+            label = Gtk.Label("Exame " + str(i % 2 + 1))
+            boxH = Gtk.HBox()
+            box.set_homogeneous(False)
+            box.add(views[i])
+            buttons[i].set_sensitive(False)
+            buttons[i].set_valign(Gtk.Align.CENTER)
+            buttons[i].set_halign(Gtk.Align.BASELINE)
+            buttons[i].connect('clicked', self.on_load_chart)
+            box.add(buttons[i])
+            boxH.set_spacing(10)
+            boxH.add(box)
+            boxH.add(chart_boxes[i])
+            boxes[i].add(label)
+            boxes[i].add(boxH)
 
         #StatusBar
         self.status_image = self.iemBuilder.get_object("status_image")
@@ -1382,7 +1419,6 @@ class Iem_wbb:
         self.main_window.maximize()
         self.resize(self.main_window)
         self.main_window.show_all()
-
 
 if __name__ == "__main__":
 
