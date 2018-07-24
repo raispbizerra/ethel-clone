@@ -1,9 +1,8 @@
 import psycopg2
 
 def open_BD(dbname, host, user, password):
-    connect_text = "dbname=" + dbname + " host=" + host + " user=" + user + " password=" + password
     #Connecting to DB
-    conn = psycopg2.connect(connect_text)
+    conn = psycopg2.connect(database=dbname, host=host, user=user, password=password)
     #Opening DB cursor
     cur = conn.cursor()
 

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+#Importação dos módulos
 import sys
 sys.path.append('src')
 sys.path.append('media')
@@ -13,13 +14,11 @@ import calculos as calc
 import conexao as connect
 import ManipularArquivo as manArq
 import bancoDeDados as bd
-import psycopg2
 
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas
 from matplotlib.backends.backend_gtk3 import NavigationToolbar2GTK3 as NavigationToolbar
-
 
 from bluetooth.btcommon import is_valid_address as iva
 from validate_email import validate_email
@@ -28,85 +27,243 @@ import wbb_calitera as wbb
 import numpy as np
 import time as ptime
 
+
 BATTERY_MAX = 208
 
 class Iem_wbb:
-    
-    def on_save_as_activate(self, menuitem, data=None):
-        path = str('./pacients/' + self.pacient['ID'] + ' - ' + self.pacient['Nome'])
+    '''
+        registro de novos pacientes 
+        captura dos sinais
+        calculo das metricas 
+        representação grafica do resultados
+        armazenamento dos resultados no banco de dados
+    '''
 
-        if(self.is_pacient and self.is_exam):
-            dialog = Gtk.FileChooserDialog("Salvar como", self.main_window,
-                Gtk.FileChooserAction.SAVE,
-                (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+    # REGISTRO DE PACIENTES #
 
-            dialog.set_do_overwrite_confirmation(True)
+    # Evento de clique do botão 'SALVAR PACIENTE'
+    def on_savepacient_button_clicked(self, widget):
 
-            self.add_filters(dialog)
-            dialog.set_current_folder(path)
-            dialog.set_current_name(self.pacient['Nome']+'.xls')
+        #Define pai transitório para diálogo
+        self.message_dialog_window.set_transient_for(self.main_window)
 
-            response = dialog.run()
-            dialog.set_filename('.xls')
-            if response == Gtk.ResponseType.OK:
-                print(dialog.get_filename())
-                manArq.importXlS(self.pacient, self.APs, self.MLs, self.exam_date, dialog.get_filename())
-                print("Salvo")
-                self.main_window.get_focus()
-            elif response == Gtk.ResponseType.CANCEL:
-                print("Cancelado")
-                self.main_window.get_focus()
+        #Definição a flag de paciente carregado como falsa
+        self.is_pacient = False
 
-            dialog.destroy()
+        #Recuperação os dados de entrada
+        pacient = { 'Nome'  : self.name_entry.get_text(), 
+                    'Sexo'  : self.sex_combobox.get_active_text(), 
+                    'Idade' : self.age_entry.get_text(), 
+                    'Altura': self.height_entry.get_text().replace(',', '.', 1)}
+
+        #Recuperação das 'entrys'
+        childList = self.name_entry.get_parent().get_children()
+
+        #Teste de dados inválidos
+        for i, data in enumerate(pacient.items()):
+            if data[1] == '' or data[1] == None:
+                self.message_dialog_window.format_secondary_text("Dados inválidos, tente novamente.")
+                self.message_dialog_window.show()
+                childList[i].grab_focus()
+
+                return
+
+        #Redefinição da entrada de altura para facilitar os cálculos
+        self.height_entry.set_text(pacient['Altura'])
+
+        #Teste se o paciente está sendo modificado
+        if not self.modifying:
+            #Inserção do paciente no banco de dados
+            self.cur.execute("INSERT INTO pacients (name, sex, age, height) VALUES (%s, %s, %s, %s);", 
+                (pacient['Nome'].upper(), pacient['Sexo'].upper(), pacient['Idade'], pacient['Altura']))
+            self.conn.commit()
+
+            #Recuperação do ID do paciente no BD
+            self.cur.execute("SELECT last_value FROM pacients_id_seq;")
+            row = self.cur.fetchall()
+            ID = row[0][0]
+            
+            #Definição do dicionário global
+            pacient['ID'] = ID
+            self.pacient = pacient
         else:
-            self.message_dialog_window.set_transient_for(self.main_window)
-            self.message_dialog_window.format_secondary_text("Não há usuário ou exame carregado.")
-            self.message_dialog_window.show()
+            #Atualização dos dados do paciente
+            self.cur.execute("UPDATE pacients SET name = (%s), sex = (%s), age = (%s), height = (%s) WHERE id = (%s);", 
+                (pacient['Nome'], pacient['Sexo'], pacient['Idade'], pacient['Altura'], self.pacient['ID']))
+            self.conn.commit()
+            self.pacient['Nome'] = pacient['Nome']
+            self.pacient['Sexo'] = pacient['Sexo']
+            self.pacient['Idade'] = pacient['Idade']
+            self.pacient['Altura'] = pacient['Altura']
 
-        self.main_window.get_focus()
+        #Mudança na sensibilidade dos elementos
+        for i in range(len(childList)-2):
+            childList[i].set_sensitive(False)
+        self.savepacient_button.set_sensitive(False)
+        self.changepacientbutton.set_sensitive(True)
 
-    def add_filters(self, dialog):
-        filter_text = Gtk.FileFilter()
-        filter_text.set_name(".xls")
-        filter_text.add_mime_type("application/x-msexcel")
-        dialog.add_filter(filter_text)
+        #Mudança na flag de paciente carregado
+        self.is_pacient = True
 
-        filter_any = Gtk.FileFilter()
-        filter_any.set_name("Todos os arquivos")
-        filter_any.add_pattern("*")
-        dialog.add_filter(filter_any)
+        print("Paciente salvo")
+
+    #Evento de clique no botão 'MODIFICAR PACIENTE'
+    def on_changepacientbutton_clicked(self, widget):
+        #Mudança na flag de modificação
+        self.modifying = True
+        
+        #Recuperação das 'entrys'
+        childList = self.name_entry.get_parent().get_children()
+        
+        #Mudança na sensibilidade dos elementos
+        for i in range(len(childList)-2):
+            childList[i].set_sensitive(True)
+        self.savepacient_button.set_sensitive(True)
+        self.changepacientbutton.set_sensitive(False)
+
+    #Evento de clique no botão 'CARREGAR PACIENTE'
+    def on_load_pacient_button_clicked(self, widget):
+        #Limpeza da janela de seleção de paciente
+        self.pacient_label_in_load.set_text("")
+
+        #Limpeza do combobox de seleção de exame
+        self.combo_box_set_exam.remove_all()
+
+        #self.clear_charts()
+
+        #Preenchimento da janela principal com os dados do paciente
+        self.name_entry.set_text(self.pacient['Nome'])
+        self.age_entry.set_text(self.pacient['Idade'])
+        self.height_entry.set_text(self.pacient['Altura'])
+        if(self.pacient['Sexo'] == 'MASCULINO'):
+            self.sex_combobox.set_active_id('0')
+        elif(self.pacient['Sexo'] == 'FEMININO'):
+            self.sex_combobox.set_active_id('1')
+        else:
+            self.sex_combobox.set_active_id('2')
+
+        self.weight.set_text(self.pacient['Peso'])
+        self.imc.set_text(self.pacient['IMC'])
+
+        #Recuperação das 'entrys'
+        childList = self.name_entry.get_parent().get_children()
+        
+        #Mudança na sensibilidade dos elementos
+        for i in range(len(childList)-2):
+            childList[i].set_sensitive(True)
+
+        self.savepacient_button.set_sensitive(False)
+        self.changepacientbutton.set_sensitive(True)
+
+        #Preenchimento do combobox de seleção de exames
+        self.cur.execute("SELECT * FROM exams WHERE pac_id = (%s)", (self.pacient['ID']))
+        rows = self.cur.fetchall()
+        i=1
+        for row in rows:
+            self.combo_box_set_exam.append(str(row[0]), str(i) + ' - ' + str(row[3]))
+            i+=1
+
+        #Mudança secundária na sensibilidade dos elementos
+        self.combo_box_set_exam.set_sensitive(False)
+        self.load_exam_button.set_sensitive(False)
+        if(len(rows)):
+            self.combo_box_set_exam.set_sensitive(True)
+            self.load_exam_button.set_sensitive(True)
+
+        #Mudança na flag de paciente carregado
+        self.is_pacient = True
+
+        #Mudança na visibilidade da janela de seleção de paciente
+        self.load_pacient_window.hide()
+
+    #Evento de ativação da opção de menu 'ABRIR'
+    def on_open_activate(self, menuitem, data=None):
+
+        self.is_pacient = False
+
+        self.pacient_label_in_load.set_text("")
+
+        #Preenchimento do combobox de seleção de paciente
+        self.combobox_in_load_pacient.remove_all()
+        self.cur.execute("SELECT id, name FROM pacients ORDER BY id;")
+        rows = self.cur.fetchall()
+        for row in rows:
+            self.combobox_in_load_pacient.append(str(row[0]),str(row[0]) + ' - ' + row[1])
+
+        #Mudança na visibilidade da janela de seleção de paciente
+        self.load_pacient_window.show()
+
+    #Evento de mudança no combobox de seleção do paciente
+    def on_combobox_in_load_pacient_changed(self, widget):
+
+        self.pacient_label_in_load.set_text("")
+
+        #Recuperação do ID ativo no combobox
+        ID = self.combobox_in_load_pacient.get_active_id()
+        ID = str(ID)
+
+        if(ID != "None"):
+            #Recupera o paciente selecionado do BD
+            select = "SELECT * FROM pacients WHERE id = %s;" % (ID)
+            self.cur.execute(select)
+            row = self.cur.fetchall()
+
+            #Preenche o dicionário do paciente 
+            name = str(row[0][1])
+            sex = str(row[0][2])
+            sex = sex[0]
+            age = str(row[0][3])
+            height = str(row[0][4])
+            weight = str(row[0][5])
+            imc = str(row[0][6])
+
+            self.pacient_label_in_load.set_text('Nome: ' + name +
+                '\n' + 'Sexo: ' + sex +
+                '\n' + 'Idade: ' + age +
+                '\n' + 'Altura: ' + height +
+                '\n' + 'Peso: ' + weight +
+                '\n' + 'IMC: ' + imc)
+
+            self.pacient = {'ID'    : ID, 
+                            'Nome'  : name, 
+                            'Sexo'  : sex, 
+                            'Idade' : age, 
+                            'Altura': height, 
+                            'Peso'  : weight, 
+                            'IMC'   : imc}
+
+    #Evento de clique do botão cancelar na tela de 
+    def on_cancel_in_load_button_clicked(self, widget):
+        self.pacient_label_in_load.set_text("")
+        self.load_pacient_window.hide()
+
+    #Gets the signal of changing at exams_combobox
+    def on_combo_box_set_exam_changed(self, widget):
+        #Gets the active row ID at exams_combobox
+        ID = self.combo_box_set_exam.get_active_id()
+        ID = str(ID)
+
+        if(ID != "None"):
+            #Selects the active row from table exams
+            select = "SELECT aps, mls, date, type FROM exams WHERE id = %s" % (ID)
+            self.cur.execute(select)
+            row = self.cur.fetchall()
+
+            self.APs = np.zeros_like(row[0][0])
+            self.MLs = np.zeros_like(row[0][1])
+
+            for i in range(len(row[0][0])):
+                self.APs[i] = row[0][0][i]
+                self.MLs[i] = row[0][1][i]
+
+            self.exam_date = row[0][2]
+            self.exam_type = row[0][3]
 
     def on_cancel_button_in_login_clicked(self, widget):
         print("Quit in login with cancel_button")
         self.cur.close()
         self.conn.close()
         Gtk.main_quit()
-
-    def clear_all_main_window(self):
-        self.pacient = {}
-        self.is_pacient = False
-
-        self.name_entry.set_text('')
-        self.sex_combobox.set_active_id()
-        self.age_entry.set_text('')
-        self.height_entry.set_text('')
-        self.weight.set_text('')
-        self.imc.set_text('')
-        self.name_entry.set_sensitive(True)
-        self.age_entry.set_sensitive(True)
-        self.height_entry.set_sensitive(True)
-        self.sex_combobox.set_sensitive(True)
-
-        self.combo_box_set_exam.remove_all()
-        self.load_exam_button.set_sensitive(False)
-
-        self.savepacient_button.set_sensitive(True)
-        self.changepacientbutton.set_sensitive(False)
-
-        self.clear_charts()
-
-        self.progressbar.set_fraction(0)
 
     def on_login_button_clicked(self, widget):
         self.message_dialog_window.set_transient_for(self.login_window)
@@ -179,7 +336,6 @@ class Iem_wbb:
         i = 0
         q = len(rows)
         while(i<q):
-            print (rows[i][0])
             if(rows[i][0]):
                 return True
             i+=1
@@ -197,7 +353,7 @@ class Iem_wbb:
         adm_password = self.adm_password_entry_in_register.get_text()
         is_adm = self.is_adm_button_in_register.get_active()
 
-        is_valid_email = validate_email(email, verify=True)
+        invalid_email = validate_email(email, verify=True)
 
         self.cur.execute("SELECT username FROM users;")
         rows = self.cur.fetchall()
@@ -217,7 +373,7 @@ class Iem_wbb:
             self.message_dialog_window.format_secondary_text("Nome de usuário inválido, tente novamente.")
             self.message_dialog_window.show()
             self.username_entry_in_register.grab_focus()
-        elif(email == "" or not is_valid_email):
+        elif(email == "" or not invalid_email):
             self.message_dialog_window.format_secondary_text("E-mail inválido, tente novamente.")
             self.message_dialog_window.show()
             self.email_entry_in_register.grab_focus()
@@ -249,6 +405,96 @@ class Iem_wbb:
         self.register_window.hide()
         self.username_entry_in_login.grab_focus()
 
+    def onFullNameEntryInRegisterChanged(self, widget):
+        fullName = widget.get_text().split(' ')
+        username = ""
+        for i in range(len(fullName)-1):
+            username += fullName[i][0]
+        username += fullName[len(fullName)-1]
+        self.username_entry_in_register.set_text(username.lower())
+        
+
+    def on_save_as_activate(self, menuitem, data=None):
+
+        #Teste se há exame e paciente selecionados
+        if(self.is_pacient and self.is_exam):
+            #Definição da janela
+            dialog = Gtk.FileChooserDialog("Salvar como", self.main_window,
+                Gtk.FileChooserAction.SAVE,
+                (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+
+            #Definição da confirmação de sobrescrição
+            dialog.set_do_overwrite_confirmation(True)
+
+            #Adicionando filtros de tipo
+            self.add_filters(dialog)
+
+            
+            #Definição da pasta a ser exibida
+            path = str('./pacients/' + self.pacient['ID'] + ' - ' + self.pacient['Nome'])
+            dialog.set_current_folder(path)
+
+            #Definição do nome do arquivo
+            dialog.set_current_name(self.pacient['Nome']+'.xls')
+
+            #Execução da janela
+            response = dialog.run()
+            #dialog.set_filename('.xls')
+            if response == Gtk.ResponseType.OK:
+                print(dialog.get_filename())
+                manArq.importXlS(self.pacient, self.APs, self.MLs, self.exam_date, dialog.get_filename())
+                print("Salvo")
+                self.main_window.get_focus()
+            elif response == Gtk.ResponseType.CANCEL:
+                print("Cancelado")
+                self.main_window.get_focus()
+
+            dialog.destroy()
+        else:
+            self.message_dialog_window.set_transient_for(self.main_window)
+            self.message_dialog_window.format_secondary_text("Não há usuário ou exame carregado.")
+            self.message_dialog_window.show()
+
+        self.main_window.get_focus()
+
+    def add_filters(self, dialog):
+        filter_text = Gtk.FileFilter()
+        filter_text.set_name(".xls")
+        filter_text.add_mime_type("application/x-msexcel")
+        dialog.add_filter(filter_text)
+
+        filter_any = Gtk.FileFilter()
+        filter_any.set_name("Todos os arquivos")
+        filter_any.add_pattern("*")
+        dialog.add_filter(filter_any)
+
+    def clear_all_main_window(self):
+        self.pacient = {}
+        self.is_pacient = False
+        self.is_exam = False
+
+        self.name_entry.set_text('')
+        self.sex_combobox.set_active_id()
+        self.age_entry.set_text('')
+        self.height_entry.set_text('')
+        self.weight.set_text('')
+        self.imc.set_text('')
+        self.name_entry.set_sensitive(True)
+        self.age_entry.set_sensitive(True)
+        self.height_entry.set_sensitive(True)
+        self.sex_combobox.set_sensitive(True)
+
+        self.combo_box_set_exam.remove_all()
+        self.load_exam_button.set_sensitive(False)
+
+        self.savepacient_button.set_sensitive(True)
+        self.changepacientbutton.set_sensitive(False)
+
+        self.clear_charts()
+
+        self.progressbar.set_fraction(0)
+
     def on_main_window_destroy(self, object, data=None):
         print("Quit with cancel")
         self.cur.close()
@@ -265,131 +511,6 @@ class Iem_wbb:
 
     def on_new_activate(self, menuitem, data=None):
         self.clear_all_main_window()
-
-    def on_open_activate(self, menuitem, data=None):
-
-        self.is_pacient = False
-
-        self.pacient_label_in_load.set_text("")
-
-        #Fills the combobox with pacients names
-        self.combobox_in_load_pacient.remove_all()
-        self.cur.execute("SELECT id, name FROM pacients ORDER BY id;")
-        rows = self.cur.fetchall()
-        for row in rows:
-            self.combobox_in_load_pacient.append(str(row[0]),str(row[0]) + ' - ' + row[1])
-
-        #Shows the window to load a pacient
-        self.load_pacient_window.show()
-
-    #Gets the signal of changing at pacients_combobox
-    def on_combobox_in_load_pacient_changed(self, widget):
-
-        self.pacient_label_in_load.set_text("")
-
-        #Gets the active row ID at pacients_combobox
-        ID = self.combobox_in_load_pacient.get_active_id()
-        ID = str(ID)
-
-        if(ID != "None"):
-            #Selects the active row from table pacients
-            select = "SELECT * FROM pacients WHERE id = %s;" % (ID)
-            self.cur.execute(select)
-            row = self.cur.fetchall()
-
-            #Fills the pacient with row content
-            name = str(row[0][1])
-            sex = str(row[0][2])
-            sex = sex[0]
-            age = str(row[0][3])
-            height = str(row[0][4])
-            weight = str(row[0][5])
-            imc = str(row[0][6])
-
-            self.pacient_label_in_load.set_text('Nome: ' + name +
-                '\n' + 'Sexo: ' + sex +
-                '\n' + 'Idade: ' + age +
-                '\n' + 'Altura: ' + height +
-                '\n' + 'Peso: ' + weight +
-                '\n' + 'IMC: ' + imc)
-
-            self.pacient = {'Nome': name, 'ID': ID, 'Sexo': sex, 'Idade': age, 'Altura': height, 'Peso' : weight, 'IMC': imc}
-
-    def on_load_pacient_button_clicked(self, widget):
-
-        self.is_pacient = True
-
-        #Clears charts and label contents
-        self.pacient_label_in_load.set_text("")
-        self.combo_box_set_exam.remove_all()
-
-        self.clear_charts()
-
-        #Fill the main window with pacient data
-        self.name_entry.set_text(self.pacient['Nome'])
-        self.age_entry.set_text(self.pacient['Idade'])
-        self.height_entry.set_text(self.pacient['Altura'])
-        if(self.pacient['Sexo'] == 'M'):
-            self.sex_combobox.set_active_id('0')
-        elif(self.pacient['Sexo'] == 'F'):
-            self.sex_combobox.set_active_id('1')
-        else:
-            self.sex_combobox.set_active_id('2')
-
-        self.weight.set_text(self.pacient['Peso'])
-        self.imc.set_text(self.pacient['IMC'])
-        self.sex_combobox.set_sensitive(False)
-        self.name_entry.set_sensitive(False)
-        self.age_entry.set_sensitive(False)
-        self.height_entry.set_sensitive(False)
-        self.savepacient_button.set_sensitive(False)
-        self.changepacientbutton.set_sensitive(True)
-        self.load_pacient_window.hide()
-        self.capture_button.set_sensitive(True)
-
-        #Fills the exams_combobox with the dates of current pacient exams
-        self.cur.execute("SELECT * FROM exams WHERE pac_id = (%s)", (self.pacient['ID']))
-        rows = self.cur.fetchall()
-        i=1
-        for row in rows:
-            self.combo_box_set_exam.append(str(row[0]), str(i) + ' - ' + str(row[3]))
-            i+=1
-
-        if(len(rows)):
-            self.combo_box_set_exam.set_sensitive(True)
-            self.load_exam_button.set_sensitive(True)
-        else:
-            self.combo_box_set_exam.set_sensitive(False)
-            self.load_exam_button.set_sensitive(False)
-
-    def on_cancel_in_load_button_clicked(self, widget):
-        self.pacient_label_in_load.set_text("")
-        self.load_pacient_window.hide()
-
-    #Gets the signal of changing at exams_combobox
-    def on_combo_box_set_exam_changed(self, widget):
-        #Gets the active row ID at exams_combobox
-        ID = self.combo_box_set_exam.get_active_id()
-        ID = str(ID)
-
-        if(ID != "None"):
-            #Selects the active row from table exams
-            select = "SELECT aps, mls, date, type FROM exams WHERE id = %s" % (ID)
-            self.cur.execute(select)
-            row = self.cur.fetchall()
-
-            self.APs = np.zeros_like(row[0][0])
-            self.MLs = np.zeros_like(row[0][1])
-
-            for i in range(len(row[0][0])):
-                self.APs[i] = row[0][0][i]
-                self.MLs[i] = row[0][1][i]
-
-            print(row)
-
-            self.exam_date = row[0][2]
-            self.exam_type = row[0][3]
-            print(type(self.exam_date), self.exam_type)
 
     def on_load_exam_button_clicked(self, widget):
         dt = 0.040
@@ -464,7 +585,9 @@ class Iem_wbb:
         print("MVELO_AP = ", mvelo_AP)
         print("MVELO_ML = ", mvelo_ML)
 
-        metricas = [dis_mediaAP, dis_mediaML, dis_media, dis_rms_AP, dis_rms_ML, dis_rms_total, totex_AP, totex_ML, totex_total, mvelo_AP, mvelo_ML, mvelo_total]
+        metricas = [dis_mediaAP, dis_mediaML, dis_media, dis_rms_AP, 
+        dis_rms_ML, dis_rms_total, totex_AP, totex_ML, totex_total, 
+        mvelo_AP, mvelo_ML, mvelo_total]
 
         for x in range(1, 2):
             for y in range(1, 13):
@@ -766,68 +889,8 @@ class Iem_wbb:
     def on_messagedialog_button_cancel_clicked(self, widget):
         self.message_dialog_window.hide()
 
-    def on_savepacient_button_clicked(self, widget):
-
-        self.is_pacient = False
-
-        name = self.name_entry.get_text()
-        sex = self.sex_combobox.get_active_text()
-        age = self.age_entry.get_text()
-        height = self.height_entry.get_text()
-
-        if (name == ""):
-            self.message_dialog_window.format_secondary_text("Nome inválido, tente novamente.")
-            self.message_dialog_window.show()
-            self.name_entry.grab_focus()
-        elif(sex == ""):
-            self.message_dialog_window.format_secondary_text("Sexo inválido, tente novamente.")
-            self.message_dialog_window.show()
-            self.sex_combobox.grab_focus()
-        elif(age == ""):
-            self.message_dialog_window.format_secondary_text("Idade inválida, tente novamente.")
-            self.message_dialog_window.show()
-            self.age_entry.grab_focus()
-        elif(height == ""):
-            self.message_dialog_window.format_secondary_text("Altura inválida, tente novamente.")
-            self.message_dialog_window.show()
-            self.height_entry.grab_focus()
-        else:
-            height = height.replace(',', '.', 1)
-            self.savepacient_button.set_sensitive(False)
-            self.height_entry.set_text(height)
-            self.name_entry.set_sensitive(False)
-            self.sex_combobox.set_sensitive(False)
-            self.age_entry.set_sensitive(False)
-            self.height_entry.set_sensitive(False)
-            self.capture_button.set_sensitive(True)
-            if not self.modifying:
-                self.cur.execute("INSERT INTO pacients (name, sex, age, height) VALUES (%s, %s, %s, %s);",(name, sex, age, height))
-                self.conn.commit()
-                self.cur.execute("SELECT * FROM pacients_id_seq;")
-                row = self.cur.fetchall()
-                ID = row[0][0]
-                self.pacient = {'Nome': name, 'ID': ID, 'Sexo': sex, 'Idade': age, 'Altura': height}
-            else:
-                self.cur.execute("UPDATE pacients SET sex = (%s), age = (%s), height = (%s), name = (%s) WHERE id = (%s);", (sex, age, height, name, self.pacient['ID']))
-                self.conn.commit()
-                self.pacient['Nome'] = name
-                self.pacient['Sexo'] = sex
-                self.pacient['Idade'] = age
-                self.pacient['Altura'] = height
-            print("Paciente salvo")
-            self.changepacientbutton.set_sensitive(True)
-            self.is_pacient = True
-
-    def on_changepacientbutton_clicked(self, widget):
-        self.modifying = True
-        self.savepacient_button.set_sensitive(True)
-        self.name_entry.set_sensitive(True)
-        self.sex_combobox.set_sensitive(True)
-        self.age_entry.set_sensitive(True)
-        self.height_entry.set_sensitive(True)
-        self.changepacientbutton.set_sensitive(False)
-
     def on_capture_button_clicked(self, widget):
+        self.message_dialog_window.set_transient_for(self.main_window)
         if(not self.is_pacient):
             self.message_dialog_window.format_secondary_text("É preciso cadastrar ou carregar um paciente para realizar o processo de captura.")
             self.message_dialog_window.show()
@@ -935,8 +998,8 @@ class Iem_wbb:
         self.maximo = max([max_absoluto_AP, max_absoluto_ML, max(dis_resultante_total)])
 
         self.axis_2.set_ylim(-self.maximo, self.maximo)
-        self.axis_2.plot(tempo, APs_Processado, color='k', label='APs')
-        self.axis_2.plot(tempo, MLs_Processado, color='m', label='MLs')
+        self.axis_2.plot(tempo, APs_Processado, color='r', label='APs')
+        self.axis_2.plot(tempo, MLs_Processado, color='b', label='MLs')
         self.axis_2.plot(tempo, dis_resultante_total, color='g', label='DRT')
         self.axis_2.legend()
         self.canvas_2.draw()
@@ -944,47 +1007,63 @@ class Iem_wbb:
         self.save_exam_button.set_sensitive(True)
 
     def on_save_exam_button_clicked(self, widget):
-        self.cur.execute("INSERT INTO exams (APs, MLs, pac_id, usr_id) VALUES (%s, %s, %s, %s)", (list(self.APs), list(self.MLs), self.pacient['ID'], self.user_ID))
-        #self.cur.execute("UPDATE pacients SET weight = %f, imc = %f WHERE id = %d;" % (float(self.pacient['Peso']), float(self.pacient['IMC']), int(self.pacient['ID'])))
-        self.conn.commit()
+        if self.is_exam:
+            self.cur.execute("INSERT INTO exams (APs, MLs, pac_id, usr_id) VALUES (%s, %s, %s, %s)", (list(self.APs), list(self.MLs), self.pacient['ID'], self.user_ID))
+            #self.cur.execute("UPDATE pacients SET weight = %f, imc = %f WHERE id = %d;" % (float(self.pacient['Peso']), float(self.pacient['IMC']), int(self.pacient['ID'])))
+            self.conn.commit()
 
-        self.combo_box_set_exam.remove_all()
-        #Fills the exams_combobox with the dates of current pacient exams
-        self.cur.execute("SELECT * FROM exams WHERE pac_id = (%s)", (self.pacient['ID']))
-        rows = self.cur.fetchall()
-        i=1
-        for row in rows:
-            self.combo_box_set_exam.append(str(row[0]), str(i) + ' - ' + str(row[3]))
-            i+=1
+            self.combo_box_set_exam.remove_all()
+            #Fills the exams_combobox with the dates of current pacient exams
+            self.cur.execute("SELECT * FROM exams WHERE pac_id = (%s)", (self.pacient['ID']))
+            rows = self.cur.fetchall()
+            i=1
+            for row in rows:
+                self.combo_box_set_exam.append(str(row[0]), str(i) + ' - ' + str(row[3]))
+                i+=1
 
-        self.combo_box_set_exam.set_active_id("0")
-        self.combo_box_set_exam.set_sensitive(True)
-        self.load_exam_button.set_sensitive(True)
-        self.save_exam_button.set_sensitive(False)
+            self.combo_box_set_exam.set_active_id("0")
+            self.combo_box_set_exam.set_sensitive(True)
+            self.load_exam_button.set_sensitive(True)
+            self.save_exam_button.set_sensitive(False)
 
-    def clear_charts(self):
+    def clear_charts(self, chart=None):
         dt = 0.040
         tTotal = len(self.APs) * dt
-
         charts_estatocinesigrama = [self.axis_0, self.axis_1]
         charts_estabilograma = [self.axis_2, self.axis_3]
 
-        for a in charts_estatocinesigrama:
-            a.clear()
-            a.set_ylabel('Anteroposterior (AP) mm')
-            a.set_xlabel('Mediolateral (ML) mm')
-            #a.set_xlim(-433/2, 433/2)
-            #a.set_ylim(-238/2, 238/2)
-            a.set_xlim(-1, 1)
-            a.set_ylim(-1, 1)
-            a.axhline(0, color='grey')
-            a.axvline(0, color='grey')
+        if not chart:
+            for a in charts_estatocinesigrama:
+                a.clear()
+                a.set_ylabel('Anteroposterior (AP) mm')
+                a.set_xlabel('Mediolateral (ML) mm')
+                #a.set_xlim(-433/2, 433/2)
+                #a.set_ylim(-238/2, 238/2)
+                a.set_xlim(-1, 1)
+                a.set_ylim(-1, 1)
+                a.axhline(0, color='grey')
+                a.axvline(0, color='grey')
 
-        for a in charts_estabilograma:
-            a.clear()
-            a.set_xlim(0, tTotal)
-            a.set_ylabel('Amplitude')
-            a.set_xlabel('Tempo (s)')
+            for a in charts_estabilograma:
+                a.clear()
+                a.set_xlim(0, tTotal)
+                a.set_ylabel('Amplitude')
+                a.set_xlabel('Tempo (s)')
+        else:
+            chart.clear()
+            if chart in charts_estatocinesigrama:
+                chart.set_ylabel('Anteroposterior (AP) mm')
+                chart.set_xlabel('Mediolateral (ML) mm')
+                chart.set_xlim(-1, 1)
+                chart.set_ylim(-1, 1)
+                chart.axhline(0, color='grey')
+                chart.axvline(0, color='grey')
+            else:
+                chart.set_xlim(0, tTotal)
+                chart.set_ylabel('Amplitude')
+                chart.set_xlabel('Tempo (s)')
+
+
 
     def verify_bt(self):
         if(self.wiimote):
@@ -1007,10 +1086,17 @@ class Iem_wbb:
         return True
 
     def resize(self, widget):
-        w1 = 575
+        w, h = self.main_window.get_size()
+        size = 0.76 * h
         charts = [self.box_0, self.box_1, self.box_2, self.box_3]
         for c in charts:
-            c.set_size_request(w1, w1)
+            c.set_size_request(size, size)
+
+    def isTime(self, time):
+        time = time.split(':')
+        if(len(time) == 3):
+            return True
+        return False
 
     def on_view_changed(self, widget):
         (model, iter) = widget.get_selected()
@@ -1027,9 +1113,11 @@ class Iem_wbb:
         
         b.set_sensitive(False)
         self.exam = None
-        if(model[iter][0][0].isdigit()):
+        
+        time = model[iter][0].split(' - ')
+        if(self.isTime(time[0])):
             b.set_sensitive(True)
-            d = '\'' + str(model[iter][0]) + '\''
+            d = '\'' + str(time[0]) + '\''
             self.cur.execute("SELECT aps, mls, type FROM exams WHERE date::time = %s" % (d))
             self.exam = self.cur.fetchall()
 
@@ -1042,6 +1130,8 @@ class Iem_wbb:
             f, a, c, x, tipo = self.fig_2, self.axis_2, self.canvas_2, 1, 1
         elif(widget == self.chart_button_3):
             f, a, c, x, tipo = self.fig_3, self.axis_3, self.canvas_3, 2, 1
+
+        self.clear_charts(a)
 
         if(self.exam):
             self.APs = np.zeros_like(self.exam[0][0])
@@ -1143,9 +1233,9 @@ class Iem_wbb:
                 a.plot(MLs_Processado, APs_Processado,'.-',color='r')
             elif(tipo == 1):
                 a.set_ylim(-self.max_absoluto_1, self.max_absoluto_1)
-                a.plot(tempo, APs_Processado, '.-', color='k', label='APs')
-                a.plot(tempo, MLs_Processado, color='m', label='MLs')
-                a.plot(tempo, dis_resultante_total, color='g', label='DRT')
+                a.plot(tempo, APs_Processado, '-', color='r', label='APs')
+                a.plot(tempo, MLs_Processado, '--', color='b', label='MLs')
+                a.plot(tempo, dis_resultante_total, ':', color='g', label='DRT')
                 a.legend()
 
             c.draw()
@@ -1204,6 +1294,7 @@ class Iem_wbb:
         self.stand_up_window = self.iemBuilder.get_object("stand_up_window")
         self.load_pacient_window = self.iemBuilder.get_object("load_pacient_window")
         self.advanced_graphs_window = self.iemBuilder.get_object("advanced_graphs_window")
+        self.save_as_dialog = self.iemBuilder.get_object("save_as_dialog")
 
         self.message_dialog_window = self.commonBuilder.get_object("message_dialog_window")
         self.new_device_window = self.commonBuilder.get_object("new_device_window")
@@ -1219,7 +1310,6 @@ class Iem_wbb:
         self.box1 = self.iemBuilder.get_object("box1")
         self.box2 = self.iemBuilder.get_object("box2")
         self.box3 = self.iemBuilder.get_object("box3")
-        
 
         #Images
         self.login_image = self.iemBuilder.get_object("login_image")
@@ -1309,8 +1399,6 @@ class Iem_wbb:
         self.fig_3 = plt.figure()
         self.axis_3 = self.fig_3.add_subplot(111)
 
-        self.clear_charts()
-
         self.canvas_0 = FigureCanvas(self.fig)
         self.box_0 = Gtk.Box()
         self.box_0.pack_start(self.canvas_0, expand=True, fill=True, padding=0)
@@ -1327,14 +1415,14 @@ class Iem_wbb:
         self.box_3 = Gtk.Box()
         self.box_3.pack_start(self.canvas_3, expand=True, fill=True, padding=0)
 
+        self.clear_charts()
+
         boxes = [self.box_0, self.box_1, self.box_2, self.box_3]
         for b in boxes:
             b.connect('button-press-event', self.on_button_press_event)
 
         #Grid 
         self.grid1 = self.iemBuilder.get_object("grid1")
-        #for x in ["mdist_", "rdist_", "totex_", "mvelo_"]:
-            #for y in ["ap_", "ml_", "total_"]:
         for m in range(1, 13):
             self.grid1.attach(Gtk.Entry.new(), 2, m, 1, 1)
             self.grid1.get_child_at(2, m).set_text('0.000000')
@@ -1360,10 +1448,11 @@ class Iem_wbb:
                 d = self.cur.fetchall()
                 for dat in list(set(d)):
                     data = store.append(nome, [str(dat[0])])
-                    self.cur.execute("SELECT date::time FROM exams WHERE date::date = %s and pac_id = %s;" % ('\''+str(dat[0])+'\'', pac[0]))
+                    self.cur.execute("SELECT date::time, type FROM exams WHERE date::date = %s and pac_id = %s;" % 
+                        ('\''+str(dat[0])+'\'', pac[0]))
                     h = self.cur.fetchall()
                     for hr in h:
-                        store.append(data, [str(hr[0])])
+                        store.append(data, [str(hr[0]) + ' - ' + str(hr[1])])
 
             # the treeview shows the model
             # create a treeview on the model store
