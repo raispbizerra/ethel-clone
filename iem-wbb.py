@@ -150,7 +150,7 @@ class Iem_wbb:
         
         #Mudança na sensibilidade dos elementos
         for i in range(len(childList)-2):
-            childList[i].set_sensitive(True)
+            childList[i].set_sensitive(False)
 
         self.savepacient_button.set_sensitive(False)
         self.changepacientbutton.set_sensitive(True)
@@ -232,10 +232,250 @@ class Iem_wbb:
                             'Peso'  : weight, 
                             'IMC'   : imc}
 
-    #Evento de clique do botão cancelar na tela de 
+    #Evento de clique do botão cancelar na tela de carregar paciente
     def on_cancel_in_load_button_clicked(self, widget):
         self.pacient_label_in_load.set_text("")
         self.load_pacient_window.hide()
+
+    # CAPTURA DE SINAIS, CÁLCULO DAS MÉTRICAS E APRESENTAÇÃO DOS RESULTADOS #
+
+    def on_start_capture_button_clicked(self, widget):
+        #Mudança na visibilidade da janela
+        self.stand_up_window.hide()
+
+        #Limpeza dos gráficos
+        self.clear_charts()
+
+        #Definição do tamanho da amostra
+        self.amostra = 768
+        self.MLs = np.zeros(self.amostra)
+        self.APs = np.zeros(self.amostra)
+        peso = 0.0
+
+        #Definição do intervalo entre capturas
+        dt = 0.040
+        tTotal = self.amostra * dt
+        tempo = np.arange(0, tTotal, dt)
+        t1 = ptime.time() + dt
+        #print(self.amostra)
+        #print(type(self.amostra))
+
+        #Início da captura
+        for i in range(self.amostra):
+
+            #Espera de eventos enquanto são feitos os cálculos pesados
+            while(Gtk.events_pending()):
+                Gtk.main_iteration()
+                self.progressbar.set_fraction(i/self.amostra)
+
+            #Realização de captura
+            readings = wbb.captura1(self.wiimote)
+
+            #Cálculo do peso
+            peso += wbb.calcWeight(readings, self.WBB['Calibração'], wbb.escala_eu)
+
+            #Cálculo dos APs, MLs
+            CoP_x, CoP_y =  wbb.calCoP(readings, self.WBB['Calibração'], wbb.escala_eu)
+
+            self.MLs[i] = CoP_x
+            self.APs[i] = CoP_y
+
+            #Verificação do intervalo de tempo
+            while (ptime.time() < t1):
+                pass
+
+            t1 += dt
+
+        #Cálculo do IMC
+        peso = peso / self.amostra
+        altura = float(self.pacient['Altura'])/100.
+        imc = peso / altura**2
+
+        self.points_entry.set_text(str(self.amostra))
+
+        #Preenchimento da janela principal com os dados do paciente
+        self.pacient['Peso'] = round(peso, 2)
+        self.pacient['IMC'] = round(imc ,1)
+
+        self.weight.set_text(str(peso))
+        self.weight.set_max_length(6)
+        self.imc.set_text(str(imc))
+        self.imc.set_max_length(5)
+        self.save_exam_button.set_sensitive(True)
+
+        #Processamento do sinal
+        APs_Processado, MLs_Processado, AP_, ML_ = calc.geraAP_ML(self.APs, self.MLs)
+        print("AP_ = ", AP_)
+        print("ML_ = ", ML_)
+
+        #RD
+        dis_resultante_total = calc.distanciaResultante(APs_Processado, MLs_Processado)
+
+        #? Isto não faz sentido
+        #dis_resultante_AP = calc.distanciaResultanteParcial(APs_Processado)
+        #dis_resultante_ML = calc.distanciaResultanteParcial(MLs_Processado)
+
+        #MDIST
+        dis_media = calc.distanciaMedia(dis_resultante_total)
+
+        #MDIST_AP
+        dis_mediaAP = calc.distanciaMedia_(APs_Processado)
+        #MDIST_ML
+        dis_mediaML = calc.distanciaMedia_(MLs_Processado)
+
+        print("MDIST = ", dis_media)
+        print("MDIST_AP = ", dis_mediaAP)
+        print("MDIST_ML = ", dis_mediaML)
+
+        #RDIST
+        dis_rms_total = calc.distRMS(dis_resultante_total)
+        #dis_rms_AP = calc.distRMS(dis_resultante_AP)
+        #dis_rms_ML = calc.distRMS(dis_resultante_ML)
+        #RDIST_AP
+        dis_rms_AP = calc.distRMS(APs_Processado)
+        #RDIST_AP
+        dis_rms_ML = calc.distRMS(MLs_Processado)
+
+        print("RDIST = ", dis_rms_total)
+        print("RDIST_AP = ", dis_rms_AP)
+        print("RDIST_ML = ", dis_rms_ML)
+
+        #totex_total = calc.totex(APs_Processado, MLs_Processado)
+        #TOTEX
+        totex_total = calc.totex(APs_Processado, MLs_Processado)
+        #TOTEX_AP
+        totex_AP = calc.totexParcial(APs_Processado)
+        #TOTEX_ML
+        totex_ML = calc.totexParcial(MLs_Processado)
+
+        print("TOTEX = ", totex_total)
+        print("TOTEX_AP = ", totex_AP)
+        print("TOTEX_ML = ", totex_ML)
+
+        #MVELO
+        mvelo_total = calc.mVelo(totex_total, tTotal)
+        #MVELO_AP
+        mvelo_AP = calc.mVelo(totex_AP, tTotal)
+        #MVELO_ML
+        mvelo_ML =  calc.mVelo(totex_ML, tTotal)
+
+        print("MVELO = ", mvelo_total)
+        print("MVELO_AP = ", mvelo_AP)
+        print("MVELO_ML = ", mvelo_ML)
+
+        #Preenchimento da janela principal com as métricas
+        metricas = [dis_mediaAP, dis_mediaML, dis_media, dis_rms_AP, 
+        dis_rms_ML, dis_rms_total, totex_AP, totex_ML, totex_total, 
+        mvelo_AP, mvelo_ML, mvelo_total]
+
+        for x in range(1, 2):
+            for y in range(1, 13):
+                self.grid1.get_child_at(x, y).set_text(str(round(metricas[y-1], 6)))
+        
+        '''
+        self.entry_Mdist_TOTAL_OA.set_text(str(dis_media))
+        self.entry_Mdist_AP_OA.set_text(str(dis_mediaAP))
+        self.entry_Mdist_ML_OA.set_text(str(dis_mediaML))
+
+        self.entry_Rdist_TOTAL_OA.set_text(str(dis_rms_total))
+        self.entry_Rdist_AP_OA.set_text(str(dis_rms_AP))
+        self.entry_Rdist_ML_OA.set_text(str(dis_rms_ML))
+
+        self.entry_TOTEX_TOTAL_OA.set_text(str(totex_total))
+        self.entry_TOTEX_AP_OA.set_text(str(totex_AP))
+        self.entry_TOTEX_ML_OA.set_text(str(totex_ML))
+
+        self.entry_MVELO_TOTAL_OA.set_text(str(mvelo_total))
+        self.entry_MVELO_AP_OA.set_text(str(mvelo_AP))
+        self.entry_MVELO_ML_OA.set_text(str(mvelo_ML))
+        '''
+
+        #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
+        #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
+
+        #Cálculo dos máximos (sinal processado)
+        max_absoluto_AP = np.absolute(APs_Processado).max()
+        max_absoluto_ML = np.absolute(MLs_Processado).max()
+
+        max_absoluto_AP *=1.05
+        max_absoluto_ML *=1.05
+
+        print('max_absoluto_AP:', max_absoluto_AP, 'max_absoluto_ML:', max_absoluto_ML)
+
+        '''
+        self.entry_Mdist_TOTAL_OA.set_text(str(dis_media))
+        self.entry_Mdist_AP_OA.set_text(str(dis_mediaAP))
+        self.entry_Mdist_ML_OA.set_text(str(dis_mediaML))
+
+        self.entry_Rdist_TOTAL_OA.set_text(str(dis_rms_total))
+        self.entry_Rdist_AP_OA.set_text(str(dis_rms_AP))
+        self.entry_Rdist_ML_OA.set_text(str(dis_rms_ML))
+
+        self.entry_TOTEX_TOTAL_OA.set_text(str(totex_total))
+        self.entry_TOTEX_AP_OA.set_text(str(totex_AP))
+        self.entry_TOTEX_ML_OA.set_text(str(totex_ML))
+
+        self.entry_MVELO_TOTAL_OA.set_text(str(mvelo_total))
+        self.entry_MVELO_AP_OA.set_text(str(mvelo_AP))
+        self.entry_MVELO_ML_OA.set_text(str(mvelo_ML))
+        '''
+
+        #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
+        #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
+
+        self.axis_0.set_xlim(-max_absoluto_ML, max_absoluto_ML)
+        self.axis_0.set_ylim(-max_absoluto_AP, max_absoluto_AP)
+        self.axis_0.plot(MLs_Processado, APs_Processado,'.-',color='r')
+        self.canvas_0.draw()
+
+        #h1 = max_absoluto_AP*800 // max_absoluto_ML
+
+        #self.box_0.set_size_request(800, h1)
+
+        '''
+        charts = [self.box_0, self.box_1, self.box_2, self.box_3]
+        for c in charts:
+            #w1 = c.get_allocation().width
+        '''
+
+        self.maximo = max([max_absoluto_AP, max_absoluto_ML, max(dis_resultante_total)])
+
+        self.axis_2.set_ylim(-self.maximo, self.maximo)
+        self.axis_2.plot(tempo, APs_Processado, color='r', label='APs')
+        self.axis_2.plot(tempo, MLs_Processado, color='b', label='MLs')
+        self.axis_2.plot(tempo, dis_resultante_total, color='g', label='DRT')
+        self.axis_2.legend()
+        self.canvas_2.draw()
+
+        self.save_exam_button.set_sensitive(True)
+
+    # ARMAZENAMENTO DOS RESULTADOS NO BANCO DE DADOS #
+
+    #Evento de clique do botão "SALVAR EXAME"
+    def on_save_exam_button_clicked(self, widget):
+        #Teste se há exame
+        if self.is_exam:
+            #Inserção do exame no BD
+            self.cur.execute("INSERT INTO exams (APs, MLs, pac_id, usr_id) VALUES (%s, %s, %s, %s)", (list(self.APs), list(self.MLs), self.pacient['ID'], self.user_ID))
+            #self.cur.execute("UPDATE pacients SET weight = %f, imc = %f WHERE id = %d;" % (float(self.pacient['Peso']), float(self.pacient['IMC']), int(self.pacient['ID'])))
+            self.conn.commit()
+
+            #Limpeza do combobox de seleção
+            self.combo_box_set_exam.remove_all()
+            #Preenchimento do combobox de seleção
+            #Fills the exams_combobox with the dates of current pacient exams
+            self.cur.execute("SELECT * FROM exams WHERE pac_id = (%s)", (self.pacient['ID']))
+            rows = self.cur.fetchall()
+            i=1
+            for row in rows:
+                self.combo_box_set_exam.append(str(row[0]), str(i) + ' - ' + str(row[3]))
+                i+=1
+
+            #Mudanças nos elementos gráficos
+            self.combo_box_set_exam.set_active_id("0")
+            self.combo_box_set_exam.set_sensitive(True)
+            self.load_exam_button.set_sensitive(True)
+            self.save_exam_button.set_sensitive(False)
 
     #Gets the signal of changing at exams_combobox
     def on_combo_box_set_exam_changed(self, widget):
@@ -413,7 +653,6 @@ class Iem_wbb:
         username += fullName[len(fullName)-1]
         self.username_entry_in_register.set_text(username.lower())
         
-
     def on_save_as_activate(self, menuitem, data=None):
 
         #Teste se há exame e paciente selecionados
@@ -495,6 +734,10 @@ class Iem_wbb:
 
         self.progressbar.set_fraction(0)
 
+        for x in range(1, 2):
+            for y in range(1, 13):
+                self.grid1.get_child_at(x, y).set_text("0.000000")
+
     def on_main_window_destroy(self, object, data=None):
         print("Quit with cancel")
         self.cur.close()
@@ -512,6 +755,7 @@ class Iem_wbb:
     def on_new_activate(self, menuitem, data=None):
         self.clear_all_main_window()
 
+    #Evento de clique no botão de carregar exame
     def on_load_exam_button_clicked(self, widget):
         dt = 0.040
         tTotal = len(self.APs) * dt
@@ -882,7 +1126,6 @@ class Iem_wbb:
         if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 3:
             pass
 
-
     def on_cancel_in_standup_clicked(self, widget):
         self.stand_up_window.hide()
 
@@ -900,131 +1143,6 @@ class Iem_wbb:
         else:
             self.progressbar.set_fraction(0)
             self.stand_up_window.show()
-
-    def on_start_capture_button_clicked(self, widget):
-        self.stand_up_window.hide()
-
-        self.clear_charts()
-
-        self.amostra = 768
-        self.MLs = np.zeros(self.amostra)
-        self.APs = np.zeros(self.amostra)
-        peso = 0.0
-
-        dt = 0.040
-        tTotal = self.amostra * dt
-        tempo = np.arange(0, tTotal, dt)
-        t1 = ptime.time() + dt
-        #print(self.amostra)
-        #print(type(self.amostra))
-
-        for i in range(self.amostra):
-
-            while(Gtk.events_pending()):
-                Gtk.main_iteration()
-                self.progressbar.set_fraction(i/self.amostra)
-
-            readings = wbb.captura1(self.wiimote)
-
-            peso += wbb.calcWeight(readings, self.WBB['Calibração'], wbb.escala_eu)
-
-            CoP_x, CoP_y =  wbb.calCoP(readings, self.WBB['Calibração'], wbb.escala_eu)
-
-            self.MLs[i] = CoP_x
-            self.APs[i] = CoP_y
-
-            while (ptime.time() < t1):
-                pass
-
-            t1 += dt
-
-        peso = peso / self.amostra
-        altura = float(self.pacient['Altura'])/100.
-        imc = peso / altura**2
-
-        self.points_entry.set_text(str(self.amostra))
-
-        self.pacient['Peso'] = round(peso, 2)
-        self.pacient['IMC'] = round(imc ,1)
-
-        self.weight.set_text(str(peso))
-        self.weight.set_max_length(6)
-        self.imc.set_text(str(imc))
-        self.imc.set_max_length(5)
-        self.save_exam_button.set_sensitive(True)
-
-        metricas = [dis_mediaAP, dis_mediaML, dis_media, dis_rms_AP, dis_rms_ML, dis_rms_total, totex_AP, totex_ML, totex_total, mvelo_AP, mvelo_ML, mvelo_total]
-
-        for x in range(1, 2):
-            for y in range(1, 13):
-                self.grid1.get_child_at(x, y).set_text(str(round(metricas[y-1], 6)))
-
-        '''
-        self.entry_Mdist_TOTAL_OA.set_text(str(dis_media))
-        self.entry_Mdist_AP_OA.set_text(str(dis_mediaAP))
-        self.entry_Mdist_ML_OA.set_text(str(dis_mediaML))
-
-        self.entry_Rdist_TOTAL_OA.set_text(str(dis_rms_total))
-        self.entry_Rdist_AP_OA.set_text(str(dis_rms_AP))
-        self.entry_Rdist_ML_OA.set_text(str(dis_rms_ML))
-
-        self.entry_TOTEX_TOTAL_OA.set_text(str(totex_total))
-        self.entry_TOTEX_AP_OA.set_text(str(totex_AP))
-        self.entry_TOTEX_ML_OA.set_text(str(totex_ML))
-
-        self.entry_MVELO_TOTAL_OA.set_text(str(mvelo_total))
-        self.entry_MVELO_AP_OA.set_text(str(mvelo_AP))
-        self.entry_MVELO_ML_OA.set_text(str(mvelo_ML))
-        '''
-
-        #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
-        #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
-
-        self.axis_0.set_xlim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis_0.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis_0.plot(MLs_Processado, APs_Processado,'.-',color='r')
-        self.canvas_0.draw()
-
-        #h1 = max_absoluto_AP*800 // max_absoluto_ML
-
-        #self.box_0.set_size_request(800, h1)
-
-        '''
-        charts = [self.box_0, self.box_1, self.box_2, self.box_3]
-        for c in charts:
-            #w1 = c.get_allocation().width
-        '''
-
-        self.maximo = max([max_absoluto_AP, max_absoluto_ML, max(dis_resultante_total)])
-
-        self.axis_2.set_ylim(-self.maximo, self.maximo)
-        self.axis_2.plot(tempo, APs_Processado, color='r', label='APs')
-        self.axis_2.plot(tempo, MLs_Processado, color='b', label='MLs')
-        self.axis_2.plot(tempo, dis_resultante_total, color='g', label='DRT')
-        self.axis_2.legend()
-        self.canvas_2.draw()
-
-        self.save_exam_button.set_sensitive(True)
-
-    def on_save_exam_button_clicked(self, widget):
-        if self.is_exam:
-            self.cur.execute("INSERT INTO exams (APs, MLs, pac_id, usr_id) VALUES (%s, %s, %s, %s)", (list(self.APs), list(self.MLs), self.pacient['ID'], self.user_ID))
-            #self.cur.execute("UPDATE pacients SET weight = %f, imc = %f WHERE id = %d;" % (float(self.pacient['Peso']), float(self.pacient['IMC']), int(self.pacient['ID'])))
-            self.conn.commit()
-
-            self.combo_box_set_exam.remove_all()
-            #Fills the exams_combobox with the dates of current pacient exams
-            self.cur.execute("SELECT * FROM exams WHERE pac_id = (%s)", (self.pacient['ID']))
-            rows = self.cur.fetchall()
-            i=1
-            for row in rows:
-                self.combo_box_set_exam.append(str(row[0]), str(i) + ' - ' + str(row[3]))
-                i+=1
-
-            self.combo_box_set_exam.set_active_id("0")
-            self.combo_box_set_exam.set_sensitive(True)
-            self.load_exam_button.set_sensitive(True)
-            self.save_exam_button.set_sensitive(False)
 
     def clear_charts(self, chart=None):
         dt = 0.040
@@ -1062,8 +1180,6 @@ class Iem_wbb:
                 chart.set_xlim(0, tTotal)
                 chart.set_ylabel('Amplitude')
                 chart.set_xlabel('Tempo (s)')
-
-
 
     def verify_bt(self):
         if(self.wiimote):
