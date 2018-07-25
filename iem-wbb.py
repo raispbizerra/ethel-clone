@@ -89,7 +89,7 @@ class Iem_wbb:
         else:
             #Atualização dos dados do paciente
             self.cur.execute("UPDATE pacients SET name = (%s), sex = (%s), age = (%s), height = (%s) WHERE id = (%s);", 
-                (pacient['Nome'], pacient['Sexo'], pacient['Idade'], pacient['Altura'], self.pacient['ID']))
+                (pacient['Nome'].upper(), pacient['Sexo'].upper(), pacient['Idade'], pacient['Altura'], self.pacient['ID']))
             self.conn.commit()
             self.pacient['Nome'] = pacient['Nome']
             self.pacient['Sexo'] = pacient['Sexo']
@@ -133,8 +133,8 @@ class Iem_wbb:
 
         #Preenchimento da janela principal com os dados do paciente
         self.name_entry.set_text(self.pacient['Nome'])
-        self.age_entry.set_text(self.pacient['Idade'])
-        self.height_entry.set_text(self.pacient['Altura'])
+        self.age_entry.set_text(str(self.pacient['Idade']))
+        self.height_entry.set_text(str(self.pacient['Altura']))
         if(self.pacient['Sexo'] == 'MASCULINO'):
             self.sex_combobox.set_active_id('0')
         elif(self.pacient['Sexo'] == 'FEMININO'):
@@ -142,8 +142,8 @@ class Iem_wbb:
         else:
             self.sex_combobox.set_active_id('2')
 
-        self.weight.set_text(self.pacient['Peso'])
-        self.imc.set_text(self.pacient['IMC'])
+        self.weight.set_text(str(self.pacient['Peso']))
+        self.imc.set_text(str(self.pacient['IMC']))
 
         #Recuperação das 'entrys'
         childList = self.name_entry.get_parent().get_children()
@@ -156,7 +156,7 @@ class Iem_wbb:
         self.changepacientbutton.set_sensitive(True)
 
         #Preenchimento do combobox de seleção de exames
-        self.cur.execute("SELECT * FROM exams WHERE pac_id = (%s)", (self.pacient['ID']))
+        self.cur.execute("SELECT * FROM exams WHERE pac_id = (%s)", (str(self.pacient['ID'])))
         rows = self.cur.fetchall()
         i=1
         for row in rows:
@@ -208,29 +208,14 @@ class Iem_wbb:
             self.cur.execute(select)
             row = self.cur.fetchall()
 
-            #Preenche o dicionário do paciente 
-            name = str(row[0][1])
-            sex = str(row[0][2])
-            sex = sex[0]
-            age = str(row[0][3])
-            height = str(row[0][4])
-            weight = str(row[0][5])
-            imc = str(row[0][6])
+            self.pacient = {}
+            text = ""
+            for i, key in enumerate(['ID', 'Nome', 'Sexo', 'Idade', 'Altura', 'Peso', 'IMC']):
+                self.pacient[key] = row[0][i]
+                if i != 0:
+                    text += str(list(self.pacient.items())[i][0]) + ': ' + str(list(self.pacient.items())[i][1]) + '\n'
 
-            self.pacient_label_in_load.set_text('Nome: ' + name +
-                '\n' + 'Sexo: ' + sex +
-                '\n' + 'Idade: ' + age +
-                '\n' + 'Altura: ' + height +
-                '\n' + 'Peso: ' + weight +
-                '\n' + 'IMC: ' + imc)
-
-            self.pacient = {'ID'    : ID, 
-                            'Nome'  : name, 
-                            'Sexo'  : sex, 
-                            'Idade' : age, 
-                            'Altura': height, 
-                            'Peso'  : weight, 
-                            'IMC'   : imc}
+            self.pacient_label_in_load.set_text(text)
 
     #Evento de clique do botão cancelar na tela de carregar paciente
     def on_cancel_in_load_button_clicked(self, widget):
@@ -253,10 +238,10 @@ class Iem_wbb:
         peso = 0.0
 
         #Definição do intervalo entre capturas
-        dt = 0.040
-        tTotal = self.amostra * dt
-        tempo = np.arange(0, tTotal, dt)
-        t1 = ptime.time() + dt
+        self.metricas['dt'] = 0.040
+        self.metricas['tTotal'] = self.amostra * self.metricas['dt']
+        self.metricas['tempo'] = np.arange(0, self.metricas['tTotal'], self.metricas['dt'])
+        t1 = ptime.time() + self.metricas['dt']
         #print(self.amostra)
         #print(type(self.amostra))
 
@@ -280,11 +265,11 @@ class Iem_wbb:
             self.MLs[i] = CoP_x
             self.APs[i] = CoP_y
 
-            #Verificação do intervalo de tempo
+            #Verificação do intervalo de self.metricas['tempo']
             while (ptime.time() < t1):
                 pass
 
-            t1 += dt
+            t1 += self.metricas['dt']
 
         #Cálculo do IMC
         peso = peso / self.amostra
@@ -303,147 +288,100 @@ class Iem_wbb:
         self.imc.set_max_length(5)
         self.save_exam_button.set_sensitive(True)
 
+        self.calculaMetricas()
+        self.plotaExame()
+
+    def calculaMetricas(self):
         #Processamento do sinal
-        APs_Processado, MLs_Processado, AP_, ML_ = calc.geraAP_ML(self.APs, self.MLs)
-        print("AP_ = ", AP_)
-        print("ML_ = ", ML_)
+        self.metricas['APs_Processado'], self.metricas['MLs_Processado'], self.metricas['AP_'], self.metricas['ML_'] = calc.geraAP_ML(self.APs, self.MLs)
+        print("AP_ = ", self.metricas['AP_'])
+        print("self.metricas['ML_'] = ", self.metricas['ML_'])
 
         #RD
-        dis_resultante_total = calc.distanciaResultante(APs_Processado, MLs_Processado)
+        self.metricas['dis_resultante_total'] = calc.distanciaResultante(self.metricas['APs_Processado'], self.metricas['MLs_Processado'])
 
         #? Isto não faz sentido
-        #dis_resultante_AP = calc.distanciaResultanteParcial(APs_Processado)
-        #dis_resultante_ML = calc.distanciaResultanteParcial(MLs_Processado)
+        #dis_resultante_AP = calc.distanciaResultanteParcial(self.metricas['APs_Processado'])
+        #dis_resultante_ML = calc.distanciaResultanteParcial(self.metricas['MLs_Processado'])
 
         #MDIST
-        dis_media = calc.distanciaMedia(dis_resultante_total)
+        self.metricas['dis_media'] = calc.distanciaMedia(self.metricas['dis_resultante_total'])
 
         #MDIST_AP
-        dis_mediaAP = calc.distanciaMedia_(APs_Processado)
+        self.metricas['dis_mediaAP'] = calc.distanciaMedia_(self.metricas['APs_Processado'])
         #MDIST_ML
-        dis_mediaML = calc.distanciaMedia_(MLs_Processado)
+        self.metricas['dis_mediaML'] = calc.distanciaMedia_(self.metricas['MLs_Processado'])
 
-        print("MDIST = ", dis_media)
-        print("MDIST_AP = ", dis_mediaAP)
-        print("MDIST_ML = ", dis_mediaML)
+        print("MDIST = ", self.metricas['dis_media'])
+        print("MDIST_AP = ", self.metricas['dis_mediaAP'])
+        print("MDIST_ML = ", self.metricas['dis_mediaML'])
 
         #RDIST
-        dis_rms_total = calc.distRMS(dis_resultante_total)
-        #dis_rms_AP = calc.distRMS(dis_resultante_AP)
-        #dis_rms_ML = calc.distRMS(dis_resultante_ML)
+        self.metricas['dis_rms_total'] = calc.distRMS(self.metricas['dis_resultante_total'])
+        #self.metricas['dis_rms_AP'] = calc.distRMS(dis_resultante_AP)
+        #self.metricas['dis_rms_ML'] = calc.distRMS(dis_resultante_ML)
         #RDIST_AP
-        dis_rms_AP = calc.distRMS(APs_Processado)
+        self.metricas['dis_rms_AP'] = calc.distRMS(self.metricas['APs_Processado'])
         #RDIST_AP
-        dis_rms_ML = calc.distRMS(MLs_Processado)
+        self.metricas['dis_rms_ML'] = calc.distRMS(self.metricas['MLs_Processado'])
 
-        print("RDIST = ", dis_rms_total)
-        print("RDIST_AP = ", dis_rms_AP)
-        print("RDIST_ML = ", dis_rms_ML)
+        print("RDIST = ", self.metricas['dis_rms_total'])
+        print("RDIST_AP = ", self.metricas['dis_rms_AP'])
+        print("RDIST_ML = ", self.metricas['dis_rms_ML'])
 
-        #totex_total = calc.totex(APs_Processado, MLs_Processado)
+        #self.metricas['totex_total'] = calc.totex(self.metricas['APs_Processado'], self.metricas['MLs_Processado'])
         #TOTEX
-        totex_total = calc.totex(APs_Processado, MLs_Processado)
-        #TOTEX_AP
-        totex_AP = calc.totexParcial(APs_Processado)
-        #TOTEX_ML
-        totex_ML = calc.totexParcial(MLs_Processado)
+        self.metricas['totex_total'] = calc.totex(self.metricas['APs_Processado'], self.metricas['MLs_Processado'])
+        #self.metricas['totex_AP']
+        self.metricas['totex_AP'] = calc.totexParcial(self.metricas['APs_Processado'])
+        #self.metricas['totex_ML']
+        self.metricas['totex_ML'] = calc.totexParcial(self.metricas['MLs_Processado'])
 
-        print("TOTEX = ", totex_total)
-        print("TOTEX_AP = ", totex_AP)
-        print("TOTEX_ML = ", totex_ML)
+        print("TOTEX = ", self.metricas['totex_total'])
+        print("self.metricas['totex_AP'] = ", self.metricas['totex_AP'])
+        print("self.metricas['totex_ML'] = ", self.metricas['totex_ML'])
 
         #MVELO
-        mvelo_total = calc.mVelo(totex_total, tTotal)
+        self.metricas['mvelo_total'] = calc.mVelo(self.metricas['totex_total'], self.metricas['tTotal'])
         #MVELO_AP
-        mvelo_AP = calc.mVelo(totex_AP, tTotal)
+        self.metricas['mvelo_AP'] = calc.mVelo(self.metricas['totex_AP'], self.metricas['tTotal'])
         #MVELO_ML
-        mvelo_ML =  calc.mVelo(totex_ML, tTotal)
+        self.metricas['mvelo_ML'] =  calc.mVelo(self.metricas['totex_ML'], self.metricas['tTotal'])
 
-        print("MVELO = ", mvelo_total)
-        print("MVELO_AP = ", mvelo_AP)
-        print("MVELO_ML = ", mvelo_ML)
+        print("MVELO = ", self.metricas['mvelo_total'])
+        print("MVELO_AP = ", self.metricas['mvelo_AP'])
+        print("MVELO_ML = ", self.metricas['mvelo_ML'])
 
         #Preenchimento da janela principal com as métricas
-        metricas = [dis_mediaAP, dis_mediaML, dis_media, dis_rms_AP, 
-        dis_rms_ML, dis_rms_total, totex_AP, totex_ML, totex_total, 
-        mvelo_AP, mvelo_ML, mvelo_total]
+        metricas = [self.metricas['dis_mediaAP'], self.metricas['dis_mediaML'], self.metricas['dis_media'], self.metricas['dis_rms_AP'], 
+        self.metricas['dis_rms_ML'], self.metricas['dis_rms_total'], self.metricas['totex_AP'], self.metricas['totex_ML'], self.metricas['totex_total'], 
+        self.metricas['mvelo_AP'], self.metricas['mvelo_ML'], self.metricas['mvelo_total']]
 
         for x in range(1, 2):
             for y in range(1, 13):
                 self.grid1.get_child_at(x, y).set_text(str(round(metricas[y-1], 6)))
-        
-        '''
-        self.entry_Mdist_TOTAL_OA.set_text(str(dis_media))
-        self.entry_Mdist_AP_OA.set_text(str(dis_mediaAP))
-        self.entry_Mdist_ML_OA.set_text(str(dis_mediaML))
-
-        self.entry_Rdist_TOTAL_OA.set_text(str(dis_rms_total))
-        self.entry_Rdist_AP_OA.set_text(str(dis_rms_AP))
-        self.entry_Rdist_ML_OA.set_text(str(dis_rms_ML))
-
-        self.entry_TOTEX_TOTAL_OA.set_text(str(totex_total))
-        self.entry_TOTEX_AP_OA.set_text(str(totex_AP))
-        self.entry_TOTEX_ML_OA.set_text(str(totex_ML))
-
-        self.entry_MVELO_TOTAL_OA.set_text(str(mvelo_total))
-        self.entry_MVELO_AP_OA.set_text(str(mvelo_AP))
-        self.entry_MVELO_ML_OA.set_text(str(mvelo_ML))
-        '''
-
-        #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
-        #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
 
         #Cálculo dos máximos (sinal processado)
-        max_absoluto_AP = np.absolute(APs_Processado).max()
-        max_absoluto_ML = np.absolute(MLs_Processado).max()
+        self.metricas['max_absoluto_AP'] = np.absolute(self.metricas['APs_Processado']).max()
+        self.metricas['max_absoluto_ML'] = np.absolute(self.metricas['MLs_Processado']).max()
 
-        max_absoluto_AP *=1.05
-        max_absoluto_ML *=1.05
+        self.metricas['max_absoluto_AP'] *=1.05
+        self.metricas['max_absoluto_ML'] *=1.05
 
-        print('max_absoluto_AP:', max_absoluto_AP, 'max_absoluto_ML:', max_absoluto_ML)
+        print('max_absoluto_AP:', self.metricas['max_absoluto_AP'], 'max_absoluto_ML:', self.metricas['max_absoluto_ML'])
 
-        '''
-        self.entry_Mdist_TOTAL_OA.set_text(str(dis_media))
-        self.entry_Mdist_AP_OA.set_text(str(dis_mediaAP))
-        self.entry_Mdist_ML_OA.set_text(str(dis_mediaML))
-
-        self.entry_Rdist_TOTAL_OA.set_text(str(dis_rms_total))
-        self.entry_Rdist_AP_OA.set_text(str(dis_rms_AP))
-        self.entry_Rdist_ML_OA.set_text(str(dis_rms_ML))
-
-        self.entry_TOTEX_TOTAL_OA.set_text(str(totex_total))
-        self.entry_TOTEX_AP_OA.set_text(str(totex_AP))
-        self.entry_TOTEX_ML_OA.set_text(str(totex_ML))
-
-        self.entry_MVELO_TOTAL_OA.set_text(str(mvelo_total))
-        self.entry_MVELO_AP_OA.set_text(str(mvelo_AP))
-        self.entry_MVELO_ML_OA.set_text(str(mvelo_ML))
-        '''
-
-        #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
-        #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
-
-        self.axis_0.set_xlim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis_0.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis_0.plot(MLs_Processado, APs_Processado,'.-',color='r')
+    def plotaExame(self):
+        self.axis_0.set_xlim(-self.metricas['max_absoluto_ML'], self.metricas['max_absoluto_ML'])
+        self.axis_0.set_ylim(-self.metricas['max_absoluto_AP'], self.metricas['max_absoluto_AP'])
+        self.axis_0.plot(self.metricas['MLs_Processado'], self.metricas['APs_Processado'],'.-',color='r')
         self.canvas_0.draw()
 
-        #h1 = max_absoluto_AP*800 // max_absoluto_ML
-
-        #self.box_0.set_size_request(800, h1)
-
-        '''
-        charts = [self.box_0, self.box_1, self.box_2, self.box_3]
-        for c in charts:
-            #w1 = c.get_allocation().width
-        '''
-
-        self.maximo = max([max_absoluto_AP, max_absoluto_ML, max(dis_resultante_total)])
+        self.maximo = max([self.metricas['max_absoluto_AP'], self.metricas['max_absoluto_ML'], max(self.metricas['dis_resultante_total'])])
 
         self.axis_2.set_ylim(-self.maximo, self.maximo)
-        self.axis_2.plot(tempo, APs_Processado, color='r', label='APs')
-        self.axis_2.plot(tempo, MLs_Processado, color='b', label='MLs')
-        self.axis_2.plot(tempo, dis_resultante_total, color='g', label='DRT')
+        self.axis_2.plot(self.metricas['tempo'], self.metricas['APs_Processado'], color='r', label='APs')
+        self.axis_2.plot(self.metricas['tempo'], self.metricas['MLs_Processado'], color='b', label='MLs')
+        self.axis_2.plot(self.metricas['tempo'], self.metricas['dis_resultante_total'], color='g', label='DRT')
         self.axis_2.legend()
         self.canvas_2.draw()
 
@@ -454,28 +392,28 @@ class Iem_wbb:
     #Evento de clique do botão "SALVAR EXAME"
     def on_save_exam_button_clicked(self, widget):
         #Teste se há exame
-        if self.is_exam:
-            #Inserção do exame no BD
-            self.cur.execute("INSERT INTO exams (APs, MLs, pac_id, usr_id) VALUES (%s, %s, %s, %s)", (list(self.APs), list(self.MLs), self.pacient['ID'], self.user_ID))
-            #self.cur.execute("UPDATE pacients SET weight = %f, imc = %f WHERE id = %d;" % (float(self.pacient['Peso']), float(self.pacient['IMC']), int(self.pacient['ID'])))
-            self.conn.commit()
+        # if self.is_exam:
+        #Inserção do exame no BD
+        self.cur.execute("INSERT INTO exams (APs, MLs, pac_id, usr_id) VALUES (%s, %s, %s, %s)", (list(self.APs), list(self.MLs), self.pacient['ID'], self.user_ID))
+        #self.cur.execute("UPDATE pacients SET weight = %f, imc = %f WHERE id = %d;" % (float(self.pacient['Peso']), float(self.pacient['IMC']), int(self.pacient['ID'])))
+        self.conn.commit()
 
-            #Limpeza do combobox de seleção
-            self.combo_box_set_exam.remove_all()
-            #Preenchimento do combobox de seleção
-            #Fills the exams_combobox with the dates of current pacient exams
-            self.cur.execute("SELECT * FROM exams WHERE pac_id = (%s)", (self.pacient['ID']))
-            rows = self.cur.fetchall()
-            i=1
-            for row in rows:
-                self.combo_box_set_exam.append(str(row[0]), str(i) + ' - ' + str(row[3]))
-                i+=1
+        #Limpeza do combobox de seleção
+        self.combo_box_set_exam.remove_all()
+        #Preenchimento do combobox de seleção
+        #Fills the exams_combobox with the dates of current pacient exams
+        self.cur.execute("SELECT * FROM exams WHERE pac_id = (%s)", (str(self.pacient['ID'])))
+        rows = self.cur.fetchall()
+        i=1
+        for row in rows:
+            self.combo_box_set_exam.append(str(row[0]), str(i) + ' - ' + str(row[3]))
+            i+=1
 
-            #Mudanças nos elementos gráficos
-            self.combo_box_set_exam.set_active_id("0")
-            self.combo_box_set_exam.set_sensitive(True)
-            self.load_exam_button.set_sensitive(True)
-            self.save_exam_button.set_sensitive(False)
+        #Mudanças nos elementos gráficos
+        self.combo_box_set_exam.set_active_id("0")
+        self.combo_box_set_exam.set_sensitive(True)
+        self.load_exam_button.set_sensitive(True)
+        self.save_exam_button.set_sensitive(False)
 
     #Gets the signal of changing at exams_combobox
     def on_combo_box_set_exam_changed(self, widget):
@@ -757,137 +695,137 @@ class Iem_wbb:
 
     #Evento de clique no botão de carregar exame
     def on_load_exam_button_clicked(self, widget):
-        dt = 0.040
-        tTotal = len(self.APs) * dt
-        tempo = np.arange(0, tTotal, 0.040)
+        self.metricas['dt'] = 0.040
+        self.metricas['tTotal'] = len(self.APs) * self.metricas['dt']
+        self.metricas['tempo'] = np.arange(0, self.metricas['tTotal'], 0.040)
 
-        max_absoluto_AP = calc.valorAbsoluto(min(self.APs), max(self.APs))
-        max_absoluto_ML = calc.valorAbsoluto(min(self.MLs), max(self.MLs))
+        self.metricas['max_absoluto_AP'] = calc.valorAbsoluto(min(self.APs), max(self.APs))
+        self.metricas['max_absoluto_ML'] = calc.valorAbsoluto(min(self.MLs), max(self.MLs))
 
-        max_absoluto_AP *= 1.25
-        max_absoluto_ML *= 1.25
+        self.metricas['max_absoluto_AP'] *= 1.25
+        self.metricas['max_absoluto_ML'] *= 1.25
 
-        print('max_absoluto_AP:',max_absoluto_AP,'max_absoluto_ML:',max_absoluto_ML)
+        print('max_absoluto_AP: ', self.metricas['max_absoluto_AP'], 'max_absoluto_ML: ',self.metricas['max_absoluto_ML'])
 
         self.clear_charts()
 
-        APs_Processado, MLs_Processado, AP_, ML_ = calc.geraAP_ML(self.APs, self.MLs)
-        print("AP_ = ", AP_)
-        print("ML_ = ", ML_)
+        self.metricas['APs_Processado'], self.metricas['MLs_Processado'], self.metricas['AP_'], self.metricas['ML_'] = calc.geraAP_ML(self.APs, self.MLs)
+        print("self.metricas['AP_'] = ", self.metricas['AP_'])
+        print("self.metricas['ML_'] = ", self.metricas['ML_'])
         #RD
-        dis_resultante_total = calc.distanciaResultante(APs_Processado, MLs_Processado)
+        self.metricas['dis_resultante_total'] = calc.distanciaResultante(self.metricas['APs_Processado'], self.metricas['MLs_Processado'])
 
         #? Isto não faz sentido
-        #dis_resultante_AP = calc.distanciaResultanteParcial(APs_Processado)
-        #dis_resultante_ML = calc.distanciaResultanteParcial(MLs_Processado)
+        #dis_resultante_AP = calc.distanciaResultanteParcial(self.metricas['APs_Processado'])
+        #dis_resultante_ML = calc.distanciaResultanteParcial(self.metricas['MLs_Processado'])
 
         #MDIST
-        dis_media = calc.distanciaMedia(dis_resultante_total)
+        self.metricas['dis_media'] = calc.distanciaMedia(self.metricas['dis_resultante_total'])
 
         #MDIST_AP
-        dis_mediaAP = calc.distanciaMedia_(APs_Processado)
+        self.metricas['dis_mediaAP'] = calc.distanciaMedia_(self.metricas['APs_Processado'])
         #MDIST_ML
-        dis_mediaML = calc.distanciaMedia_(MLs_Processado)
+        self.metricas['dis_mediaML'] = calc.distanciaMedia_(self.metricas['MLs_Processado'])
 
-        print("MDIST = ", dis_media)
-        print("MDIST_AP = ", dis_mediaAP)
-        print("MDIST_ML = ", dis_mediaML)
+        print("MDIST = ", self.metricas['dis_media'])
+        print("MDIST_AP = ", self.metricas['dis_mediaAP'])
+        print("MDIST_ML = ", self.metricas['dis_mediaML'])
 
         #RDIST
-        dis_rms_total = calc.distRMS(dis_resultante_total)
-        #dis_rms_AP = calc.distRMS(dis_resultante_AP)
-        #dis_rms_ML = calc.distRMS(dis_resultante_ML)
+        self.metricas['dis_rms_total'] = calc.distRMS(self.metricas['dis_resultante_total'])
+        #self.metricas['dis_rms_AP'] = calc.distRMS(dis_resultante_AP)
+        #self.metricas['dis_rms_ML'] = calc.distRMS(dis_resultante_ML)
         #RDIST_AP
-        dis_rms_AP = calc.distRMS(APs_Processado)
+        self.metricas['dis_rms_AP'] = calc.distRMS(self.metricas['APs_Processado'])
         #RDIST_AP
-        dis_rms_ML = calc.distRMS(MLs_Processado)
+        self.metricas['dis_rms_ML'] = calc.distRMS(self.metricas['MLs_Processado'])
 
-        print("RDIST = ", dis_rms_total)
-        print("RDIST_AP = ", dis_rms_AP)
-        print("RDIST_ML = ", dis_rms_ML)
+        print("RDIST = ", self.metricas['dis_rms_total'])
+        print("RDIST_AP = ", self.metricas['dis_rms_AP'])
+        print("RDIST_ML = ", self.metricas['dis_rms_ML'])
 
-        #totex_total = calc.totex(APs_Processado, MLs_Processado)
+        #self.metricas['totex_total'] = calc.totex(self.metricas['APs_Processado'], self.metricas['MLs_Processado'])
         #TOTEX
-        totex_total = calc.totex(APs_Processado, MLs_Processado)
-        #TOTEX_AP
-        totex_AP = calc.totexParcial(APs_Processado)
-        #TOTEX_ML
-        totex_ML = calc.totexParcial(MLs_Processado)
+        self.metricas['totex_total'] = calc.totex(self.metricas['APs_Processado'], self.metricas['MLs_Processado'])
+        #self.metricas['totex_AP']
+        self.metricas['totex_AP'] = calc.totexParcial(self.metricas['APs_Processado'])
+        #self.metricas['totex_ML']
+        self.metricas['totex_ML'] = calc.totexParcial(self.metricas['MLs_Processado'])
 
-        print("TOTEX = ", totex_total)
-        print("TOTEX_AP = ", totex_AP)
-        print("TOTEX_ML = ", totex_ML)
+        print("TOTEX = ", self.metricas['totex_total'])
+        print("self.metricas['totex_AP'] = ", self.metricas['totex_AP'])
+        print("self.metricas['totex_ML'] = ", self.metricas['totex_ML'])
 
         #MVELO
-        mvelo_total = calc.mVelo(totex_total, tTotal)
+        self.metricas['mvelo_total'] = calc.mVelo(self.metricas['totex_total'], self.metricas['tTotal'])
         #MVELO_AP
-        mvelo_AP = calc.mVelo(totex_AP, tTotal)
+        self.metricas['mvelo_AP'] = calc.mVelo(self.metricas['totex_AP'], self.metricas['tTotal'])
         #MVELO_ML
-        mvelo_ML =  calc.mVelo(totex_ML, tTotal)
+        self.metricas['mvelo_ML'] =  calc.mVelo(self.metricas['totex_ML'], self.metricas['tTotal'])
 
-        print("MVELO = ", mvelo_total)
-        print("MVELO_AP = ", mvelo_AP)
-        print("MVELO_ML = ", mvelo_ML)
+        print("MVELO = ", self.metricas['mvelo_total'])
+        print("MVELO_AP = ", self.metricas['mvelo_AP'])
+        print("MVELO_ML = ", self.metricas['mvelo_ML'])
 
-        metricas = [dis_mediaAP, dis_mediaML, dis_media, dis_rms_AP, 
-        dis_rms_ML, dis_rms_total, totex_AP, totex_ML, totex_total, 
-        mvelo_AP, mvelo_ML, mvelo_total]
+        metricas = [self.metricas['dis_mediaAP'], self.metricas['dis_mediaML'], self.metricas['dis_media'], self.metricas['dis_rms_AP'], 
+        self.metricas['dis_rms_ML'], self.metricas['dis_rms_total'], self.metricas['totex_AP'], self.metricas['totex_ML'], self.metricas['totex_total'], 
+        self.metricas['mvelo_AP'], self.metricas['mvelo_ML'], self.metricas['mvelo_total']]
 
         for x in range(1, 2):
             for y in range(1, 13):
                 self.grid1.get_child_at(x, y).set_text(str(round(metricas[y-1], 6)))
         
         '''
-        self.entry_Mdist_TOTAL_OA.set_text(str(dis_media))
-        self.entry_Mdist_AP_OA.set_text(str(dis_mediaAP))
-        self.entry_Mdist_ML_OA.set_text(str(dis_mediaML))
+        self.entry_Mdist_TOTAL_OA.set_text(str(self.metricas['dis_media']))
+        self.entry_Mdist_self.metricas['AP_']OA.set_text(str(self.metricas['dis_mediaAP']))
+        self.entry_Mdist_ML_OA.set_text(str(self.metricas['dis_mediaML']))
 
-        self.entry_Rdist_TOTAL_OA.set_text(str(dis_rms_total))
-        self.entry_Rdist_AP_OA.set_text(str(dis_rms_AP))
-        self.entry_Rdist_ML_OA.set_text(str(dis_rms_ML))
+        self.entry_Rdist_TOTAL_OA.set_text(str(self.metricas['dis_rms_total']))
+        self.entry_Rdist_self.metricas['AP_']OA.set_text(str(self.metricas['dis_rms_AP']))
+        self.entry_Rdist_ML_OA.set_text(str(self.metricas['dis_rms_ML']))
 
-        self.entry_TOTEX_TOTAL_OA.set_text(str(totex_total))
-        self.entry_TOTEX_AP_OA.set_text(str(totex_AP))
-        self.entry_TOTEX_ML_OA.set_text(str(totex_ML))
+        self.entry_TOTEX_TOTAL_OA.set_text(str(self.metricas['totex_total']))
+        self.entry_TOTEX_self.metricas['AP_']OA.set_text(str(self.metricas['totex_AP']))
+        self.entry_TOTEX_ML_OA.set_text(str(self.metricas['totex_ML']))
 
-        self.entry_MVELO_TOTAL_OA.set_text(str(mvelo_total))
-        self.entry_MVELO_AP_OA.set_text(str(mvelo_AP))
-        self.entry_MVELO_ML_OA.set_text(str(mvelo_ML))
+        self.entry_MVELO_TOTAL_OA.set_text(str(self.metricas['mvelo_total']))
+        self.entry_MVELO_self.metricas['AP_']OA.set_text(str(self.metricas['mvelo_AP']))
+        self.entry_MVELO_ML_OA.set_text(str(self.metricas['mvelo_ML']))
         '''
 
-        #max_absoluto_AP = calc.valorAbsoluto(min(APs_Processado), max(APs_Processado))
-        #max_absoluto_ML = calc.valorAbsoluto(min(MLs_Processado), max(MLs_Processado))
+        #self.metricas['max_absoluto_AP'] = calc.valorAbsoluto(min(self.metricas['APs_Processado']), max(self.metricas['APs_Processado']))
+        #self.metricas['max_absoluto_ML'] = calc.valorAbsoluto(min(self.metricas['MLs_Processado']), max(self.metricas['MLs_Processado']))
 
-        max_absoluto_AP = np.absolute(APs_Processado).max()
-        max_absoluto_ML = np.absolute(MLs_Processado).max()
+        self.metricas['max_absoluto_AP'] = np.absolute(self.metricas['APs_Processado']).max()
+        self.metricas['max_absoluto_ML'] = np.absolute(self.metricas['MLs_Processado']).max()
 
-        max_absoluto_AP *=1.05
-        max_absoluto_ML *=1.05
+        self.metricas['max_absoluto_AP'] *=1.05
+        self.metricas['max_absoluto_ML'] *=1.05
 
-        print('max_absoluto_AP:', max_absoluto_AP, 'max_absoluto_ML:', max_absoluto_ML)
+        print('max_absoluto_AP: ', self.metricas['max_absoluto_AP'], 'max_absoluto_ML: ', self.metricas['max_absoluto_ML'])
 
-        self.axis_0.set_xlim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis_0.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis_0.plot(MLs_Processado, APs_Processado,'.-',color='r')
+        self.axis_0.set_xlim(-self.metricas['max_absoluto_ML'], self.metricas['max_absoluto_ML'])
+        self.axis_0.set_ylim(-self.metricas['max_absoluto_AP'], self.metricas['max_absoluto_AP'])
+        self.axis_0.plot(self.metricas['MLs_Processado'], self.metricas['APs_Processado'],'.-',color='r')
         self.canvas_0.draw()
 
         #w1 = self.box_0.get_allocation().width
 
-        #h1 = max_absoluto_AP*w1//max_absoluto_ML
+        #h1 = self.metricas['max_absoluto_AP']*w1//self.metricas['max_absoluto_ML']
         
         #self.box_0.set_size_request(w1, h1)
 
-        '''self.axis_1.set_xlim(-max_absoluto_ML, max_absoluto_ML)
-        self.axis_1.set_ylim(-max_absoluto_AP, max_absoluto_AP)
-        self.axis_1.plot(MLs_Processado, APs_Processado,'.-',color='g')
+        '''self.axis_1.set_xlim(-self.metricas['max_absoluto_ML'], self.metricas['max_absoluto_ML'])
+        self.axis_1.set_ylim(-self.metricas['max_absoluto_AP'], self.metricas['max_absoluto_AP'])
+        self.axis_1.plot(self.metricas['MLs_Processado'], self.metricas['APs_Processado'],'.-',color='g')
         self.canvas_1.draw()'''
 
-        self.maximo = max([max_absoluto_AP, max_absoluto_ML, max(dis_resultante_total)])
+        self.maximo = max([self.metricas['max_absoluto_AP'], self.metricas['max_absoluto_ML'], max(self.metricas['dis_resultante_total'])])
 
         self.axis_2.set_ylim(-self.maximo, self.maximo)
-        self.axis_2.plot(tempo, APs_Processado, color='k', label='APs')
-        self.axis_2.plot(tempo, MLs_Processado, color='m', label='MLs')
-        self.axis_2.plot(tempo, dis_resultante_total, color='g', label='DRT')
+        self.axis_2.plot(self.metricas['tempo'], self.metricas['APs_Processado'], color='k', label='APs')
+        self.axis_2.plot(self.metricas['tempo'], self.metricas['MLs_Processado'], color='m', label='MLs')
+        self.axis_2.plot(self.metricas['tempo'], self.metricas['dis_resultante_total'], color='g', label='DRT')
         self.axis_2.legend()
         self.canvas_2.draw()
 
@@ -1145,8 +1083,8 @@ class Iem_wbb:
             self.stand_up_window.show()
 
     def clear_charts(self, chart=None):
-        dt = 0.040
-        tTotal = len(self.APs) * dt
+        self.metricas['dt'] = 0.040
+        self.metricas['tTotal'] = len(self.APs) * self.metricas['dt']
         charts_estatocinesigrama = [self.axis_0, self.axis_1]
         charts_estabilograma = [self.axis_2, self.axis_3]
 
@@ -1164,7 +1102,7 @@ class Iem_wbb:
 
             for a in charts_estabilograma:
                 a.clear()
-                a.set_xlim(0, tTotal)
+                a.set_xlim(0, self.metricas['tTotal'])
                 a.set_ylabel('Amplitude')
                 a.set_xlabel('Tempo (s)')
         else:
@@ -1177,7 +1115,7 @@ class Iem_wbb:
                 chart.axhline(0, color='grey')
                 chart.axvline(0, color='grey')
             else:
-                chart.set_xlim(0, tTotal)
+                chart.set_xlim(0, self.metricas['tTotal'])
                 chart.set_ylabel('Amplitude')
                 chart.set_xlabel('Tempo (s)')
 
@@ -1259,80 +1197,80 @@ class Iem_wbb:
 
             self.t = self.exam[0][2]
 
-            dt = 0.040
-            tTotal = len(self.APs) * dt
-            tempo = np.arange(0, tTotal, dt)
+            self.metricas['dt'] = 0.040
+            self.metricas['tTotal'] = len(self.APs) * self.metricas['dt']
+            self.metricas['tempo'] = np.arange(0, self.metricas['tTotal'], self.metricas['dt'])
 
-            APs_Processado, MLs_Processado, AP_, ML_ = calc.geraAP_ML(self.APs, self.MLs)
-            #print("AP_ = ", AP_)
-            #print("ML_ = ", ML_)
+            self.metricas['APs_Processado'], self.metricas['MLs_Processado'], self.metricas['AP_'], self.metricas['ML_'] = calc.geraAP_ML(self.APs, self.MLs)
+            #print("self.metricas['AP_'] = ", self.metricas['AP_'])
+            #print("self.metricas['ML_'] = ", self.metricas['ML_'])
             #RD
-            dis_resultante_total = calc.distanciaResultante(APs_Processado, MLs_Processado)
+            self.metricas['dis_resultante_total'] = calc.distanciaResultante(self.metricas['APs_Processado'], self.metricas['MLs_Processado'])
 
             #? Isto não faz sentido
-            dis_resultante_AP = calc.distanciaResultanteParcial(APs_Processado)
-            dis_resultante_ML = calc.distanciaResultanteParcial(MLs_Processado)
+            dis_resultante_AP = calc.distanciaResultanteParcial(self.metricas['APs_Processado'])
+            dis_resultante_ML = calc.distanciaResultanteParcial(self.metricas['MLs_Processado'])
 
             #MDIST
-            dis_media = calc.distanciaMedia(dis_resultante_total)
+            self.metricas['dis_media'] = calc.distanciaMedia(self.metricas['dis_resultante_total'])
 
             #MDIST_AP
-            dis_mediaAP = calc.distanciaMedia_(APs_Processado)
+            self.metricas['dis_mediaAP'] = calc.distanciaMedia_(self.metricas['APs_Processado'])
             #MDIST_ML
-            dis_mediaML = calc.distanciaMedia_(MLs_Processado)
+            self.metricas['dis_mediaML'] = calc.distanciaMedia_(self.metricas['MLs_Processado'])
 
-            #print("MDIST = ", dis_media)
-            #print("MDIST_AP = ", dis_mediaAP)
-            #print("MDIST_ML = ", dis_mediaML)
+            #print("MDIST = ", self.metricas['dis_media'])
+            #print("MDIST_AP = ", self.metricas['dis_mediaAP'])
+            #print("MDIST_ML = ", self.metricas['dis_mediaML'])
 
             #RDIST
-            dis_rms_total = calc.distRMS(dis_resultante_total)
-            #dis_rms_AP = calc.distRMS(dis_resultante_AP)
-            #dis_rms_ML = calc.distRMS(dis_resultante_ML)
+            self.metricas['dis_rms_total'] = calc.distRMS(self.metricas['dis_resultante_total'])
+            #self.metricas['dis_rms_AP'] = calc.distRMS(dis_resultante_AP)
+            #self.metricas['dis_rms_ML'] = calc.distRMS(dis_resultante_ML)
             #RDIST_AP
-            dis_rms_AP = calc.distRMS(APs_Processado)
+            self.metricas['dis_rms_AP'] = calc.distRMS(self.metricas['APs_Processado'])
             #RDIST_AP
-            dis_rms_ML = calc.distRMS(MLs_Processado)
+            self.metricas['dis_rms_ML'] = calc.distRMS(self.metricas['MLs_Processado'])
 
-            #print("RDIST = ", dis_rms_total)
-            #print("RDIST_AP = ", dis_rms_AP)
-            #print("RDIST_ML = ", dis_rms_ML)
+            #print("RDIST = ", self.metricas['dis_rms_total'])
+            #print("RDIST_AP = ", self.metricas['dis_rms_AP'])
+            #print("RDIST_ML = ", self.metricas['dis_rms_ML'])
 
-            #totex_total = calc.totex(APs_Processado, MLs_Processado)
+            #self.metricas['totex_total'] = calc.totex(self.metricas['APs_Processado'], self.metricas['MLs_Processado'])
             #TOTEX
-            totex_total = calc.totex(APs_Processado, MLs_Processado)
-            #TOTEX_AP
-            totex_AP = calc.totexParcial(APs_Processado)
-            #TOTEX_ML
-            totex_ML = calc.totexParcial(MLs_Processado)
+            self.metricas['totex_total'] = calc.totex(self.metricas['APs_Processado'], self.metricas['MLs_Processado'])
+            #self.metricas['totex_AP']
+            self.metricas['totex_AP'] = calc.totexParcial(self.metricas['APs_Processado'])
+            #self.metricas['totex_ML']
+            self.metricas['totex_ML'] = calc.totexParcial(self.metricas['MLs_Processado'])
 
-            #print("TOTEX = ", totex_total)
-            #print("TOTEX_AP = ", totex_AP)
-            #print("TOTEX_ML = ", totex_ML)
+            #print("TOTEX = ", self.metricas['totex_total'])
+            #print("self.metricas['totex_AP'] = ", self.metricas['totex_AP'])
+            #print("self.metricas['totex_ML'] = ", self.metricas['totex_ML'])
 
             #MVELO
-            mvelo_total = calc.mVelo(totex_total, tTotal)
+            self.metricas['mvelo_total'] = calc.mVelo(self.metricas['totex_total'], self.metricas['tTotal'])
             #MVELO_AP
-            mvelo_AP = calc.mVelo(totex_AP, tTotal)
+            self.metricas['mvelo_AP'] = calc.mVelo(self.metricas['totex_AP'], self.metricas['tTotal'])
             #MVELO_ML
-            mvelo_ML =  calc.mVelo(totex_ML, tTotal)
+            self.metricas['mvelo_ML'] =  calc.mVelo(self.metricas['totex_ML'], self.metricas['tTotal'])
 
-            #print("MVELO = ", mvelo_total)
-            #print("MVELO_AP = ", mvelo_AP)
-            #print("MVELO_ML = ", mvelo_ML)
+            #print("MVELO = ", self.metricas['mvelo_total'])
+            #print("MVELO_AP = ", self.metricas['mvelo_AP'])
+            #print("MVELO_ML = ", self.metricas['mvelo_ML'])
 
-            max_absoluto_AP = np.absolute(APs_Processado).max()
-            max_absoluto_ML = np.absolute(MLs_Processado).max()
+            self.metricas['max_absoluto_AP'] = np.absolute(self.metricas['APs_Processado']).max()
+            self.metricas['max_absoluto_ML'] = np.absolute(self.metricas['MLs_Processado']).max()
 
-            max_absoluto_AP *=1.05
-            max_absoluto_ML *=1.05
+            self.metricas['max_absoluto_AP'] *=1.05
+            self.metricas['max_absoluto_ML'] *=1.05
 
-            self.max_absoluto_0 = max([self.max_absoluto_0, max_absoluto_AP, max_absoluto_ML])
-            self.max_absoluto_1 = max([max(dis_resultante_total), max_absoluto_AP, max_absoluto_ML])
+            self.max_absoluto_0 = max([self.max_absoluto_0, self.metricas['max_absoluto_AP'], self.metricas['max_absoluto_ML']])
+            self.max_absoluto_1 = max([max(self.metricas['dis_resultante_total']), self.metricas['max_absoluto_AP'], self.metricas['max_absoluto_ML']])
 
-            metricas = [dis_mediaAP, dis_mediaML, dis_media, 
-            dis_rms_AP, dis_rms_ML, dis_rms_total, totex_AP, 
-            totex_ML, totex_total, mvelo_AP, mvelo_ML, mvelo_total]
+            metricas = [self.metricas['dis_mediaAP'], self.metricas['dis_mediaML'], self.metricas['dis_media'], 
+            self.metricas['dis_rms_AP'], self.metricas['dis_rms_ML'], self.metricas['dis_rms_total'], self.metricas['totex_AP'], 
+            self.metricas['totex_ML'], self.metricas['totex_total'], self.metricas['mvelo_AP'], self.metricas['mvelo_ML'], self.metricas['mvelo_total']]
 
             for y in range(len(metricas)):
                 self.grid1.get_child_at(x, y+1).set_text(str(round(metricas[y], 6)))
@@ -1346,12 +1284,12 @@ class Iem_wbb:
             if(tipo == 0):
                 a.set_xlim(-self.max_absoluto_0, self.max_absoluto_0)
                 a.set_ylim(-self.max_absoluto_0, self.max_absoluto_0)
-                a.plot(MLs_Processado, APs_Processado,'.-',color='r')
+                a.plot(self.metricas['MLs_Processado'], self.metricas['APs_Processado'],'.-',color='r')
             elif(tipo == 1):
                 a.set_ylim(-self.max_absoluto_1, self.max_absoluto_1)
-                a.plot(tempo, APs_Processado, '-', color='r', label='APs')
-                a.plot(tempo, MLs_Processado, '--', color='b', label='MLs')
-                a.plot(tempo, dis_resultante_total, ':', color='g', label='DRT')
+                a.plot(self.metricas['tempo'], self.metricas['APs_Processado'], '-', color='r', label='APs')
+                a.plot(self.metricas['tempo'], self.metricas['MLs_Processado'], '--', color='b', label='MLs')
+                a.plot(self.metricas['tempo'], self.metricas['dis_resultante_total'], ':', color='g', label='DRT')
                 a.legend()
 
             c.draw()
@@ -1375,6 +1313,7 @@ class Iem_wbb:
         self.balance_CoP_y = np.zeros(self.amostra)
         self.APs = np.zeros(self.amostra)
         self.MLs = np.zeros(self.amostra)
+        self.metricas = {}
         self.WBB = {}
 
         self.user_ID = None
@@ -1459,15 +1398,15 @@ class Iem_wbb:
         self.weight = self.iemBuilder.get_object("weight")
         self.imc = self.iemBuilder.get_object("imc")
         self.entry_Mdist_TOTAL_OA = self.iemBuilder.get_object("mdist_t_oa")
-        self.entry_Mdist_AP_OA = self.iemBuilder.get_object("mdist_ap_oa")
+        self.entry_Mdist_AP_OA = self.iemBuilder.get_object("mdist_self.metricas['AP_']oa")
         self.entry_Mdist_ML_OA = self.iemBuilder.get_object("mdist_ml_oa")
-        self.entry_Rdist_AP_OA = self.iemBuilder.get_object("rdist_ap_oa")
+        self.entry_Rdist_AP_OA = self.iemBuilder.get_object("rdist_self.metricas['AP_']oa")
         self.entry_Rdist_ML_OA = self.iemBuilder.get_object("rdist_ml_oa")
         self.entry_Rdist_TOTAL_OA = self.iemBuilder.get_object("rdist_t_oa")
-        self.entry_TOTEX_AP_OA = self.iemBuilder.get_object("totex_ap_oa")
+        self.entry_TOTEX_AP_OA = self.iemBuilder.get_object("totex_self.metricas['AP_']oa")
         self.entry_TOTEX_ML_OA = self.iemBuilder.get_object("totex_ml_oa")
         self.entry_TOTEX_TOTAL_OA = self.iemBuilder.get_object("totex_t_oa")
-        self.entry_MVELO_AP_OA = self.iemBuilder.get_object("mvelo_ap_oa")
+        self.entry_MVELO_AP_OA = self.iemBuilder.get_object("mvelo_self.metricas['AP_']oa")
         self.entry_MVELO_ML_OA = self.iemBuilder.get_object("mvelo_ml_oa")
         self.entry_MVELO_TOTAL_OA = self.iemBuilder.get_object("mvelo_t_oa")
         self.points_entry = self.iemBuilder.get_object("points_entry")
