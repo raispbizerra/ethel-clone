@@ -38,23 +38,15 @@ sudo -H pip3 install awk flex pybluez xlrd xlwt xlutils matplotlib psycopg2 psyc
 ## POSTGRESQL CONFIGURATION
 ### 1. Changing UNIX postgres password
 
-First of all, you have to set/change the password of the new UNIX user (postgres) with the following command:
-
 ```bash
 sudo passwd postgres
 ```
 
-You will be asked to type and retype the new UNIX password.
-
 ### 2. Accessing UNIX postgres account in the terminal
-
-To access UNIX postgres account in the terminal, you will use the following command:
 
 ```bash
 su - postgres
 ```
-
-You will be asked to type the postgres password created on the first step.
 
 ### 3. Creating a postgres user with su privileges
 ```bash
