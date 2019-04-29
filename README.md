@@ -54,10 +54,6 @@ myuser=$(who | cut -d' ' -f1 | sort | uniq)
 createuser $myuser -s
 exit
 ```
-### 4. Altering postgres user password
-```bash
-psql -d postgres -c "ALTER ROLE postgres WITH PASSWORD 'postgres';"
-```
 
 ### 5. Creating iem_wbb DATABASE
 ```bash
