@@ -14,76 +14,65 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
------------------------------------------------------------------------------------------------------------------------
-IEM_WBB
------------------------------------------------------------------------------------------------------------------------
+# IEM_WBB
 
-DESCRIPTION
------------------------------------------------------------------------------------------------------------------------
+## DESCRIPTION
+
 System for instrumentation of medical examinations, wii balance board version.
 
-REQUIREMENTS
------------------------------------------------------------------------------------------------------------------------
-Packages - sudo apt-get install flex bison libbluetooth-dev libcwiid-dev python-gobject python3-tk python3-dev
+## REQUIREMENTS
 
-PostgreSQL - https://www.postgresql.org/download/linux/ubuntu/
+### Packages
+```bash
+sudo apt install flex bison libbluetooth-dev libcwiid-dev python-gobject python3-pip python3-tk python3-dev postgresql postgresql-server-dev-10 automake
+```
 
-Python3 - sudo apt-get install python3
+### Python3 modules
 
-pip - 	1. Download get-pip.py at https://bootstrap.pypa.io/get-pip.py
-		2. sudo python3 get-pip.py
+```bash
+sudo -H pip3 install awk flex pybluez xlrd xlwt xlutils matplotlib psycopg2 psycopg2-binary
+```
 
-Python3 modules - 	sudo -H pip3 install awk flex pybluez xlrd xlwt xlutils matplotlib psycopg2 psycopg2-binary
-			cwiid - https://github.com/azzra/python3-wiimote
+[cwiid](https://github.com/azzra/python3-wiimote) (Clone repository and follow README instructions)
 
-POSTGRESQL CONFIGURATION
------------------------------------------------------------------------------------------------------------------------
-Step 1 - Changing UNIX postgres password
+## POSTGRESQL CONFIGURATION
+### 1. Changing UNIX postgres password
 
-	First of all, you have to set/change the password of the new UNIX user (postgres) with the following command:
-	
-		sudo passwd postgres
+First of all, you have to set/change the password of the new UNIX user (postgres) with the following command:
 
-	You will be asked to type and retype the new UNIX password.
+```bash
+sudo passwd postgres
+```
 
-Step 2. Accessing UNIX postgres account in the terminal
+You will be asked to type and retype the new UNIX password.
 
-	To access UNIX postgres account in the terminal, you will use the following command:
+### 2. Accessing UNIX postgres account in the terminal
 
-		su - postgres
+To access UNIX postgres account in the terminal, you will use the following command:
 
-	You will be asked to type the postgres password created on the first step.
+```bash
+su - postgres
+```
 
-Step 3. Changing the password of PostgreSQL default user
+You will be asked to type the postgres password created on the first step.
 
-	After setting/changing the UNIX postgres password, you have to change the password of PostgreSQL default user, also named as postgres. To do so, you will use the following commands:
+### 3. Creating a postgres user with su privileges
+```bash
+myuser=$(who | cut -d' ' -f1 | sort | uniq)
+createuser $myuser -s
+exit
+```
+### 4. Altering postgres user password
+```bash
+psql -d postgres -c "ALTER ROLE postgres WITH PASSWORD 'postgres';"
+```
 
-		psql
-		ALTER ROLE postgres WITH PASSWORD 'postgres';
+### 5. Creating iem_wbb DATABASE
+```bash
+psql -d postgres -f src/scripts.sql
+```
 
-Step 4. Creating iem_wbb DATABASE
-
-	To create the appication database in PostgreSQL, you will use the file "scripts.sql". Still inside psql and knowing the path to "scripts.sql", type in the terminal:
-
-		\i /path_to_scripts.sql/scripts.sql
-
-	You will see returns like these in the terminal:
-
-		DROP DATABASE
-		CREATE DATABASE
-		Você está conectado agora ao banco de dados "iem_wbb" como usuário "postgres".
-		CREATE EXTENSION
-		CREATE TABLE
-		CREATE TABLE
-		CREATE TABLE
-		CREATE TABLE
-		BEGIN
-		INSERT 0 1
-		INSERT 0 1
-		INSERT 0 1
-		COPY 1
-		COMMIT
-
-EXECUTION
------------------------------------------------------------------------------------------------------------------------
+## USAGE
+```bash
 python3 iem-wbb.py
+```
