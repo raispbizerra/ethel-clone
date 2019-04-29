@@ -55,7 +55,7 @@ createuser $myuser -s
 exit
 ```
 
-### 5. Creating iem_wbb DATABASE
+### 4. Creating iem_wbb DATABASE
 ```bash
 psql -d postgres -f src/scripts.sql
 ```
