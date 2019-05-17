@@ -18,7 +18,7 @@ from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as Figur
 from bluetooth.btcommon import is_valid_address as iva
 
 import psycopg2
-import wbb_calitera as wbb
+import src.wbb_calitera as wbb
 
 
 class Calibration:
@@ -55,7 +55,10 @@ class Calibration:
         self.progressbar.set_fraction(0)
 
         self.calibration_button = Gtk.Button("Iniciar")
-        self.calibration_button.connect('clicked', self.on_calibration_button_clicked)
+
+        self.calibration_button.disconnect(self.cal_but_handler)
+        self.cal_but_handler = self.calibration_button.connect('clicked', self.on_calibration_button_clicked)
+        
         # Muda a sensibilidade do bot~ao de inicio
         self.calibration_button.set_sensitive(True)
 
@@ -67,8 +70,14 @@ class Calibration:
 
         calibrations = calibrations.replace('[', '{', 4).replace(']', '}', 4)
         mac = '\'' + str(self.WBB['MAC']) + '\''
-
-        self.cur.execute("UPDATE devices SET calibrations = %s WHERE mac = %s" % (calibrations, mac))
+        name = str(self.WBB['Nome'])
+        print(calibrations)
+        self.cur.execute("SELECT * FROM devices WHERE mac = %s" % (mac))
+        rows = self.cur.fetchone()
+        if rows:
+            self.cur.execute("UPDATE devices SET calibrations = %s WHERE mac = %s" % (calibrations, mac))
+        else:
+            self.cur.execute("INSERT INTO devices (name, mac, calibrations) VALUES (%s, %s, %s)" % (name, mac, calibrations))
         self.conn.commit()
 
     # Evento de continuar para a calibração
@@ -76,8 +85,8 @@ class Calibration:
         self.calibration_equipment_window.hide()
         if self.calibration_by_points:
             calibration_menu_bar = Gtk.MenuBar()
-            arquivo = Gtk.MenuItem("_Arquivo", True)
-            conexao = Gtk.MenuItem("_Conexão", True)
+            arquivo = Gtk.MenuItem("Arquivo", True)
+            conexao = Gtk.MenuItem("Conexão", True)
 
             arquivo_menu = Gtk.Menu()
             conexao_menu = Gtk.Menu()
@@ -122,7 +131,7 @@ class Calibration:
             separator1 = Gtk.HSeparator()
 
             self.calibration_button = Gtk.Button("Iniciar")
-            self.calibration_button.connect('clicked', self.on_calibration_button_clicked)
+            self.cal_but_handler = self.calibration_button.connect('clicked', self.on_calibration_button_clicked)
 
             button_box = Gtk.ButtonBox()
             button_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
@@ -155,10 +164,10 @@ class Calibration:
                 "É preciso conectar a um dispositivo para realizar o processo de captura.")
             self.message_dialog_window.show()
         else:
-            self.calibration_test = 0
             self.calibration_by_points_image.set_sensitive(True)
             self.calibration_button.set_label("Medir")
-            self.calibration_button.connect('clicked', self.on_start_calibration_clicked)
+            self.calibration_button.disconnect(self.cal_but_handler)
+            self.cal_but_handler = self.calibration_button.connect('clicked', self.on_start_calibration_clicked)
             text = "Posicione a plataforma sem nenhum peso"
             self.calibration_label.set_text(text)
             self.progressbar.set_visible(True)
@@ -208,7 +217,7 @@ class Calibration:
                 self.calibration_label.set_text(text)
                 self.calibration_test = (self.calibration_test + 1) % 3
 
-            self.current_image = (self.current_image + 1) % len(self.calibration_by_points_images)
+            self.current_image = (self.current_image + 1) % 4
             self.calibration_by_points_image.set_from_file(
                 './media/' + self.calibration_by_points_images[self.current_image])
         else:
@@ -241,7 +250,7 @@ class Calibration:
                 self.salvar_cal.set_sensitive(True)
                 return
 
-            self.current_image = (self.current_image + 1) % len(self.calibration_by_points_images)
+            self.current_image = (self.current_image + 1) % 4
             self.calibration_by_points_image.set_from_file(
                 './media/' + self.calibration_by_points_images[self.current_image])
 
@@ -280,6 +289,7 @@ class Calibration:
             self.message_dialog_window.show()
         else:
             self.WBB = {'Nome': name, 'MAC': mac, 'Padrao': is_default}
+            print(self.WBB)
             if is_default:
                 self.cur.execute("SELECT * FROM devices_id_seq;")
                 row = self.cur.fetchall()
@@ -338,12 +348,15 @@ class Calibration:
         self.wiimote, self.battery = wbb.conecta(self.devices[device_ID][0])
 
         if self.wiimote:
+            self.WBB['MAC'] = self.devices[device_ID][0]
+            self.WBB['Nome'] = self.devices[device_ID][1]
+            print(self.WBB)
             self.is_connected = True
             self.battery_label.set_text("Bateria: " + str(int(100 * self.battery)) + "%")
             self.battery_label.set_visible(True)
             self.status_image.set_from_file("./media/bt_green.png")
             self.status_label.set_text("Conectado")
-            self.capture_button.set_sensitive(True)
+            # self.capture_button.set_sensitive(True)
             self.search_device_window.hide()
 
             # Gdk.threads_add_timeout(GLib.PRIORITY_HIGH_IDLE, 1, self.verify_bt)
@@ -414,14 +427,15 @@ class Calibration:
             self.cur.execute("SELECT name, calibrations, is_default FROM devices WHERE mac = \'%s\';" % (str(MAC)))
             rows = self.cur.fetchall()
             row_calibration = rows[0][1]
-
-            calibration = {'right_top': row_calibration[0],
-                           'right_bottom': row_calibration[1],
-                           'left_top': row_calibration[2],
-                           'left_bottom': row_calibration[3]}
-
+            if row_calibration:
+                calibration = {'right_top': row_calibration[0],
+                            'right_bottom': row_calibration[1],
+                            'left_top': row_calibration[2],
+                            'left_bottom': row_calibration[3]}
+            else:
+                calibration = None
             self.WBB = {'Nome': rows[0][0], 'MAC': MAC, 'Calibração': calibration, 'Padrão': rows[0][2]}
-
+            print(self.WBB)
             self.is_connected = True
             self.battery_label.set_text("Bateria: " + str(int(100 * self.battery)) + "%")
             self.battery_label.set_visible(True)
@@ -430,7 +444,7 @@ class Calibration:
             self.instructions_on_saved_box.set_visible(False)
             self.connect_in_saved_button.set_sensitive(False)
             self.saved_devices_window.hide()
-            self.capture_button.set_sensitive(True)
+            # self.capture_button.set_sensitive(True)
 
             GLib.timeout_add_seconds(1, self.verify_bt)
             # Gdk.threads_add_timeout(GLib.PRIORITY_HIGH_IDLE, 1, self.verify_bt)

@@ -30,6 +30,7 @@ import numpy as np
 import time as ptime
 
 BATTERY_MAX = 208
+TESTING = False
 
 
 class iemWbb:
@@ -94,6 +95,7 @@ class iemWbb:
                               self.pacient['ID']))
             self.conn.commit()
             pacient['ID'] = self.pacient['ID']
+            self.flags['modifying'] = False  
 
         # Definição do dicionário global
         self.pacient = pacient
@@ -251,6 +253,7 @@ class iemWbb:
             readings = wbb.captura1(self.wiimote)
 
             # Cálculo do peso
+            
             peso += wbb.calcWeight(readings, self.WBB['Calibração'], wbb.escala_eu)
 
             # Cálculo dos APs, MLs
@@ -727,7 +730,7 @@ class iemWbb:
         else:
             self.message_dialog_window.format_secondary_text(
                 "Um novo dispositivo não está calibrado, o que pode gerar dados equivocados.")
-            self.message_dialog_window.show()
+            self.message_dialog_window.show()            
             self.WBB = {'Nome': name, 'MAC': mac, 'Padrao': is_default}
             if is_default:
                 self.cur.execute("UPDATE devices SET is_default = FALSE;")
@@ -795,6 +798,12 @@ class iemWbb:
         self.wiimote, self.battery = connect.connectToWBB(self.devices[device_ID][0])
 
         if self.wiimote:
+            cal = self.wiimote.get_balance_cal()
+            calibrations = {'right_top': cal[0],
+                        'right_bottom': cal[1],
+                        'left_top': cal[2],
+                        'left_bottom': cal[3]}
+            self.WBB = {'Calibração': calibrations}
             self.flags['is_connected'] = True
             self.battery_label.set_text("Bateria: " + str(int(100 * self.battery)) + "%")
             self.battery_label.set_visible(True)
@@ -867,18 +876,26 @@ class iemWbb:
         self.wiimote, self.battery = wbb.conecta(MAC)
 
         if self.wiimote:
-
-            self.cur.execute("SELECT name, calibrations, is_default FROM devices WHERE mac = \'%s\';" % (str(MAC)))
+            
+            self.cur.execute("SELECT name, is_default FROM devices WHERE mac = \'%s\';" % (str(MAC)))
             rows = self.cur.fetchall()
-            row_calibration = rows[0][1]
+            if TESTING:
+                cal = self.wiimote.get_balance_cal()
+                calibration = {'right_top': cal[0],
+                                'right_bottom': cal[1],
+                                'left_top': cal[2],
+                                'left_bottom': cal[3]}
+            else:
+                self.cur.execute("SELECT calibrations FROM devices WHERE mac = \'%s\';" % (str(MAC)))
+                cals = self.cur.fetchall()
+                row_calibration = cals[0][0]
 
-            calibration = {'right_top': row_calibration[0],
-                           'right_bottom': row_calibration[1],
-                           'left_top': row_calibration[2],
-                           'left_bottom': row_calibration[3]}
+                calibration = {'right_top': row_calibration[0],
+                            'right_bottom': row_calibration[1],
+                            'left_top': row_calibration[2],
+                            'left_bottom': row_calibration[3]}
 
-            self.WBB = {'Nome': rows[0][0], 'MAC': MAC, 'Calibração': calibration, 'Padrão': rows[0][2]}
-
+            self.WBB = {'Nome': rows[0][0], 'MAC': MAC, 'Calibração': calibration, 'Padrão': rows[0][1]}
             self.flags['is_connected'] = True
             self.battery_label.set_text("Bateria: " + str(int(100 * self.battery)) + "%")
             self.battery_label.set_visible(True)

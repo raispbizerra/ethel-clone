@@ -25,17 +25,17 @@ escala_eu = 1875.  # Escala EUA 18,5 Kg * 2 = 37,5 Kg * 4 = 150 Kg
 
 
 def captura(wiimote, progressbar, min=False, rep=100):
-    duration = 1  # second
-    freq = 440  # Hz
-    freq_ = 220  # Hz
+    # duration = 1  # second
+    # freq = 440  # Hz
+    # freq_ = 220  # Hz
     # os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq))
     # print("Preparados!!!!!")
     # time.sleep(5)
     # print("Já!!!!!!!!!!")
     # os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq_))
     calibre = np.zeros((rep, 4))
-    fat = rep / 10
-    per = 0
+    # fat = rep / 10
+    # per = 0
     for i in range(rep):
         wiimote.request_status()
         readings = wiimote.state['balance']
@@ -49,7 +49,8 @@ def captura(wiimote, progressbar, min=False, rep=100):
             calibre[i, j] = readings[sensor]
             j += 1
 
-            time.sleep(0.05)
+        time.sleep(0.05)
+        print(i)
 
         while Gtk.events_pending():
             Gtk.main_iteration()
