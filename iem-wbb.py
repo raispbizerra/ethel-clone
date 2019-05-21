@@ -32,7 +32,6 @@ import time as ptime
 BATTERY_MAX = 208
 TESTING = False
 
-
 class iemWbb:
     """
         registro de novos pacientes
@@ -238,6 +237,13 @@ class iemWbb:
         self.MLs = np.zeros(self.amostra)
         self.APs = np.zeros(self.amostra)
         peso = 0.0
+        peso_ = 0.0
+
+        cal = self.wiimote.get_balance_cal()
+        calibration = { 'right_top': cal[0],
+                        'right_bottom': cal[1],
+                        'left_top': cal[2],
+                        'left_bottom': cal[3]}
 
         t1 = ptime.time() + self.metricas['dt']
 
@@ -253,8 +259,8 @@ class iemWbb:
             readings = wbb.captura1(self.wiimote)
 
             # Cálculo do peso
-            
             peso += wbb.calcWeight(readings, self.WBB['Calibração'], wbb.escala_eu)
+            peso_ += wbb.calcWeight(readings, calibration, wbb.escala_eu)
 
             # Cálculo dos APs, MLs
             CoP_x, CoP_y = wbb.calCoP(readings, self.WBB['Calibração'], wbb.escala_eu)
@@ -267,6 +273,9 @@ class iemWbb:
                 pass
 
             t1 += self.metricas['dt']
+
+        # Print do peso com calibração padrão
+        print('\n\nPeso com calibração padrão: {}\n\n'.format(peso_))
 
         # Cálculo do IMC
         peso = peso / self.amostra
