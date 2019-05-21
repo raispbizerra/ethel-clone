@@ -275,6 +275,7 @@ class iemWbb:
             t1 += self.metricas['dt']
 
         # Print do peso com calibração padrão
+        peso_ /= self.amostra
         print('\n\nPeso com calibração padrão: {}\n\n'.format(peso_))
 
         # Cálculo do IMC
