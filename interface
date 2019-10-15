@@ -1,0 +1,111 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+# Default library imports
+import sys
+
+# Third party imports
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, GLib, Gdk
+
+# Local imports
+## Windows
+from src.interface.windows.main_window import MainWindow
+from src.interface.windows.patient_window import PatientWindow
+from src.interface.windows.device_window import DeviceWindow
+from src.interface.windows.load_device_window import LoadDeviceWindow
+from src.interface.windows.search_device_window import SearchDeviceWindow
+from src.interface.windows.load_patient_window import LoadPatientWindow
+from src.interface.windows.los_window import LosWindow
+from src.interface.windows.exam_window import ExamWindow
+from src.interface.windows.calibration_window import CalibrationWindow
+from src.interface.windows.calibration_test_window import CalibrationTestWindow
+
+## Models
+from src.models.patient import Patient
+from src.models.device import Device
+from src.models.static_exam import StaticExam
+from src.models.dynamic_exam import DynamicExam
+from src.models.user import User
+
+class Ethel(Gtk.Application):
+	def __init__(self):
+		Gtk.Application.__init__(self)
+		self.patient = Patient()
+		self.device = Device()
+		self.user = User()
+		self.static_exam = StaticExam()
+		self.dynamic_exam = DynamicExam()
+		self.wiimote = None
+		self.change_flags = {'patient':False, 'device':False, 'user':False}
+		self.connection_flags = {'patient':False, 'device':False, 'user':False}
+		self.style()
+
+	def style(self):
+		style_provider = Gtk.CssProvider()
+		css = None
+		with open('src/interface/css/gtk.css', 'rb') as css_file:
+			css = css_file.read()
+
+		style_provider.load_from_data(css)
+
+		Gtk.StyleContext.add_provider_for_screen(
+			Gdk.Screen.get_default(), style_provider,
+			Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+		)
+	def get_windows(self):
+		self.main_window = MainWindow(self)
+		self.device_window = DeviceWindow(self)
+		self.load_device_window = LoadDeviceWindow(self)
+		self.search_device_window = SearchDeviceWindow(self)
+		self.patient_window = PatientWindow(self)
+		self.load_patient_window = LoadPatientWindow(self)
+		self.los_window = LosWindow(self)
+		self.exam_window = ExamWindow(self)
+		self.calibration_window = CalibrationWindow(self)
+		self.calibration_test_window = CalibrationTestWindow(self)
+
+	def add_windows(self):
+		self.add_window(self.main_window)
+		self.add_window(self.patient_window)
+		self.add_window(self.load_patient_window)
+		self.add_window(self.device_window)
+		self.add_window(self.load_device_window)
+		self.add_window(self.search_device_window)
+		self.add_window(self.los_window)
+		self.add_window(self.exam_window)
+		self.add_window(self.calibration_window)
+		self.add_window(self.calibration_test_window)
+
+	def do_activate(self):
+		self.get_windows()
+		self.add_windows()
+		self.statusbar = self.main_window.statusbar
+		self.patient_label = self.main_window.patient_label
+		GLib.timeout_add_seconds(1, self.verify_connection_flags)
+		self.main_window.present()
+
+	def on_quit(self, widget):
+		self.quit()
+
+	def on_delete_event(self, window, event):
+		window.hide()
+		return True
+
+	def on_verify_connection(self):
+		GLib.timeout_add_seconds(1, self.main_window.verify_connection)
+
+	def verify_connection_flags(self):
+		if self.connection_flags['device'] and self.connection_flags['patient']:
+			self.calibration_window.calibration_button.set_sensitive(True)
+			self.main_window.start_static_exam_button.set_sensitive(True)
+			self.main_window.start_dynamic_exam_button.set_sensitive(True)
+		else:
+			self.main_window.start_static_exam_button.set_sensitive(False)
+			self.main_window.start_dynamic_exam_button.set_sensitive(False)
+		return True
+
+if __name__ == '__main__':
+	app = Ethel()
+	app.run(sys.argv)
