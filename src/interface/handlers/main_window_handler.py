@@ -1,6 +1,7 @@
 # Third party imports
 import sys
 import os
+from src.database.patient_dao import PatientDao
 from src.database.device_dao import DeviceDao
 from src.database.dynamic_exam_dao import DynamicExamDao
 from src.models.dynamic_exam import DynamicExam
@@ -14,12 +15,11 @@ import src.utilities.wbb_calitera as wbb
 from datetime import datetime
 import numpy as np
 from cwiid import BATTERY_MAX
-from gi.repository import Gtk, GLib
 import gi
 gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, GLib, Gdk
 
 # Local imports
-
 DT = 40
 STATIC_SAMPLE = 768
 LOS_SAMPLE = 200
@@ -33,16 +33,18 @@ class Handler():
         self.static_exam_dao = StaticExamDao()
         self.dynamic_exam_dao = DynamicExamDao()
         self.device_dao = DeviceDao()
+        self.patient_dao = PatientDao()
 
     def on_show(self, window):
         '''
         This method handles show event
         '''
-        self.get_treeviews()
+        # self.get_treeviews()
         self.get_charts()
         self.clear_static_charts()
         self.clear_dynamic_chart()
         self.window.show_all()
+        self.exam_counter = {'ON':0, 'CN':0, 'OF':0, 'CF':0}
 
     def get_treeviews(self):
         self.window.static_list_store = Gtk.ListStore(
@@ -131,14 +133,42 @@ class Handler():
         # Change button sensitivity
         self.window.load_dynamic_exam_button.set_sensitive(True)
 
+    def clear_exam_grid(self):
+        # AP
+        for i in range(2, 6):
+            grid = self.window.app.main_window.exam_grid.get_child_at(1, i)
+            for j in range(4):
+                grid.get_child_at(j, 0).set_text('0.0')
+
+        # ML
+        for i in range(2, 6):
+            grid = self.window.app.main_window.exam_grid.get_child_at(2, i)
+            for j in range(4):
+                grid.get_child_at(j, 0).set_text('0.0')
+
+        # VM 
+        for i in range(2, 6):
+            grid = self.window.app.main_window.exam_grid.get_child_at(3, i)
+            for j in range(4):
+                grid.get_child_at(j, 0).set_text('0.0')
+
+    def clear_static_metrics(self):
+        for x in range(1, 16):
+            self.window.metrics_grid.get_child_at(1, x).set_text('0.0')
+
+    def clear_dynamic_metrics(self):
+        for i in range(1, 4):
+            for j in range(1, 9):
+                self.window.los_grid.get_child_at(i, j).set_text('0.0')
+
     def clear_static_charts(self):
         '''
         This method clears static exam charts
         '''
         self.axis_0.clear()
         self.axis_0.set_title('Estatocinesiograma')
-        self.axis_0.set_ylabel('Anteroposterior (mm)')
-        self.axis_0.set_xlabel('Mediolateral (mm)')
+        self.axis_0.set_ylabel('Anteroposterior (cm)')
+        self.axis_0.set_xlabel('Mediolateral (cm)')
         self.axis_0.set_xlim(-1, 1)
         self.axis_0.set_ylim(-1, 1)
         self.axis_0.axhline(0, color='grey')
@@ -148,7 +178,7 @@ class Handler():
         self.axis_1.clear()
         self.axis_1.set_title('Estabilograma')
         self.axis_1.set_xlim(0, 30)
-        self.axis_1.set_ylabel('Amplitude (mm)')
+        self.axis_1.set_ylabel('Amplitude (cm)')
         self.axis_1.set_xlabel('Tempo (s)')
 
     def clear_dynamic_chart(self):
@@ -247,11 +277,11 @@ class Handler():
         '''
         self.window.app.connection_flags['device'] = False
         self.window.app.wiimote = None
-        self.window.app.device.set_cod(None)
-        self.window.app.device.set_name(None)
-        self.window.app.device.set_mac(None)
-        self.window.app.device.set_calibrations(None)
-        self.window.app.device.set_is_default(None)
+        self.window.app.device.cod = None
+        self.window.app.device.name = None
+        self.window.app.device.mac = None
+        self.window.app.device.calibrations = None
+        self.window.app.device.is_default = None
         self.window.app.main_window.edit_device.set_sensitive(False)
         self.window.app.main_window.calibrate_device.set_sensitive(False)
         self.window.app.main_window.disconnect_device.set_sensitive(False)
@@ -336,26 +366,25 @@ class Handler():
         '''
 
         # Estado dos olhos e espuma
-        eyes = 0 if self.window.app.static_exam.get_type()[0] != 'C' else 1
+        eyes = 0 if self.window.app.static_exam.state[0] != 'C' else 1
         self.window.eyes_state.get_children()[eyes].set_active(True)
 
-        foam = 0 if self.window.app.static_exam.get_type()[1] != 'F' else 1
+        foam = 0 if self.window.app.static_exam.state[1] != 'F' else 1
         self.window.foam_state.get_children()[foam].set_active(True)
 
         # Preenchimento da janela principal com as métricas
         metrics = [
+            self.static_metrics['AP_'], self.static_metrics['ML_'],
             self.static_metrics['dis_mediaAP'], self.static_metrics['dis_mediaML'], self.static_metrics['dis_media'],
             self.static_metrics['dis_rms_AP'], self.static_metrics['dis_rms_ML'], self.static_metrics['dis_rms_total'],
-            self.static_metrics['totex_AP'], self.static_metrics['totex_ML'], self.static_metrics['totex_total'],
             self.static_metrics['mvelo_AP'], self.static_metrics['mvelo_ML'], self.static_metrics['mvelo_total'],
             self.static_metrics['amplitude_AP'], self.static_metrics['amplitude_ML'], self.static_metrics['amplitude_total'],
             768
         ]
 
-        for x in range(1, 2):
-            for y in range(1, 17):
-                self.window.metrics_grid.get_child_at(
-                    x, y).set_text(str(round(metrics[y - 1], 6)))
+        l = len(metrics) + 1
+        for x in range(1, l):
+            self.window.metrics_grid.get_child_at(1, x).set_text(f"{round(metrics[x - 1], 2)}")
 
         self.axis_0.set_xlim(-self.static_metrics['max_absoluto'],
                              self.static_metrics['max_absoluto'])
@@ -368,6 +397,7 @@ class Handler():
 
         self.axis_1.set_ylim(-self.static_metrics['maximo'],
                              self.static_metrics['maximo'])
+        self.axis_1.set_xlim(self.static_metrics['tempo'][0], self.static_metrics['tempo'][-1])
         self.axis_1.plot(
             self.static_metrics['tempo'], self.static_metrics['APs_Processado'], '-', label='APs')
         self.axis_1.plot(
@@ -376,6 +406,8 @@ class Handler():
             self.static_metrics['tempo'], self.static_metrics['dis_resultante_total'], ':', label='DRT')
         self.axis_1.legend()
         self.canvas_1.draw()
+
+
 
     def on_load_static_exam_button_clicked(self, button):
         '''
@@ -390,11 +422,10 @@ class Handler():
             self.static_exam_cod)
         self.clear_static_charts()
         self.static_metrics = calc.computes_metrics(
-            self.window.app.static_exam.get_aps(), self.window.app.static_exam.get_mls())
-        self.get_amplitude()
+            self.window.app.static_exam.aps, self.window.app.static_exam.mls)
         self.show_static_exam()
+        self.window.static_notebook.set_current_page(1)
         self.window.app.statusbar.set_text('Exame carregado')
-        self.window.paned.set_sensitive(True)
 
     def show_dynamic_exam(self):
         '''
@@ -402,11 +433,11 @@ class Handler():
         '''
         for i in range(8):
             self.window.los_grid.get_child_at(1, i + 1).set_text(
-                f"{self.dynamic_metrics['reaction_time'][i]}")
+                f"{round(self.dynamic_metrics['reaction_time'][i], 2)}")
             self.window.los_grid.get_child_at(2, i + 1).set_text(
-                f"{self.dynamic_metrics['maximum_excursion'][i]}")
+                f"{round(self.dynamic_metrics['maximum_excursion'][i], 2)}")
             self.window.los_grid.get_child_at(3, i + 1).set_text(
-                f"{self.dynamic_metrics['directional_control'][i]}")
+                f"{round(self.dynamic_metrics['directional_control'][i], 2)}")
 
         angles = np.radians(np.arange(0., 405., 45.))
         # angles = np.radians(np.array([315., 0., 45., 90., 135., 180., 225., 270., 315.]))
@@ -417,11 +448,10 @@ class Handler():
         self.canvas_2.draw()
 
     def get_amplitude(self):
-        exams = self.static_exam_dao.read_last_exams_from_patient(self.window.app.patient.get_cod())
+        exams = self.static_exam_dao.read_last_exams_from_patient(self.window.app.patient.cod)
         if len(exams) < 3:
             self.window.app.statusbar.set_text('Realize mais exames estáticos!')
             self.window.notebook.set_current_page(0)
-            self.window.paned.set_sensitive(False)
             self.window.app.amplitude = (self.static_metrics['amplitude_AP']*2/3,
                                      self.static_metrics['amplitude_AP']/3,
                                      self.static_metrics['amplitude_ML']/2)
@@ -430,7 +460,7 @@ class Handler():
         amplitude_AP = np.zeros(3)
         amplitude_ML = np.zeros(3)
         for i, exam in enumerate(exams):
-            amplitude_AP[i], amplitude_ML[i] = calc.get_amplitude(exam.get_aps(), exam.get_mls())
+            amplitude_AP[i], amplitude_ML[i] = calc.get_amplitude(exam.aps, exam.mls)
 
         self.window.app.amplitude = (amplitude_AP.mean()*2/3,
                                      amplitude_AP.mean()/3,
@@ -450,8 +480,8 @@ class Handler():
             self.dynamic_exam_cod)
         self.clear_dynamic_chart()
         self.get_amplitude()
-        self.dynamic_metrics = calc_los.computes_metrics(self.window.app.dynamic_exam.get_cop_x(
-        ), self.window.app.dynamic_exam.get_cop_y(), self.window.app.patient.get_height(), self.window.app.amplitude)
+        self.dynamic_metrics = calc_los.computes_metrics(self.window.app.dynamic_exam.cop_x, 
+            self.window.app.dynamic_exam.cop_y, self.window.app.patient.height, self.window.app.amplitude)
         self.show_dynamic_exam()
         self.window.app.statusbar.set_text('Exame carregado')
 
@@ -465,10 +495,10 @@ class Handler():
             readings = wbb.captura1(self.window.app.wiimote)
             # Weight computation
             self.weight += wbb.calcWeight(
-                readings, self.window.app.device.get_calibrations(), wbb.escala_eu)
+                readings, self.window.app.device.calibrations, wbb.escala_eu)
             # Cop computation
             cop_x, cop_y = wbb.calCoP_(
-                readings, self.window.app.device.get_calibrations(), wbb.escala_eu)
+                readings, self.window.app.device.calibrations, wbb.escala_eu)
             self.static_cop_x = np.append(self.static_cop_x, cop_x)
             self.static_cop_y = np.append(self.static_cop_y, cop_y)
             # Progressbar fraction
@@ -483,12 +513,10 @@ class Handler():
                 os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq))
             self.window.app.wiimote.led = 0
             self.weight /= STATIC_SAMPLE
-            height = self.window.app.patient.get_height() / 100
-            imc = self.weight / height ** 2
+            height = self.window.app.patient.height / 100
+            self.imc = self.weight / height ** 2
             date = datetime.now()
 
-            self.window.app.patient.set_weight(round(self.weight, 2))
-            self.window.app.patient.set_imc(round(imc, 1))
             self.window.points_entry.set_text(str(STATIC_SAMPLE))
 
             if self.window.app.exam_window.open_eyes:
@@ -501,16 +529,16 @@ class Handler():
             else:
                 ex_type += 'F'
 
-            self.window.app.static_exam = StaticExam(sta_ex_aps=self.static_cop_x,
-                                                     sta_ex_mls=self.static_cop_y,
-                                                     sta_ex_date=date, sta_ex_pat_cod=self.window.app.patient.get_cod(),
-                                                     sta_ex_type=ex_type)
+            self.window.app.static_exam = StaticExam(aps=self.static_cop_x,
+                                                     mls=self.static_cop_y,
+                                                     date=date, pat_cod=self.window.app.patient.cod,
+                                                     state=ex_type)
             self.static_metrics = calc.computes_metrics(
                 self.static_cop_x, self.static_cop_y)
-            self.get_amplitude()
             self.show_static_exam()
             self.window.save_static_exam_button.set_sensitive(True)
             self.window.save_static_exam_button.grab_focus()
+            self.fill_grid()
             self.window.app.exam_window.hide()
 
             return False
@@ -524,8 +552,8 @@ class Handler():
         button : Gtk.Button
                 The button
         '''
+        self.window.static_notebook.set_current_page(0)
         self.window.statusbar.set_text('Começando exame...')
-
         # Mudança na visibilidade da janela
         self.window.app.exam_window.open_eyes = self.window.eyes_state.get_children()[
             0].get_active()
@@ -561,6 +589,42 @@ class Handler():
             self.window.method_id = GLib.timeout_add(DT, self.static_posturography)
         return False
 
+    def fill_grid(self):
+        keys = ['ON', 'CN', 'OF', 'CF']
+        i = keys.index(self.window.app.static_exam.state)
+        j = self.exam_counter[self.window.app.static_exam.state]
+        
+        self.current_exam_labels = list()
+        for k in range(1,4):
+            self.current_exam_labels.append(self.window.exam_grid.get_child_at(k, i+2).get_child_at(j, 0))
+
+        context = self.window.exam_grid.get_child_at(1, i+2).get_child_at(j, 0).get_style_context()
+        context.add_class("orange")
+        self.window.exam_grid.get_child_at(1, i+2).get_child_at(j, 0).set_text(f"{round(self.static_metrics['amplitude_AP'], 2)}")
+        m = 0.
+        for l in range(j+1):
+            m += float(self.window.exam_grid.get_child_at(1, i+2).get_child_at(l, 0).get_text())
+        m /= j+1
+        self.window.exam_grid.get_child_at(1, i+2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+
+        context = self.window.exam_grid.get_child_at(2, i+2).get_child_at(j, 0).get_style_context()
+        context.add_class("orange")
+        self.window.exam_grid.get_child_at(2, i+2).get_child_at(j, 0).set_text(f"{round(self.static_metrics['amplitude_ML'], 2)}")
+        m = 0.
+        for l in range(j+1):
+            m += float(self.window.exam_grid.get_child_at(2, i+2).get_child_at(l, 0).get_text())
+        m /= j+1
+        self.window.exam_grid.get_child_at(2, i+2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+
+        context = self.window.exam_grid.get_child_at(3, i+2).get_child_at(j, 0).get_style_context()
+        context.add_class("orange")
+        self.window.exam_grid.get_child_at(3, i+2).get_child_at(j, 0).set_text(f"{round(self.static_metrics['mvelo_total'], 2)}")
+        m = 0.
+        for l in range(j+1):
+            m += float(self.window.exam_grid.get_child_at(3, i+2).get_child_at(l, 0).get_text())
+        m /= j+1
+        self.window.exam_grid.get_child_at(3, i+2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+
     def on_save_static_exam_button_clicked(self, button):
         '''
         This method handles save_static_exam_button click
@@ -570,10 +634,18 @@ class Handler():
         button : Gtk.Button
                 The button
         '''
+        if self.window.app.static_exam.state == 'ON':
+            self.window.app.patient.weight = self.weight
+            self.window.app.patient.imc = self.imc
         self.static_exam_dao.create_exam(self.window.app.static_exam)
+        self.patient_dao.update_patient(self.window.app.patient)
         self.window.statusbar.set_text('Exame salvo!')
         self.window.save_static_exam_button.set_sensitive(False)
         self.window.app.load_patient_window.handler.load_static_exams()
+        self.exam_counter[self.window.app.static_exam.state] = (self.exam_counter[self.window.app.static_exam.state] + 1) % 3
+        for label in self.current_exam_labels:
+            context = label.get_style_context()
+            context.remove_class("orange")
 
     def on_start_dynamic_exam_button_clicked(self, button):
         '''
@@ -584,9 +656,10 @@ class Handler():
         button : Gtk.Button
                 The button
         '''
+        self.get_amplitude()
         date = datetime.now()
         self.window.app.dynamic_exam = DynamicExam(
-            ex_date=date, ex_pat_cod=self.window.app.patient.get_cod())
+            date=date, pat_cod=self.window.app.patient.cod)
         self.clear_dynamic_chart()
         self.window.app.los_window.show()
 
@@ -604,11 +677,20 @@ class Handler():
         self.window.save_dynamic_exam_button.set_sensitive(False)
         self.window.app.load_patient_window.handler.load_dynamic_exams()
 
-    def update_exams(self):
+    def on_exam_tab_toggled(self, button):
         '''
-        This method update listed exams
+        This method handles save_dynamic_exam_button click
+
+        Parameters
+        ----------
+        button : Gtk.Button
+                The button
         '''
-        pass
+        self.window.metrics_grid.set_visible(not self.window.metrics_grid.get_visible())
+        self.window.exams_list.set_visible(not self.window.exams_list.get_visible())
+
+    def on_report_select(self, item):
+        self.window.app.report_window.show_all()
 
     def verify_connection(self):
         '''
@@ -632,3 +714,6 @@ class Handler():
         else:
             return False
         return True
+
+    def on_delete_activate(self):
+        print('activated')

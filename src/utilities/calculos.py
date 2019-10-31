@@ -62,9 +62,11 @@ def geraAP_ML(valy, valx):
 
     # AP_barra = soma_AP0 / len(valx)
     # ML_barra = soma_ML0 / len(valy
-    AP_barra = sum(valy) / len(valy)
-    ML_barra = sum(valx) / len(valx)
-
+    # AP_barra = sum(valy) / len(valy)
+    # ML_barra = sum(valx) / len(valx)
+    AP_barra = valy.mean()
+    ML_barra = valx.mean()
+    
     valores_AP = valy - AP_barra
     valores_ML = valx - ML_barra
     # for i in range(len(valy)):
@@ -134,11 +136,14 @@ def get_amplitude(aps, mls):
 def computes_metrics(aps, mls):
     metrics = dict()
 
+    aps *= .1
+    mls *= .1
+
     # Definição do intervalo entre capturas
     metrics['dt'] = 0.040
     metrics['tTotal'] = len(aps) * metrics['dt']
     metrics['tempo'] = np.arange(0, metrics['tTotal'], metrics['dt'])
-
+    
     # Processamento do sinal
     metrics['APs_Processado'], metrics['MLs_Processado'], metrics['AP_'], metrics['ML_'] = geraAP_ML(
         aps, mls)

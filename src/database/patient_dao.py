@@ -46,9 +46,9 @@ class PatientDao():
 			self.c.connect(self.db) 
 			cursor = self.c.conn.execute(sql)
 			pat_cod = cursor.fetchone()[0]
-			patient.set_cod(pat_cod)
-			pat_birth = Utils.date_to_str(patient.get_birth())
-			self.c.conn.execute(sql_, [patient.get_cod(), patient.get_name(), patient.get_sex(), pat_birth, patient.get_height(), patient.get_weight(), patient.get_imc()])
+			patient.cod = pat_cod
+			pat_birth = Utils.date_to_str(patient.birth)
+			self.c.conn.execute(sql_, [patient.cod, patient.name, patient.sex, pat_birth, patient.height, patient.weight, patient.imc])
 			self.c.conn.commit()
 			result = True
 		except:
@@ -104,8 +104,8 @@ class PatientDao():
 		sql = 'UPDATE patients SET pat_name = ?, pat_sex = ?, pat_birth = ?, pat_height = ?, pat_weight = ?, pat_imc = ? WHERE pat_cod = ?'
 		try:
 			self.c.connect(self.db)
-			pat_birth = Utils.date_to_str(patient.get_birth())
-			self.c.conn.execute(sql, [patient.get_name(), patient.get_sex(), pat_birth, patient.get_height(), patient.get_weight(), patient.get_imc(), patient.get_cod()])
+			pat_birth = Utils.date_to_str(patient.birth)
+			self.c.conn.execute(sql, [patient.name, patient.sex, pat_birth, patient.height, patient.weight, patient.imc, patient.cod])
 			self.c.conn.commit()
 			result = True
 		except:

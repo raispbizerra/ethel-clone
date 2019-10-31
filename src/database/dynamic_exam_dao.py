@@ -46,14 +46,14 @@ class DynamicExamDao():
 		result = False
 		sql = 'SELECT COUNT(*)+1 FROM dynamic_exams'
 		sql_ = 'INSERT INTO dynamic_exams (dyn_ex_cop_x, dyn_ex_cop_y, dyn_ex_date, pat_cod, usr_cod) values (?,?,?,?,?)'
-		cop_x = Utils.cop_to_str(exam.get_cop_x())
-		cop_y = Utils.cop_to_str(exam.get_cop_y())
-		date = Utils.datetime_to_str(exam.get_date())
+		cop_x = Utils.cop_to_str(exam.cop_x)
+		cop_y = Utils.cop_to_str(exam.cop_y)
+		date = Utils.datetime_to_str(exam.date)
 		try:
 			self.c.connect(self.db)
 			cursor = self.c.conn.execute(sql)
-			exam.set_cod(cursor.fetchone()[0])
-			self.c.conn.execute(sql_, [cop_x, cop_y, date, exam.get_pat_cod(), exam.get_usr_cod()])
+			exam.cod = cursor.fetchone()[0]
+			self.c.conn.execute(sql_, [cop_x, cop_y, date, exam.pat_cod, exam.usr_cod])
 			self.c.conn.commit()
 			result = True
 		except:
@@ -111,10 +111,10 @@ class DynamicExamDao():
 		sql = 'UPDATE dynamic_exams SET dyn_ex_cop_x = ?, dyn_ex_cop_y = ?, dyn_ex_date = ?, pat_cod = ?, usr_cod = ? WHERE dyn_ex_cod = ?'
 		try:
 			self.c.connect(self.db)
-			cop_x = Utils.cop_to_str(exam.get_aps())
-			cop_y = Utils.cop_to_str(exam.get_mls())
-			date = Utils.datetime_to_str(exam.get_date())
-			self.c.conn.execute(sql, [cop_x, cop_y, date, exam.get_pat_cod(), exam.get_usr_cod(), exam.get_cod()])
+			cop_x = Utils.cop_to_str(exam.aps)
+			cop_y = Utils.cop_to_str(exam.mls)
+			date = Utils.datetime_to_str(exam.date)
+			self.c.conn.execute(sql, [cop_x, cop_y, date, exam.pat_cod, exam.usr_cod, exam.cod])
 			self.c.conn.commit()
 			result = True
 		except:

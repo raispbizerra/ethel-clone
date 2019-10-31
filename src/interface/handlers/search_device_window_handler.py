@@ -101,11 +101,11 @@ class Handler():
 			# self.window.app.wiimote.led = 1
 			self.window.app.connection_flags['device'] = True
 			for device in self.device_list:
-				if device.get_mac() == mac:
+				if device.mac == mac:
 					self.window.app.device = device
 					break
 			else:
-				self.window.app.device = Device(dev_name=name, dev_mac=mac, dev_calibrations=self.get_calibrations(), dev_is_default=False, dev_calibration_date=datetime.now())
+				self.window.app.device = Device(name=name, mac=mac, calibrations=self.get_calibrations(), is_default=False, calibration_date=datetime.now())
 			
 			# self.window.app.main_window.edit_device.set_sensitive(True)
 			# self.window.app.main_window.calibrate_device.set_sensitive(True)

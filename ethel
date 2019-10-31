@@ -21,6 +21,7 @@ from src.interface.windows.los_window import LosWindow
 from src.interface.windows.exam_window import ExamWindow
 from src.interface.windows.calibration_window import CalibrationWindow
 from src.interface.windows.calibration_test_window import CalibrationTestWindow
+from src.interface.windows.report_window import ReportWindow
 
 ## Models
 from src.models.patient import Patient
@@ -65,6 +66,7 @@ class Ethel(Gtk.Application):
 		self.exam_window = ExamWindow(self)
 		self.calibration_window = CalibrationWindow(self)
 		self.calibration_test_window = CalibrationTestWindow(self)
+		self.report_window = ReportWindow(self)
 
 	def add_windows(self):
 		self.add_window(self.main_window)
@@ -77,8 +79,10 @@ class Ethel(Gtk.Application):
 		self.add_window(self.exam_window)
 		self.add_window(self.calibration_window)
 		self.add_window(self.calibration_test_window)
+		self.add_window(self.report_window)
 
 	def do_activate(self):
+		# self.pull()
 		self.get_windows()
 		self.add_windows()
 		self.statusbar = self.main_window.statusbar
@@ -87,6 +91,7 @@ class Ethel(Gtk.Application):
 		self.main_window.present()
 
 	def on_quit(self, widget):
+		# self.push()
 		self.quit()
 
 	def on_delete_event(self, window, event):

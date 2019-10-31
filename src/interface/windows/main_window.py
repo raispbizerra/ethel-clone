@@ -27,9 +27,11 @@ class MainWindow(Gtk.ApplicationWindow):
 		box = builder.get_object('box')
 		self.static_exam_box = builder.get_object('static_exam_box')
 		self.dynamic_exam_box = builder.get_object('dynamic_exam_box')
+		self.exams_list = builder.get_object('exams_list')
 		## Grids
 		self.los_grid = builder.get_object('los_grid')
 		self.metrics_grid = builder.get_object('metrics_grid')
+		self.exam_grid = builder.get_object('exam_grid')
 		## Buttons
 		self.start_static_exam_button = builder.get_object('start_static_exam_button')
 		self.save_static_exam_button = builder.get_object('save_static_exam_button')
@@ -64,7 +66,13 @@ class MainWindow(Gtk.ApplicationWindow):
 		self.paned = builder.get_object('paned')
 		## Notebooks
 		self.notebook = builder.get_object('notebook')
-
+		self.static_notebook = builder.get_object('static_notebook')
+		## Liststores
+		self.static_list_store = builder.get_object('static_list_store')
+		self.dynamic_list_store = builder.get_object('dynamic_list_store')
+		## CellRenderer
+		self.static_exams_pixbuf = builder.get_object('static_exams_pixbuf')
+		
 		self.add(box)
 
 		# Assign builder

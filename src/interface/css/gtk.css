@@ -125,6 +125,38 @@ label {
   caret-color: currentColor;
 }
 
+.blue{
+  background-color: #1F77B4;
+  font-weight: bolder;
+  color: white;
+}
+
+.orange{
+  background-color: #b45c1f;
+  font-weight: bolder;
+  color: white;
+}
+
+.dark-blue{
+  background-color: #144c73;
+  font-weight: bolder;
+  color: white;
+
+}
+
+.light-grey{
+  background-color: #e6e6e6;
+}
+
+.bordered{
+  border-right: 1px solid grey;
+}
+
+.bordered *{
+  border: 1px solid lightgrey;
+  /*border-bottom: 1px solid black;*/
+}
+
 label.separator {
   color: rgba(0, 0, 0, 0.87);
 }

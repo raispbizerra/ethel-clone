@@ -1,60 +1,109 @@
-from IPython.display import display, HTML
+# -*- coding: utf-8 -*-
 
-graphs = [
-    'https://plot.ly/~christopherp/308',
-    'https://plot.ly/~christopherp/306',
-    'https://plot.ly/~christopherp/300',
-    'https://plot.ly/~christopherp/296'
-]
+#import csv
+import xlwt
+import itertools
+import datetime
 
-def report_block_template(report_type, graph_url, caption=''):
-    if report_type == 'interactive':
-        graph_block = '<iframe style="border: none;" src="{graph_url}.embed" width="100%" height="600px"></iframe>'
-    elif report_type == 'static':
-        graph_block = (''
-            '<a href="{graph_url}" target="_blank">' # Open the interactive graph when you click on the image
-                '<img style="height: 400px;" src="{graph_url}.png">'
-            '</a>')
+# Style
+STYLE = xlwt.Style.easyxf('font: colour white, bold on; align: wrap on, vert centre, horiz center; pattern: pattern solid, fore-colour ocean_blue;')
 
-    report_block = ('' +
-        graph_block +
-        '{caption}' + # Optional caption to include below the graph
-        '<br>'      + # Line break
-        '<a href="{graph_url}" style="color: rgb(190,190,190); text-decoration: none; font-weight: 200;" target="_blank">'+
-            'Click to comment and see the interactive graph' + # Direct readers to Plotly for commenting, interactive graph
-        '</a>' +
-        '<br>' +
-        '<hr>') # horizontal line                       
+def fill_sheet(worksheet : xlwt.Worksheet, exams : list):
+    """
+    This function fills a worksheet with the given exams
 
-    return report_block.format(graph_url=graph_url, caption=caption)
+    Parameters
+    ----------
+    worksheet : xlwt.Worksheet
+        Patient name
+    exams: list
+        All metrics by contition
 
+    Returns
+    -------
+    bool
+        Whether the process was succesful
+    """
 
-interactive_report = ''
-static_report = ''
+    # Header
+    header = ['MÉTRICA','MÉDIA','DESVPAD']
 
-for graph_url in graphs:
-    _static_block = report_block_template('static', graph_url, caption='')
-    _interactive_block = report_block_template('interactive', graph_url, caption='')
+    # Redefine HEADER
+    for i in range(len(exams)):
+        header.insert(i+1, f"E{i+1}")
 
-    static_report += _static_block
-    interactive_report += _interactive_block
+    # Fill header
+    for i, item in enumerate(header):
+        worksheet.write(0, i, item, style=STYLE)
 
-from xhtml2pdf import pisa             # import python module
+    # Fill metrics
+    for i, metrics in enumerate(exams):
+        for j, key in enumerate(metrics.keys()):
+            # Metrics labels
+            if not i:
+                worksheet.write(j+1, 0, list(metrics.keys())[j], style=STYLE)
+            # worksheet.write(j+1, i+1, 'RAÍ')
+            worksheet.write(j+1, i+1, round(metrics[key], 2))
 
-# Utility function
-def convert_html_to_pdf(source_html, output_filename):
-    # open output file for writing (truncated binary)
-    result_file = open(output_filename, "w+b")
+    # Fill mean and stdev
+    nrows = len(exams[0])
+    ncols = len(exams)
+    for i in range(nrows):
+        worksheet.write(i+1, ncols+1, xlwt.Formula(f"AVERAGE(B{i+2}:D{i+2})"))
+        worksheet.write(i+1, ncols+2, xlwt.Formula(f"STDEV(B{i+2}:D{i+2})"))
 
-    # convert HTML to PDF
-    pisa_status = pisa.CreatePDF(
-            source_html,                # the HTML to convert
-            dest=result_file)           # file handle to recieve result
+    # Change cell size
+    col_width = 256 * 15 # 20 characters wide
+    try:
+        for i in itertools.count():
+            worksheet.col(i).width = col_width
+    except ValueError:
+        pass
 
-    # close output file
-    result_file.close()                 # close output file
+def generate_report(name : str, exams : dict, date : str):
+    """
+    This function generates a report with the given exams
 
-    # return True on success and False on errors
-    return pisa_status.err
+    Parameters
+    ----------
+    name : str
+        Patient name
+    exams : dict
+        All exams by contition
+    date : str
+        Exam date
 
-convert_html_to_pdf(static_report, 'report.pdf')
+    Returns
+    -------
+    bool
+        Whether the process was succesful
+    """
+
+    # Init Workbook
+    workbook = xlwt.Workbook()
+
+    for key in exams.keys():
+        worksheet = workbook.add_sheet(key)
+        fill_sheet(worksheet, exams[key])
+
+    workbook.save(f"reports/{name} ({date}).xls")
+
+if __name__ == '__main__':
+    import numpy as np
+    metrics = dict()
+    keys = [
+        'AP_', 'ML_', 'dis_media', 'dis_mediaAP', \
+        'dis_mediaML', 'dis_rms_total', 'dis_rms_AP', \
+        'dis_rms_ML', 'totex_total', 'totex_AP', 'totex_ML', \
+        'mvelo_total', 'mvelo_AP', 'mvelo_ML', 'amplitude_total', \
+        'amplitude_AP', 'amplitude_ML'
+        ]
+    values = np.random.random_sample(len(keys))
+    for i, key in enumerate(keys):
+        metrics[key] = values[i]
+
+    name = "Raí"
+    exams = {'OA':[metrics, metrics, metrics], 'OF':[metrics, metrics, metrics], 'OAE':[metrics, metrics, metrics], 'OFE':[metrics, metrics, metrics]}
+    date = datetime.date.today().isoformat()
+
+    generate_report(name, exams, date)

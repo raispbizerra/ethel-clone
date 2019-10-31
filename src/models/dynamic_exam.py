@@ -1,77 +1,74 @@
 class DynamicExam():
-	'''
-	This class represents a dynamic exam (limits of stability).
+    '''
+    This class represents a dynamic exam (limits of stability).
 
-	Attributes
-	----------
-	dyn_ex_cod	: int
-		Exam's code at the database; 
-	dyn_ex_cop_x: numpy.array
-		Exam's center of pressure x_axis;
-	dyn_ex_cop_y: numpy.array
-		Exam's center of pressure y_axis;
-	dyn_ex_date : datetime
-		Exam's date;
-	dyn_ex_pat_cod : int
-		Exam's patient code;
-	dyn_ex_usr_cod : int
-		Exam's user code;
-	'''
-	def __init__(self, ex_cod = None, ex_cop_x = None, ex_cop_y = None, ex_date = None, ex_pat_cod = None, ex_usr_cod = None):
-		self.__cod		= ex_cod
-		self.__cop_x	= ex_cop_x
-		self.__cop_y	= ex_cop_y
-		self.__date		= ex_date
-		self.__pat_cod	= ex_pat_cod
-		self.__usr_cod	= ex_usr_cod
+    Attributes
+    ----------
+    cod : int
+        Exam's code at the database; 
+    cop_x: numpy.array
+        Exam's center of pressure x_axis;
+    cop_y: numpy.array
+        Exam's center of pressure y_axis;
+    date : datetime
+        Exam's date;
+    pat_cod : int
+        Exam's patient code;
+    usr_cod : int
+        Exam's user code;
+    '''
+    def __init__(self, cod = None, cop_x = None, cop_y = None, date = None, pat_cod = None, usr_cod = None):
+        self._cod       = cod
+        self._cop_x     = cop_x
+        self._cop_y     = cop_y
+        self._date      = date
+        self._pat_cod   = pat_cod
+        self._usr_cod   = usr_cod
 
-	# Getters and Setters
-	def get_cod(self):
-		return self.__cod
+    @property
+    def cod(self):
+        return self._cod
 
-	def set_cod(self, value):
-		self.__cod = value
+    @cod.setter
+    def cod(self, cod):
+        self._cod = cod
 
-	def get_cop_x(self):
-		return self.__cop_x
+    @property
+    def cop_x(self):
+        return self._cop_x
 
-	def set_cop_x(self, value):
-		self.__cop_x = value
-	
-	def get_cop_y(self):
-		return self.__cop_y
+    @cop_x.setter
+    def cop_x(self, cop_x):
+        self._cop_x = cop_x
 
-	def set_cop_y(self, value):
-		self.__cop_y = value
+    @property
+    def cop_y(self):
+        return self._cop_y
 
-	def get_date(self):
-		return self.__date
+    @cop_y.setter
+    def cop_y(self, cop_y):
+        self._cop_y = cop_y
 
-	def set_date(self, value):
-		self.__date = value
+    @property
+    def date(self):
+        return self._date
 
-	def get_pat_cod(self):
-		return self.__pat_cod
+    @date.setter
+    def date(self, date):
+        self._date = date
 
-	def set_pat_cod(self, value):
-		self.__pat_cod = value
+    @property
+    def pat_cod(self):
+        return self._pat_cod
 
-	def get_usr_cod(self):
-		return self.__usr_cod
+    @pat_cod.setter
+    def pat_cod(self, pat_cod):
+        self._pat_cod = pat_cod
 
-	def set_usr_cod(self, value):
-		self.__usr_cod = value
+    @property
+    def usr_cod(self):
+        return self._usr_cod
 
-	def get_exam(self):
-		return [self.get_cod(), self.get_cop_x(), self.get_cop_y(), self.get_date(), self.get_pat_cod(), self.get_usr_cod()]
-
-	# Simple printing
-	def show(self):
-		print("{} {} {} {} {} {}".format(self.get_cod(), self.get_cop_x(), self.get_cop_y(), self.get_date(), self.get_pat_cod(), self.get_usr_cod()))
-	
-	# Comparison methods 
-	def __eq__(self, other):
-		return self.__cod == other.get_cod() and self.__cop_x == other.get_cop_x() and self.__cop_y == other.get_cop_y() and self.__pat_cod == other.get_pat_cod() and self.__usr_cod == other.get_usr_cod() and self.__date == other.get_date()
-
-	def __ne__(self, other):
-		return self.__cod != other.get_cod() or self.__cop_x != other.get_cop_x() or self.__cop_y != other.get_cop_y() or self.__pat_cod != other.get_pat_cod() or self.__usr_cod != other.get_usr_cod() or self.__date != other.get_date()
+    @usr_cod.setter
+    def usr_cod(self, usr_cod):
+        self._usr_cod = usr_cod

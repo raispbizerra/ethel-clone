@@ -44,7 +44,7 @@ class Handler():
 
         # Modifying
         if self.window.app.change_flags['patient']:
-            data = self.window.app.patient.get_patient()[1:]
+            data = [self.window.app.patient.name, self.window.app.patient.sex, self.window.app.patient.birth, self.window.app.patient.height, self.window.app.patient.weight, self.window.app.patient.imc]
             self.set_sex(data[1])
             data[2] = utils.date_to_str(data[2])
             data.remove(data[1])
@@ -153,7 +153,7 @@ class Handler():
         value   = 2
         for data in [('Nome', 'o', self.window.name), ('Data de Nascimento', 'a', self.window.birth), ('Altura', 'a', self.window.height)]:
             if data[value].get_text() == '':
-                self.window.statusbar.set_text('{} inválid{}!'.format(data[label], data[article]))
+                self.window.statusbar.set_text(f"{data[label]} inválid{data[article]}!")
                 data[value].grab_focus()
                 return
 
@@ -169,18 +169,17 @@ class Handler():
         # Checking modifying flag
         if self.window.app.change_flags['patient']:
             # Assigning patient
-            self.window.app.patient.set_name(name)
-            self.window.app.patient.set_birth(birth)
-            self.window.app.patient.set_sex(sex)
-            self.window.app.patient.set_height(height)
+            self.window.app.patient.name = name
+            self.window.app.patient.birth = birth
+            self.window.app.patient.sex = sex
+            self.window.app.patient.height = height
             # Update patient
             self.patient_dao.update_patient(self.window.app.patient)
             # Assigning patient statusbar
-            txt = "Nome: {}\tAltura (cm): {}".format(self.window.app.patient.get_name(), self.window.app.patient.get_height())
-            self.window.app.patient_label.set_text(txt)
+            self.window.app.patient_label.set_text(self.window.app.patient.name)
         else:
             # Create patient
-            patient = Patient(pat_name=name, pat_birth=birth, pat_sex=sex, pat_height=height)
+            patient = Patient(name=name, birth=birth, sex=sex, height=height)
             self.patient_dao.create_patient(patient)
 
         # Assigning statusbar

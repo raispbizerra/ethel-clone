@@ -56,6 +56,7 @@ class ExamWindow(Gtk.ApplicationWindow):
 
         # Connect signals
         self.connect('delete-event', self.on_delete_event)
+        self.connect('key-press-event', self.on_key_press)
         self.connect('show', self.on_show)
 
         self.fullscreen()
@@ -102,3 +103,11 @@ class ExamWindow(Gtk.ApplicationWindow):
         GLib.source_remove(self.app.main_window.method_id)
         self.hide()
         return True
+
+    def on_key_press(self, widget, event):
+        key = Gdk.keyval_name(event.keyval).upper()
+        if key == 'ESCAPE':
+            self.app.wiimote.led = 0
+            GLib.source_remove(self.app.main_window.method_id)
+            self.app.statusbar.set_text('Exame interrompido.')
+            self.hide()
