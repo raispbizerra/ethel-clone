@@ -110,6 +110,7 @@ class Handler():
             date = datetime.date.today().isoformat()
             name = self.patient_dao.read_patient(pat_cod).name
             rpt.generate_report(name, report, date)
+        
         window.hide()
 
     def on_cancel(self, window):

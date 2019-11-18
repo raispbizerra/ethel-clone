@@ -1,10 +1,10 @@
 # Default imports
-from datetime import datetime
+import datetime as dt
 
 # Third party imports
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 # Local imports
 from src.database.patient_dao import PatientDao
@@ -23,26 +23,26 @@ class Handler():
         self.static_exam_dao = StaticExamDao()
         self.dynamic_exam_dao = DynamicExamDao()
 
-        # List store (treeview's model)
-        self.list_store = Gtk.ListStore(int, str, str, str, int, float, float)
+        # # List store (treeview's model)
+        # self.window.liststore = Gtk.ListStore(int, str, str, str, int, float, float)
         
-        # Treeview
-        self.treeview = Gtk.TreeView(self.list_store)
+        # # Treeview
+        # self.treeview = Gtk.TreeView(self.window.liststore)
         
-        # Fill treeview with list store
-        for i, col_title in enumerate(['Cod', 'Nome', 'Sexo', 'Nascimento', 'Altura (cm)', 'Peso (kg)', 'IMC']):
-            renderer = Gtk.CellRendererText()
-            column = Gtk.TreeViewColumn(col_title, renderer, text=i)
-            column.set_sort_column_id(i)
-            self.treeview.append_column(column)
+        # # Fill treeview with list store
+        # for i, col_title in enumerate(['Cod', 'Nome', 'Sexo', 'Nascimento', 'Altura (cm)', 'Peso (kg)', 'IMC']):
+        #     renderer = Gtk.CellRendererText()
+        #     column = Gtk.TreeViewColumn(col_title, renderer, text=i)
+        #     column.set_sort_column_id(i)
+        #     self.treeview.append_column(column)
 
-        # Connect signal for change in selection
-        row_selection = self.treeview.get_selection()
-        row_selection.connect('changed', self.on_row_selection_changed)
+        # # Connect signal for change in selection
+        # row_selection = self.treeview.get_selection()
+        # row_selection.connect('changed', self.on_row_selection_changed)
 
-        # Add treeview to window
-        self.window.treeview_box.add(self.treeview)
-        self.window.treeview_box.reorder_child(self.treeview, 1)
+        # # Add treeview to window
+        # self.window.treeview_box.add(self.treeview)
+        # self.window.treeview_box.reorder_child(self.treeview, 1)
 
     def fill_liststore(self, name):
         """
@@ -55,7 +55,7 @@ class Handler():
         """
 
         # Clear liststore
-        self.list_store.clear()
+        self.window.liststore.clear()
 
         # Recover all patients stored at database
         patients = list()
@@ -66,9 +66,9 @@ class Handler():
 
         # Fill liststore with patients
         for patient in patients:
-            data = [patient.cod, patient.name, patient.sex, patient.birth, patient.height, patient.weight, patient.imc]
-            data[3] = utils.date_to_str(data[3])
-            self.list_store.append(data)
+            data = [patient.cod, patient.name, patient.sex, dt.datetime.strftime(patient.birth, '%d-%m-%Y'), patient.height, patient.weight, patient.imc]
+            data.append(dt.datetime.strftime(patient.birth, '%Y-%m-%d'))
+            self.window.liststore.append(data)
 
     def on_show(self, window):
         """
@@ -99,9 +99,14 @@ class Handler():
         model, i = selection.get_selected()
 
         # Assign patient cod variable
-        self.patient_cod = model[i][0]
+        try:
+            self.patient_cod = model[i][0]
+        except TypeError as e:
+            pass
 
         self.window.load_button.set_sensitive(True)
+
+
 
     def on_search_changed(self, entry):
         """
@@ -138,9 +143,19 @@ class Handler():
         for exam in self.window.app.static_exam_list:
             data = list()
             data.append(exam.cod)
+            if exam.state == 'ON':
+                exam.state = 'OA'
+            elif exam.state == 'OF':
+                exam.state = 'OAE'
+            elif exam.state == 'CN':
+                exam.state = 'OF'
+            else:
+                exam.state = 'OFE'
             data.append(exam.state)
-            for d in utils.datetime_to_str(exam.date).split(' '):
+            for d in dt.datetime.strftime(exam.date, '%d-%m-%Y %H:%M:%S').split(' '):
                 data.append(d)
+            data.append(dt.datetime.strptime(data[-2], '%d-%m-%Y').strftime('%Y-%m-%d'))
+            print(data)
             self.window.app.main_window.static_list_store.append(data)
 
     def load_dynamic_exams(self):
@@ -153,7 +168,7 @@ class Handler():
         for exam in self.window.app.dynamic_exam_list:
             data = list()
             data.append(exam.cod)
-            for d in utils.datetime_to_str(exam.date).split(' '):
+            for d in dt.datetime.strftime(exam.date, '%d-%m-%Y %H:%M:%S').split(' '):
                 data.append(d)
             self.window.app.main_window.dynamic_list_store.append(data)
 
@@ -198,6 +213,9 @@ class Handler():
             for i, c in enumerate((on, cn, of, cf)):
                 self.fill_grid(i+2, c)
 
+    def get_patient_age(self):
+        age = int((dt.datetime.now().date() - self.window.app.patient.birth).days / 365)
+        return f"{age} anos"
 
     def on_load_clicked(self, button : Gtk.Button):
         """
@@ -213,7 +231,7 @@ class Handler():
 
         # txt = "Nome: {}\tAltura (cm): {}".format(self.window.app.patient.name, self.window.app.patient.height)
         # self.window.app.patient_label.set_text(txt)
-        self.window.app.patient_label.set_text(self.window.app.patient.name)
+        self.window.app.patient_label.set_text(f"{self.window.app.patient.name}\t{self.get_patient_age()}")
         self.window.app.statusbar.set_text("Paciente carregado.")
 
         self.window.app.main_window.edit_patient.set_sensitive(True)
@@ -230,3 +248,13 @@ class Handler():
         # Hiding the window
         self.window.app.connection_flags['patient'] = True
         self.window.hide()
+
+    def on_patients_tree_button_press_event(self, treeview, event):
+        if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS and event.button == 1:
+            selection = treeview.get_selection()
+            model, i = selection.get_selected()
+            if i == None: #note 3
+                return True
+            model = treeview.get_model()
+            self.patient_cod = model[i][0]
+            self.on_load_clicked(self.window.load_button)

@@ -22,6 +22,42 @@
     <property name="can_focus">False</property>
     <property name="pixbuf">../../../../ethel/media/device.png</property>
   </object>
+  <object class="GtkMessageDialog" id="dialog">
+    <property name="can_focus">False</property>
+    <property name="modal">True</property>
+    <property name="type_hint">dialog</property>
+    <property name="decorated">False</property>
+    <property name="message_type">warning</property>
+    <property name="buttons">yes-no</property>
+    <property name="text" translatable="yes">VOCÊ TEM CERTEZA QUE DESEJA EXCLUIR O EXAME:</property>
+    <signal name="response" handler="on_dialog_response" swapped="no"/>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="margin_left">10</property>
+        <property name="margin_right">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="homogeneous">True</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="dynamic_list_store">
     <columns>
       <!-- column-name Cod -->
@@ -107,6 +143,8 @@
       <!-- column-name Data -->
       <column type="gchararray"/>
       <!-- column-name Hora -->
+      <column type="gchararray"/>
+      <!-- column-name DataOrd -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -464,6 +502,7 @@
                     </child>
                     <child>
                       <object class="GtkScrolledWindow">
+                        <property name="width_request">250</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="shadow_type">in</property>
@@ -474,9 +513,14 @@
                             <property name="can_focus">False</property>
                             <child>
                               <object class="GtkTreeView" id="static_exams_tree">
+                                <property name="width_request">-1</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="model">static_list_store</property>
+                                <property name="search_column">0</property>
+                                <property name="activate_on_single_click">True</property>
+                                <signal name="button-press-event" handler="on_static_exams_tree_button_press_event" swapped="no"/>
+                                <signal name="row-activated" handler="on_static_exams_tree_row_activated" swapped="no"/>
                                 <child internal-child="selection">
                                   <object class="GtkTreeSelection">
                                     <signal name="changed" handler="on_row_selection_static_changed" swapped="no"/>
@@ -504,7 +548,7 @@
                                     <property name="clickable">True</property>
                                     <property name="reorderable">True</property>
                                     <property name="sort_indicator">True</property>
-                                    <property name="sort_column_id">2</property>
+                                    <property name="sort_column_id">4</property>
                                     <child>
                                       <object class="GtkCellRendererText"/>
                                       <attributes>
@@ -531,10 +575,9 @@
                                 </child>
                                 <child>
                                   <object class="GtkTreeViewColumn">
-                                    <property name="visible">False</property>
                                     <child>
-                                      <object class="GtkCellRendererPixbuf" id="static_exams_pixbuf">
-                                        <property name="pixbuf">../../../../Downloads/delete-24px.svg</property>
+                                      <object class="GtkCellRendererPixbuf">
+                                        <property name="pixbuf">../../../media/delete-24px.svg</property>
                                       </object>
                                     </child>
                                   </object>
@@ -2152,7 +2195,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2186,7 +2229,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2205,7 +2248,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2224,7 +2267,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2243,7 +2286,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2262,7 +2305,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2281,7 +2324,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2300,7 +2343,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2319,7 +2362,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2338,7 +2381,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2357,7 +2400,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2376,7 +2419,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2395,7 +2438,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2414,7 +2457,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2433,7 +2476,7 @@
                         <property name="caps_lock_warning">False</property>
                         <property name="primary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">False</property>
-                        <property name="placeholder_text" translatable="yes">0.000000</property>
+                        <property name="placeholder_text" translatable="yes">0.00</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -2538,11 +2581,6 @@
                                 <child>
                                   <object class="GtkTreeViewColumn">
                                     <property name="visible">False</property>
-                                    <child>
-                                      <object class="GtkCellRendererPixbuf">
-                                        <property name="pixbuf">../../../../Downloads/delete-24px.svg</property>
-                                      </object>
-                                    </child>
                                   </object>
                                 </child>
                               </object>

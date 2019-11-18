@@ -18,13 +18,13 @@ class Device():
         Device's calibrations date
     '''
 
-    def __init__(self, cod = None, name = None, mac = None, is_default = None, calibrations = None, calibration_date = None):
-        self._cod               = cod
-        self._name              = name
-        self._mac               = mac
-        self._is_default        = is_default
-        self._calibrations      = calibrations
-        self._calibration_date  = calibration_date
+    def __init__(self, cod=None, name=None, mac=None, is_default=None, calibrations=None, calibration_date=None):
+        self._cod = cod
+        self._name = name
+        self._mac = mac
+        self._is_default = is_default
+        self._calibrations = calibrations
+        self._calibration_date = calibration_date
 
     @property
     def cod(self):

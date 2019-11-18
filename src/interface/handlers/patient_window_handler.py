@@ -1,5 +1,5 @@
 # Default imports
-from datetime import datetime
+import datetime as dt
 
 # Third party imports
 import gi
@@ -46,7 +46,7 @@ class Handler():
         if self.window.app.change_flags['patient']:
             data = [self.window.app.patient.name, self.window.app.patient.sex, self.window.app.patient.birth, self.window.app.patient.height, self.window.app.patient.weight, self.window.app.patient.imc]
             self.set_sex(data[1])
-            data[2] = utils.date_to_str(data[2])
+            data[2] = dt.datetime.strftime(data[2], '%d-%m-%Y')
             data.remove(data[1])
             for i, entry in enumerate([self.window.name, self.window.birth, self.window.height, self.window.weight, self.window.imc]):
                 entry.set_text(str(data[i]))
@@ -102,17 +102,17 @@ class Handler():
         
         # Formating date to show
         m += 1
-        dt = datetime(y, m, d).date()
+        birth = dt.datetime(y, m, d).date()
 
         # Checking if the date is valid
-        if dt > datetime.today().date():
+        if birth > dt.datetime.today().date():
             self.window.statusbar.set_text('Data inválida!')
             return
         
         self.window.statusbar.set_text('')
 
         # Setting entry text
-        self.window.birth.set_text(utils.date_to_str(dt))
+        self.window.birth.set_text(birth.strftime('%d-%m-%Y'))
 
         # Hiding popover
         self.window.popover.popdown()
@@ -137,6 +137,10 @@ class Handler():
                 return child.get_label().upper()
         return ''
 
+    def get_patient_age(self):
+        age = int((dt.datetime.now() - self.window.app.patient.birth).days() / 365)
+        return f"{age} anos"
+
     def on_save_clicked(self, button):
         '''
         This method handles save click
@@ -147,19 +151,19 @@ class Handler():
             The button
         '''
 
-        # Checking if any value is empty
+        # Checking if any entry is empty
         label   = 0
         article = 1
-        value   = 2
+        entry   = 2
         for data in [('Nome', 'o', self.window.name), ('Data de Nascimento', 'a', self.window.birth), ('Altura', 'a', self.window.height)]:
-            if data[value].get_text() == '':
+            if data[entry].get_text() == '':
                 self.window.statusbar.set_text(f"{data[label]} inválid{data[article]}!")
-                data[value].grab_focus()
+                data[entry].grab_focus()
                 return
 
         # Getting values
         name    = self.window.name.get_text().upper()
-        birth   = utils.str_to_date(self.window.birth.get_text().upper())
+        birth   = dt.datetime.strptime(self.window.birth.get_text(), '%d-%m-%Y').date()
         height  = int(self.window.height.get_text())
         sex     = self.get_sex()
         
@@ -176,7 +180,7 @@ class Handler():
             # Update patient
             self.patient_dao.update_patient(self.window.app.patient)
             # Assigning patient statusbar
-            self.window.app.patient_label.set_text(self.window.app.patient.name)
+            self.window.app.patient_label.set_text(f"{self.window.app.patient.name}\t{self.get_patient_age()}")
         else:
             # Create patient
             patient = Patient(name=name, birth=birth, sex=sex, height=height)

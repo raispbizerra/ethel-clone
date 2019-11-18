@@ -70,9 +70,12 @@ class MainWindow(Gtk.ApplicationWindow):
 		## Liststores
 		self.static_list_store = builder.get_object('static_list_store')
 		self.dynamic_list_store = builder.get_object('dynamic_list_store')
-		## CellRenderer
-		self.static_exams_pixbuf = builder.get_object('static_exams_pixbuf')
-		
+		## TreeViews
+		self.static_exams_tree = builder.get_object('static_exams_tree')
+		## Dialogs
+		self.dialog = builder.get_object('dialog')
+		self.dialog.connect('delete-event', self.app.on_delete_event)
+		self.dialog.set_transient_for(self)
 		self.add(box)
 
 		# Assign builder

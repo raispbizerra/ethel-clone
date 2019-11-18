@@ -135,8 +135,8 @@ class PatientDao():
 					pat_birth = Utils.str_to_date(result[3])
 					patient = Patient(result[0], result[1], result[2], pat_birth, result[4], result[5], result[6])
 					patients.append(patient)
-		except:
-			print ("Error!")
+		except Exception as e:
+			print ("Error!", e)
 		finally:
 			self.c.close()
 		return patients

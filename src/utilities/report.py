@@ -36,13 +36,14 @@ def fill_sheet(worksheet : xlwt.Worksheet, exams : list):
     for i, item in enumerate(header):
         worksheet.write(0, i, item, style=STYLE)
 
+
     # Fill metrics
     for i, metrics in enumerate(exams):
-        for j, key in enumerate(metrics.keys()):
+        keys = list(metrics.keys())
+        for j, key in enumerate(keys):
             # Metrics labels
             if not i:
-                worksheet.write(j+1, 0, list(metrics.keys())[j], style=STYLE)
-            # worksheet.write(j+1, i+1, 'RAÍ')
+                worksheet.write(j+1, 0, keys[j], style=STYLE)
             worksheet.write(j+1, i+1, round(metrics[key], 2))
 
     # Fill mean and stdev
@@ -82,8 +83,10 @@ def generate_report(name : str, exams : dict, date : str):
     # Init Workbook
     workbook = xlwt.Workbook()
 
-    for key in exams.keys():
-        worksheet = workbook.add_sheet(key)
+    keys = [t.replace('O', 'OA').replace('F', 'E').replace('C', 'OF').replace('N', '') for t in list(exams.keys())]
+
+    for i, key in enumerate(exams.keys()):
+        worksheet = workbook.add_sheet(keys[i])
         fill_sheet(worksheet, exams[key])
 
     workbook.save(f"reports/{name} ({date}).xls")

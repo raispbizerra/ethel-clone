@@ -110,12 +110,12 @@ class StaticExamDao():
             sta_ex_aps = Utils.list_to_str(exam.aps)
             sta_ex_mls = Utils.list_to_str(exam.mls)
             sta_ex_date = Utils.datetime_to_str(exam.date)
-            self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, sta_ex_date, exam.type, 
+            self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, sta_ex_date, exam.state,
                 exam.pat_cod, exam.usr_cod, exam.cod])
             self.c.conn.commit()
             result = True
-        except:
-            print("Error!")
+        except Exception as e:
+            print("Error!", e)
         finally:
             self.c.close()
         return result
@@ -148,8 +148,8 @@ class StaticExamDao():
                     exam = StaticExam(
                         result[0], sta_ex_aps, sta_ex_mls, sta_ex_date, result[4], pat_cod, result[5])
                     exams.append(exam)
-        except:
-            print("Error!")
+        except Exception as e:
+            print("Error!", e)
         finally:
             self.c.close()
         return exams

@@ -245,6 +245,3 @@ def computes_metrics(cop_x, cop_y, height, amplitude):
         metrics[key] = np.append(metrics[key][1:], metrics[key][0])
 
     return metrics
-
-if __name__ == '__main__':
-    computes_metrics()
