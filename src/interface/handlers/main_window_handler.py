@@ -472,8 +472,8 @@ class Handler:
             self.weight = round(self.weight, 2)
             height = self.window.app.patient.height / 100
             self.imc = self.weight / height ** 2
-            date = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
+            date = dt.datetime.now().strftime('%d-%m-%Y %H:%M:%S.%f')
+            print(date)
             self.window.points_entry.set_text(str(STATIC_SAMPLE))
 
             if self.window.app.exam_window.open_eyes:
@@ -486,12 +486,11 @@ class Handler:
             else:
                 ex_type += 'F'
 
-            self.window.app.static_exam = StaticExam(aps=self.static_cop_x,
-                                                     mls=self.static_cop_y,
+            self.window.app.static_exam = StaticExam(aps=self.static_cop_y,
+                                                     mls=self.static_cop_x,
                                                      date=date, pat_cod=self.window.app.patient.cod,
                                                      state=ex_type)
-            self.static_metrics = calc.computes_metrics(
-                self.static_cop_x, self.static_cop_y)
+            self.static_metrics = calc.computes_metrics(self.static_cop_y, self.static_cop_x)
             self.window.app.exam_window.hide()
             self.show_static_exam()
             self.fill_grid()
@@ -551,8 +550,9 @@ class Handler:
         i = keys.index(self.window.app.static_exam.state)
         j = self.exam_counter[self.window.app.static_exam.state]
 
-        metrics = (self.static_metrics['amplitude_AP'], self.static_metrics['amplitude_ML'], self.static_metrics['mvelo_total'])
-
+        # metrics = (self.static_metrics['amplitude_AP'], self.static_metrics['amplitude_ML'], self.static_metrics['mvelo_total'])
+        metrics = (self.static_metrics['dis_mediaAP'], self.static_metrics['dis_mediaML'], self.static_metrics['mvelo_total'])
+        
         self.current_exam_labels = list()
         for k in range(1, 4):
             self.current_exam_labels.append(self.window.exam_grid.get_child_at(k, i + 2).get_child_at(j, 0))

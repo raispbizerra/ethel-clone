@@ -2,7 +2,7 @@
 from src.database.connection import Connection
 from src.models.static_exam import StaticExam
 import src.utilities.utils as Utils
-
+import datetime as dt
 
 class StaticExamDao():
     """
@@ -44,10 +44,10 @@ class StaticExamDao():
         sql = 'INSERT INTO static_exams (sta_ex_aps, sta_ex_mls, sta_ex_date, sta_ex_type, pat_cod, usr_cod) values (?,?,?,?,?,?)'
         sta_ex_aps = Utils.list_to_str(exam.aps)
         sta_ex_mls = Utils.list_to_str(exam.mls)
-        sta_ex_date = Utils.datetime_to_str(exam.date)
+        # sta_ex_date = Utils.datetime_to_str(exam.date)
         try:
             self.c.connect(self.db)
-            self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, sta_ex_date, exam.state, 
+            self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, exam.date, exam.state, 
                 exam.pat_cod, exam.usr_cod])
             self.c.conn.commit()
             result = True
@@ -144,7 +144,8 @@ class StaticExamDao():
                 for result in results:
                     sta_ex_aps = Utils.str_to_array(result[1])
                     sta_ex_mls = Utils.str_to_array(result[2])
-                    sta_ex_date = Utils.str_to_datetime(result[3])
+                    # sta_ex_date = Utils.str_to_datetime(result[3])
+                    sta_ex_date = dt.datetime.strptime(result[3], '%d-%m-%Y %H:%M:%S.%f')
                     exam = StaticExam(
                         result[0], sta_ex_aps, sta_ex_mls, sta_ex_date, result[4], pat_cod, result[5])
                     exams.append(exam)
@@ -208,7 +209,8 @@ class StaticExamDao():
                 for result in results:
                     sta_ex_aps = Utils.str_to_array(result[1])
                     sta_ex_mls = Utils.str_to_array(result[2])
-                    sta_ex_date = Utils.str_to_datetime(result[3])
+                    # sta_ex_date = Utils.str_to_datetime(result[3])
+                    sta_ex_date = dt.datetime.strptime(result[3], '%d-%m-%Y %H:%M:%S').strftime('%d-%m-%Y %H:%M:%S')
                     exam = StaticExam(
                         result[0], sta_ex_aps, sta_ex_mls, sta_ex_date, result[4], result[5], result[6])
                     exams.append(exam)
