@@ -19,7 +19,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gdk
 
 DT = 40
-STATIC_SAMPLE = 768
+STATIC_SAMPLE = 10
 LOS_SAMPLE = 200
 MEAN_SAMPLE = LOS_SAMPLE // 2
 
@@ -555,49 +555,55 @@ class Handler:
         j = self.exam_counter[self.window.app.static_exam.state]
 
         # metrics = (self.static_metrics['amplitude_AP'], self.static_metrics['amplitude_ML'], self.static_metrics['mvelo_total'])
-        metrics = (self.static_metrics['dis_mediaAP'], self.static_metrics['dis_mediaML'], self.static_metrics['mvelo_total'])
+        # metrics = (self.static_metrics['dis_mediaAP'], self.static_metrics['dis_mediaML'], self.static_metrics['mvelo_total'])
         
+        # self.current_exam_labels = list()
+        # for k in range(1, 4):
+        #     self.current_exam_labels.append(self.window.exam_grid.get_child_at(k, i + 2).get_child_at(j, 0))
+        #     context = self.window.exam_grid.get_child_at(k, i + 2).get_child_at(j, 0).get_style_context()
+        #     context.add_class("orange")
+        #     self.window.exam_grid.get_child_at(k, i + 2).get_child_at(j, 0).set_text(f"{round(metrics[k-1], 2)}")
+        #     m = 0.
+        #     for l in range(j + 1):
+        #         m += float(self.window.exam_grid.get_child_at(1, i + 2).get_child_at(l, 0).get_text())
+        #     m /= j + 1
+        #     self.window.exam_grid.get_child_at(k, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+
         self.current_exam_labels = list()
-        for k in range(1, 4):
-            self.current_exam_labels.append(self.window.exam_grid.get_child_at(k, i + 2).get_child_at(j, 0))
-            context = self.window.exam_grid.get_child_at(k, i + 2).get_child_at(j, 0).get_style_context()
-            context.add_class("orange")
-            self.window.exam_grid.get_child_at(k, i + 2).get_child_at(j, 0).set_text(f"{round(metrics[k-1], 2)}")
-            m = 0.
-            for l in range(j + 1):
-                m += float(self.window.exam_grid.get_child_at(1, i + 2).get_child_at(l, 0).get_text())
-            m /= j + 1
-            self.window.exam_grid.get_child_at(k, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+        self.current_exam_labels.append(self.window.exam_grid.get_child_at(1, i + 2).get_child_at(j, 0))
+        self.current_exam_labels.append(self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0))
+        self.current_exam_labels.append(self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0))
 
-        # context = self.window.exam_grid.get_child_at(1, i + 2).get_child_at(j, 0).get_style_context()
-        # context.add_class("orange")
-        # self.window.exam_grid.get_child_at(1, i + 2).get_child_at(j, 0).set_text(
-        #     f"{round(self.static_metrics['amplitude_AP'], 2)}")
-        # m = 0.
-        # for l in range(j + 1):
-        #     m += float(self.window.exam_grid.get_child_at(1, i + 2).get_child_at(l, 0).get_text())
-        # m /= j + 1
-        # self.window.exam_grid.get_child_at(1, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+        context = self.window.exam_grid.get_child_at(1, i + 2).get_child_at(j, 0).get_style_context()
+        context.add_class("orange")
 
-        # context = self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0).get_style_context()
-        # context.add_class("orange")
-        # self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0).set_text(
-        #     f"{round(self.static_metrics['amplitude_ML'], 2)}")
-        # m = 0.
-        # for l in range(j + 1):
-        #     m += float(self.window.exam_grid.get_child_at(2, i + 2).get_child_at(l, 0).get_text())
-        # m /= j + 1
-        # self.window.exam_grid.get_child_at(2, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+        self.window.exam_grid.get_child_at(1, i + 2).get_child_at(j, 0).set_text(
+            f"{round(self.static_metrics['dis_mediaAP'], 2)}")
+        m = 0.
+        for l in range(j + 1):
+            m += float(self.window.exam_grid.get_child_at(1, i + 2).get_child_at(l, 0).get_text())
+        m /= j + 1
+        self.window.exam_grid.get_child_at(1, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
 
-        # context = self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0).get_style_context()
-        # context.add_class("orange")
-        # self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0).set_text(
-        #     f"{round(self.static_metrics['mvelo_total'], 2)}")
-        # m = 0.
-        # for l in range(j + 1):
-        #     m += float(self.window.exam_grid.get_child_at(3, i + 2).get_child_at(l, 0).get_text())
-        # m /= j + 1
-        # self.window.exam_grid.get_child_at(3, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+        context = self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0).get_style_context()
+        context.add_class("orange")
+        self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0).set_text(
+            f"{round(self.static_metrics['dis_mediaML'], 2)}")
+        m = 0.
+        for l in range(j + 1):
+            m += float(self.window.exam_grid.get_child_at(2, i + 2).get_child_at(l, 0).get_text())
+        m /= j + 1
+        self.window.exam_grid.get_child_at(2, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+
+        context = self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0).get_style_context()
+        context.add_class("orange")
+        self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0).set_text(
+            f"{round(self.static_metrics['mvelo_total'], 2)}")
+        m = 0.
+        for l in range(j + 1):
+            m += float(self.window.exam_grid.get_child_at(3, i + 2).get_child_at(l, 0).get_text())
+        m /= j + 1
+        self.window.exam_grid.get_child_at(3, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
 
     def on_save_static_exam_button_clicked(self, button):
         """
