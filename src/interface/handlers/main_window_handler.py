@@ -53,6 +53,7 @@ class Handler:
         self.clear_static_charts()
         self.clear_dynamic_chart()
         self.window.show_all()
+        self.window.save_static_exam_button.set_sensitive(True)
 
     def on_row_selection_static_changed(self, selection):
         """
@@ -67,7 +68,10 @@ class Handler:
         model, i = selection.get_selected()
 
         # Get exam_cod
-        self.static_exam_cod = model[i][0]
+        try:
+            self.static_exam_cod = model[i][0]
+        except TypeError:
+            pass
 
         # Change button sensitivity
         self.window.load_static_exam_button.set_sensitive(True)
@@ -379,6 +383,7 @@ class Handler:
         self.clear_static_charts()
         self.static_metrics = calc.computes_metrics(self.window.app.static_exam.aps, self.window.app.static_exam.mls)
         self.show_static_exam()
+        print(self.window.app.static_exam.date)
         self.window.static_notebook.set_current_page(1)
         self.window.app.statusbar.set_text('Exame carregado')
 
@@ -473,7 +478,6 @@ class Handler:
             height = self.window.app.patient.height / 100
             self.imc = self.weight / height ** 2
             date = dt.datetime.now().strftime('%d-%m-%Y %H:%M:%S.%f')
-            print(date)
             self.window.points_entry.set_text(str(STATIC_SAMPLE))
 
             if self.window.app.exam_window.open_eyes:
@@ -528,7 +532,7 @@ class Handler:
 
     def counter(self):
         if self.window.app.exam_window.time > 0:
-            print(f"{self.window.app.exam_window.time}", self.window.app.exam_window.counting)
+            # print(f"{self.window.app.exam_window.time}", self.window.app.exam_window.counting)
             self.window.app.exam_window.drawing_area.queue_draw()
             self.window.app.exam_window.time -= 1
             duration = .1  # second

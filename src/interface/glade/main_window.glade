@@ -640,7 +640,7 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Amplitude AP (cm)</property>
+                                <property name="label" translatable="yes">Distância Média AP (cm)</property>
                                 <style>
                                   <class name="blue"/>
                                 </style>
@@ -654,7 +654,7 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Amplitude ML (cm)</property>
+                                <property name="label" translatable="yes">Distância Média ML (cm)</property>
                                 <style>
                                   <class name="dark-blue"/>
                                 </style>

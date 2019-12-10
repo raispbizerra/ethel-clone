@@ -66,6 +66,8 @@ def geraAP_ML(valy, valx):
     # ML_barra = sum(valx) / len(valx)
     AP_barra = valy.mean()
     ML_barra = valx.mean()
+    print(f'AP_: {AP_barra}')
+    print(f'ML_: {ML_barra}')
     
     valores_AP = valy - AP_barra
     valores_ML = valx - ML_barra

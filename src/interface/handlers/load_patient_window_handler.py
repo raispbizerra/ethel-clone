@@ -155,7 +155,7 @@ class Handler():
             for d in dt.datetime.strftime(exam.date, '%d-%m-%Y %H:%M:%S').split(' '):
                 data.append(d)
             data.append(dt.datetime.strptime(data[-2], '%d-%m-%Y').strftime('%Y-%m-%d'))
-            print(data)
+            # print(data)
             self.window.app.main_window.static_list_store.append(data)
 
     def load_dynamic_exams(self):

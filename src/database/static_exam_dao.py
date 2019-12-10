@@ -80,11 +80,12 @@ class StaticExamDao():
             if result:
                 sta_ex_aps = Utils.str_to_array(result[0])
                 sta_ex_mls = Utils.str_to_array(result[1])
-                sta_ex_date = Utils.str_to_datetime(result[2])
+                # sta_ex_date = Utils.str_to_datetime(result[2])
+                sta_ex_date = dt.datetime.strptime(result[2], '%d-%m-%Y %H:%M:%S.%f')
                 exam = StaticExam(sta_ex_cod, sta_ex_aps, sta_ex_mls,
                                   sta_ex_date, result[3], result[4], result[5])
-        except:
-            print("Error!")
+        except Exception as e:
+            print("Error!", e)
         finally:
             self.c.close()
         return exam
