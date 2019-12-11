@@ -135,11 +135,11 @@ def get_amplitude(aps, mls):
 
     return amplitude_AP, amplitude_ML
 
-def computes_metrics(aps, mls):
+def computes_metrics(cop_y, cop_x):
     metrics = dict()
 
-    aps *= .1
-    mls *= .1
+    aps = cop_y * .1
+    mls = cop_x * .1
 
     # Definição do intervalo entre capturas
     metrics['dt'] = 0.040

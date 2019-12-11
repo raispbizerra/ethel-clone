@@ -41,13 +41,17 @@ class StaticExamDao():
                 Whether the operation was successful or not
         '''
         result = False
-        sql = 'INSERT INTO static_exams (sta_ex_aps, sta_ex_mls, sta_ex_date, sta_ex_type, pat_cod, usr_cod) values (?,?,?,?,?,?)'
+        sql = 'INSERT INTO static_exams (sta_ex_cod, sta_ex_aps, sta_ex_mls, sta_ex_date, sta_ex_type, pat_cod, usr_cod) values (?,?,?,?,?,?,?)'
+        sql_ = 'SELECT sta_ex_cod FROM static_exams ORDER BY sta_ex_cod DESC LIMIT 1'
         sta_ex_aps = Utils.list_to_str(exam.aps)
         sta_ex_mls = Utils.list_to_str(exam.mls)
         # sta_ex_date = Utils.datetime_to_str(exam.date)
         try:
             self.c.connect(self.db)
-            self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, exam.date, exam.state, 
+            cursor = self.c.conn.execute(sql_)
+            sta_ex_cod = cursor.fetchone()[0]
+            exam.cod = sta_ex_cod + 1
+            self.c.conn.execute(sql, [exam.cod, sta_ex_aps, sta_ex_mls, exam.date, exam.state, 
                 exam.pat_cod, exam.usr_cod])
             self.c.conn.commit()
             result = True
@@ -110,8 +114,8 @@ class StaticExamDao():
             self.c.connect(self.db)
             sta_ex_aps = Utils.list_to_str(exam.aps)
             sta_ex_mls = Utils.list_to_str(exam.mls)
-            sta_ex_date = Utils.datetime_to_str(exam.date)
-            self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, sta_ex_date, exam.state,
+            # sta_ex_date = Utils.datetime_to_str(exam.date)
+            self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, exam.date, exam.state,
                 exam.pat_cod, exam.usr_cod, exam.cod])
             self.c.conn.commit()
             result = True
@@ -136,7 +140,7 @@ class StaticExamDao():
                 Whether the operation was successful or not
         '''
         exams = list()
-        sql = 'SELECT sta_ex_cod, sta_ex_aps, sta_ex_mls, sta_ex_date, sta_ex_type, usr_cod FROM static_exams WHERE pat_cod = ?'
+        sql = 'SELECT sta_ex_cod, sta_ex_aps, sta_ex_mls, sta_ex_date, sta_ex_type, usr_cod FROM static_exams WHERE pat_cod = ? ORDER BY sta_ex_cod'
         try:
             self.c.connect(self.db)
             cursor = self.c.conn.execute(sql, [pat_cod])

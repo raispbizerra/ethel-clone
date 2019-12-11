@@ -33,6 +33,7 @@ class Handler:
         self.device_dao = DeviceDao()
         self.patient_dao = PatientDao()
         self.exam_counter = {'ON': 0, 'CN': 0, 'OF': 0, 'CF': 0}
+        self.exams = {'ON': [None]*3, 'CN': [None]*3, 'OF': [None]*3, 'CF': [None]*3}
         self.dynamic_metrics = dict()
         self.static_metrics = dict()
         self.static_exam_cod = -1
@@ -42,6 +43,7 @@ class Handler:
         self.static_cop_x = np.zeros(0)
         self.static_cop_y = np.zeros(0)
         self.weight = 0.
+        self.current_exam_labels = list()
 
     def on_show(self, window):
         """
@@ -49,11 +51,38 @@ class Handler:
         :param window:
         :return:
         """
+        self.on_state_changed(self.window.app.exam_window.open_eyes)
         self.get_charts()
         self.clear_static_charts()
         self.clear_dynamic_chart()
         self.window.show_all()
-        self.window.save_static_exam_button.set_sensitive(True)
+
+    # def on_state_changed(self, button):
+        
+
+    def on_state_changed(self, button):
+        for ctx in self.current_exam_labels:
+            ctx.remove_class("yellow")
+
+        if self.window.eyes_state.get_children()[0].get_active():
+            ex_type = 'O'
+        else:
+            ex_type = 'C'
+
+        if self.window.foam_state.get_children()[0].get_active():
+            ex_type += 'N'
+        else:
+            ex_type += 'F'
+
+        keys = ['ON', 'CN', 'OF', 'CF']
+        i = keys.index(ex_type)
+        j = self.exam_counter[ex_type]
+
+        for k in range(1, 4):
+            context = self.window.exam_grid.get_child_at(k, i + 2).get_child_at(j, 0).get_style_context()
+            self.current_exam_labels.append(context)
+            context.add_class("yellow")
+
 
     def on_row_selection_static_changed(self, selection):
         """
@@ -383,7 +412,6 @@ class Handler:
         self.clear_static_charts()
         self.static_metrics = calc.computes_metrics(self.window.app.static_exam.aps, self.window.app.static_exam.mls)
         self.show_static_exam()
-        print(self.window.app.static_exam.date)
         self.window.static_notebook.set_current_page(1)
         self.window.app.statusbar.set_text('Exame carregado')
 
@@ -462,6 +490,7 @@ class Handler:
                 readings, self.window.app.device.calibrations, wbb.escala_eu)
             self.static_cop_x = np.append(self.static_cop_x, cop_x)
             self.static_cop_y = np.append(self.static_cop_y, cop_y)
+            print(self.static_cop_x, self.static_cop_y)
             # Progressbar fraction
             self.window.progressbar.set_fraction(i / STATIC_SAMPLE)
             self.window.app.exam_window.drawing_area.queue_draw()
@@ -569,12 +598,12 @@ class Handler:
         #     m /= j + 1
         #     self.window.exam_grid.get_child_at(k, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
 
-        self.current_exam_labels = list()
-        self.current_exam_labels.append(self.window.exam_grid.get_child_at(1, i + 2).get_child_at(j, 0))
-        self.current_exam_labels.append(self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0))
-        self.current_exam_labels.append(self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0))
+        # self.current_exam_labels.append(self.window.exam_grid.get_child_at(1, i + 2).get_child_at(j, 0))
+        # self.current_exam_labels.append(self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0))
+        # self.current_exam_labels.append(self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0))
 
         context = self.window.exam_grid.get_child_at(1, i + 2).get_child_at(j, 0).get_style_context()
+        self.current_exam_labels.append(context)
         context.add_class("orange")
 
         self.window.exam_grid.get_child_at(1, i + 2).get_child_at(j, 0).set_text(
@@ -586,6 +615,7 @@ class Handler:
         self.window.exam_grid.get_child_at(1, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
 
         context = self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0).get_style_context()
+        self.current_exam_labels.append(context)
         context.add_class("orange")
         self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0).set_text(
             f"{round(self.static_metrics['dis_mediaML'], 2)}")
@@ -596,6 +626,7 @@ class Handler:
         self.window.exam_grid.get_child_at(2, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
 
         context = self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0).get_style_context()
+        self.current_exam_labels.append(context)
         context.add_class("orange")
         self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0).set_text(
             f"{round(self.static_metrics['mvelo_total'], 2)}")
@@ -614,19 +645,32 @@ class Handler:
         button : Gtk.Button
                 The button
         """
-        if self.window.app.static_exam.state == 'ON':
-            self.window.app.patient.weight = round(self.weight, 2)
-            self.window.app.patient.imc = round(self.imc, 2)
-        self.static_exam_dao.create_exam(self.window.app.static_exam)
-        self.patient_dao.update_patient(self.window.app.patient)
+        print(self.exam_counter[self.window.app.static_exam.state])
+        exam = self.exams[self.window.app.static_exam.state][self.exam_counter[self.window.app.static_exam.state]]
+        last_exam = self.exams[self.window.app.static_exam.state][self.exam_counter[self.window.app.static_exam.state]-1]
+        if exam:
+            print(exam.date)
+            if last_exam != self.window.app.static_exam:
+                self.window.app.static_exam.cod = exam.cod
+                self.static_exam_dao.update_exam(self.window.app.static_exam)
+                print('\n\nupdate\n')
+        else:
+            if self.window.app.static_exam.state == 'ON':
+                self.window.app.patient.weight = round(self.weight, 2)
+                self.window.app.patient.imc = round(self.imc, 2)
+                self.patient_dao.update_patient(self.window.app.patient)
+            self.static_exam_dao.create_exam(self.window.app.static_exam)
+            print('\n\nsave\n')
+        self.exams[self.window.app.static_exam.state][self.exam_counter[self.window.app.static_exam.state]] = self.window.app.static_exam
         self.window.statusbar.set_text('Exame salvo!')
-        self.window.save_static_exam_button.set_sensitive(False)
+        # self.window.save_static_exam_button.set_sensitive(False)
         self.window.app.load_patient_window.handler.load_static_exams()
+        for context in self.current_exam_labels:
+            # context = label.get_style_context()
+            context.remove_class("orange")
         self.exam_counter[self.window.app.static_exam.state] = (self.exam_counter[
                                                                     self.window.app.static_exam.state] + 1) % 3
-        for label in self.current_exam_labels:
-            context = label.get_style_context()
-            context.remove_class("orange")
+        self.on_state_changed(self.window.app.exam_window.open_eyes)
 
     def on_start_dynamic_exam_button_clicked(self, button):
         """

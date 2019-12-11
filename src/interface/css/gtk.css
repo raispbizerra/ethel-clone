@@ -6127,6 +6127,12 @@ FIXME this is really an API */
   color: white;
 }
 
+.yellow{
+  background-color: #FFBC25;
+  /*font-weight: bolder;*/
+  color: black;
+}
+
 .dark-blue{
   background-color: #144c73;
   font-weight: bolder;
