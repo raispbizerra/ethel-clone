@@ -51,18 +51,22 @@ class Handler:
         :param window:
         :return:
         """
-        self.on_state_changed(self.window.app.exam_window.open_eyes)
+        self.get_exam()
         self.get_charts()
         self.clear_static_charts()
         self.clear_dynamic_chart()
         self.window.show_all()
 
-    # def on_state_changed(self, button):
-        
-
     def on_state_changed(self, button):
+        self.exam_counter = {'ON': 0, 'CN': 0, 'OF': 0, 'CF': 0}
+        self.exams = {'ON': [None]*3, 'CN': [None]*3, 'OF': [None]*3, 'CF': [None]*3}
+        self.window.app.static_exam = None
+        self.get_exam()
+
+    def get_exam(self):
         for ctx in self.current_exam_labels:
             ctx.remove_class("yellow")
+            ctx.remove_class("orange")
 
         if self.window.eyes_state.get_children()[0].get_active():
             ex_type = 'O'
@@ -670,7 +674,7 @@ class Handler:
             context.remove_class("orange")
         self.exam_counter[self.window.app.static_exam.state] = (self.exam_counter[
                                                                     self.window.app.static_exam.state] + 1) % 3
-        self.on_state_changed(self.window.app.exam_window.open_eyes)
+        self.get_exam()
 
     def on_start_dynamic_exam_button_clicked(self, button):
         """
