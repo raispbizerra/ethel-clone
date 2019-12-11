@@ -245,6 +245,10 @@ class Handler():
         self.load_dynamic_exams()
         # self.fill_exams()
 
+        self.window.app.main_window.handler.exam_counter = {'ON': 0, 'CN': 0, 'OF': 0, 'CF': 0}
+        self.window.app.main_window.handler.exams = {'ON': [None]*3, 'CN': [None]*3, 'OF': [None]*3, 'CF': [None]*3}
+        self.window.app.main_window.handler.on_state_changed(self.window.app.main_window.eyes_state.get_children()[0])
+
         # Hiding the window
         self.window.app.connection_flags['patient'] = True
         self.window.hide()
