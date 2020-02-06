@@ -19,7 +19,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib, Gdk
 
 DT = 40
-STATIC_SAMPLE = 10
+STATIC_SAMPLE = 768
 LOS_SAMPLE = 200
 MEAN_SAMPLE = LOS_SAMPLE // 2
 
@@ -686,7 +686,7 @@ class Handler:
                 The button
         """
         self.get_amplitude()
-        date = datetime.now()
+        date = dt.datetime.now()
         self.window.app.dynamic_exam = DynamicExam(
             date=date, pat_cod=self.window.app.patient.cod)
         self.clear_dynamic_chart()

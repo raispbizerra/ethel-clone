@@ -126,12 +126,14 @@ def amplitude_parcial(ap_ou_ml):
 	return ap_ou_ml.max() - ap_ou_ml.min()
 
 def get_amplitude(aps, mls):
+    aps = aps * .1
+    mls = mls * .1
     APs_Processado, MLs_Processado, _, _ = geraAP_ML(aps, mls)
 
     # AMPLITUDE_AP
-    amplitude_AP = amplitude_parcial(APs_Processado)
+    amplitude_AP = amplitude_parcial(APs_Processado) 
     # AMPLITUDE_ML
-    amplitude_ML = amplitude_parcial(MLs_Processado)
+    amplitude_ML = amplitude_parcial(MLs_Processado) 
 
     return amplitude_AP, amplitude_ML
 

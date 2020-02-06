@@ -87,6 +87,8 @@ class Handler():
         self.set_signals()
         self.init_los()
         self.a, self.b, self.r = self.window.app.amplitude
+        print("a = ", self.a, " b = ", self.b, " r = ", self.r)
+        
         # self.a *= 10
         # self.b *= 10
         # self.r *= 10
