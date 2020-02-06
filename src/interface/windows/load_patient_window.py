@@ -28,7 +28,8 @@ class LoadPatientWindow(Gtk.ApplicationWindow):
         # Gett glade objects
         box = builder.get_object('box')
         self.search = builder.get_object('search')
-        self.treeview_box = builder.get_object('treeview_box')
+        self.treeview = builder.get_object('treeview')
+        self.liststore = builder.get_object('liststore')
         self.load_button = builder.get_object('load_button')
         self.add(box)
 

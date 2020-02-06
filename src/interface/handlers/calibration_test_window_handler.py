@@ -28,6 +28,7 @@ class Monitor():
     def __str__(self):
         return f"Res: {self.width, self.height}\nGeo: {self.x, self.y}\nmm_size: {self.mm_size}\nCenter: {self.center}"
 
+
 class Position():
     """docstring for Position"""
     def __init__(self, x = 0, y = 0):
@@ -36,6 +37,7 @@ class Position():
 
     def __str__(self):
         return f"{self.x, self.y}"
+
 
 class ImageSurface():
     """docstring for ImageSurface"""
@@ -49,6 +51,7 @@ class ImageSurface():
     def set_position(self, x, y):
         self.pos.x = x - self.img.get_width()//2
         self.pos.y = y - self.img.get_height()//2
+
 
 class Handler():
     """This class implements Los Window Handler
@@ -127,7 +130,7 @@ class Handler():
             # Gets wbb readings
             readings = wbb.captura1(self.window.app.wiimote)
             # Gets CoP
-            cop_x, cop_y = wbb.calCoP(readings, self.window.app.device.get_calibrations(), wbb.escala_eu)
+            cop_x, cop_y = wbb.calCoP(readings, self.window.app.device.calibrations, wbb.escala_eu)
 
             self.default_weight += wbb.calcWeight(readings, self.calibrations, wbb.escala_eu)
             self.calibrated_weight += wbb.calcWeight(readings, self.window.app.calibration, wbb.escala_eu)

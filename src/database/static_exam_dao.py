@@ -2,7 +2,7 @@
 from src.database.connection import Connection
 from src.models.static_exam import StaticExam
 import src.utilities.utils as Utils
-
+import datetime as dt
 
 class StaticExamDao():
     """
@@ -41,18 +41,22 @@ class StaticExamDao():
                 Whether the operation was successful or not
         '''
         result = False
-        sql = 'INSERT INTO static_exams (sta_ex_aps, sta_ex_mls, sta_ex_date, sta_ex_type, pat_cod, usr_cod) values (?,?,?,?,?,?)'
-        sta_ex_aps = Utils.list_to_str(exam.get_aps())
-        sta_ex_mls = Utils.list_to_str(exam.get_mls())
-        sta_ex_date = Utils.datetime_to_str(exam.get_date())
+        sql = 'INSERT INTO static_exams (sta_ex_cod, sta_ex_aps, sta_ex_mls, sta_ex_date, sta_ex_type, pat_cod, usr_cod) values (?,?,?,?,?,?,?)'
+        sql_ = 'SELECT sta_ex_cod FROM static_exams ORDER BY sta_ex_cod DESC LIMIT 1'
+        sta_ex_aps = Utils.list_to_str(exam.aps)
+        sta_ex_mls = Utils.list_to_str(exam.mls)
+        # sta_ex_date = Utils.datetime_to_str(exam.date)
         try:
             self.c.connect(self.db)
-            self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, sta_ex_date, exam.get_type(
-            ), exam.get_pat_cod(), exam.get_usr_cod()])
+            cursor = self.c.conn.execute(sql_)
+            sta_ex_cod = cursor.fetchone()[0]
+            exam.cod = sta_ex_cod + 1
+            self.c.conn.execute(sql, [exam.cod, sta_ex_aps, sta_ex_mls, exam.date, exam.state, 
+                exam.pat_cod, exam.usr_cod])
             self.c.conn.commit()
             result = True
-        except:
-            print("Error!")
+        except Exception as e:
+            print(f"Error! {e}")
         finally:
             self.c.close()
         return result
@@ -80,11 +84,12 @@ class StaticExamDao():
             if result:
                 sta_ex_aps = Utils.str_to_array(result[0])
                 sta_ex_mls = Utils.str_to_array(result[1])
-                sta_ex_date = Utils.str_to_datetime(result[2])
+                # sta_ex_date = Utils.str_to_datetime(result[2])
+                sta_ex_date = dt.datetime.strptime(result[2], '%d-%m-%Y %H:%M:%S.%f')
                 exam = StaticExam(sta_ex_cod, sta_ex_aps, sta_ex_mls,
                                   sta_ex_date, result[3], result[4], result[5])
-        except:
-            print("Error!")
+        except Exception as e:
+            print("Error!", e)
         finally:
             self.c.close()
         return exam
@@ -107,15 +112,15 @@ class StaticExamDao():
         sql = 'UPDATE static_exams SET sta_ex_aps = ?, sta_ex_mls = ?, sta_ex_date = ?, sta_ex_type = ?, pat_cod = ?, usr_cod = ? WHERE sta_ex_cod = ?'
         try:
             self.c.connect(self.db)
-            sta_ex_aps = Utils.list_to_str(exam.get_aps())
-            sta_ex_mls = Utils.list_to_str(exam.get_mls())
-            sta_ex_date = Utils.datetime_to_str(exam.get_date())
-            self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, sta_ex_date, exam.get_type(
-            ), exam.get_pat_cod(), exam.get_usr_cod(), exam.get_cod()])
+            sta_ex_aps = Utils.list_to_str(exam.aps)
+            sta_ex_mls = Utils.list_to_str(exam.mls)
+            # sta_ex_date = Utils.datetime_to_str(exam.date)
+            self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, exam.date, exam.state,
+                exam.pat_cod, exam.usr_cod, exam.cod])
             self.c.conn.commit()
             result = True
-        except:
-            print("Error!")
+        except Exception as e:
+            print("Error!", e)
         finally:
             self.c.close()
         return result
@@ -135,7 +140,7 @@ class StaticExamDao():
                 Whether the operation was successful or not
         '''
         exams = list()
-        sql = 'SELECT sta_ex_cod, sta_ex_aps, sta_ex_mls, sta_ex_date, sta_ex_type, usr_cod FROM static_exams WHERE pat_cod = ?'
+        sql = 'SELECT sta_ex_cod, sta_ex_aps, sta_ex_mls, sta_ex_date, sta_ex_type, usr_cod FROM static_exams WHERE pat_cod = ? ORDER BY sta_ex_cod'
         try:
             self.c.connect(self.db)
             cursor = self.c.conn.execute(sql, [pat_cod])
@@ -144,12 +149,13 @@ class StaticExamDao():
                 for result in results:
                     sta_ex_aps = Utils.str_to_array(result[1])
                     sta_ex_mls = Utils.str_to_array(result[2])
-                    sta_ex_date = Utils.str_to_datetime(result[3])
+                    # sta_ex_date = Utils.str_to_datetime(result[3])
+                    sta_ex_date = dt.datetime.strptime(result[3], '%d-%m-%Y %H:%M:%S.%f')
                     exam = StaticExam(
                         result[0], sta_ex_aps, sta_ex_mls, sta_ex_date, result[4], pat_cod, result[5])
                     exams.append(exam)
-        except:
-            print("Error!")
+        except Exception as e:
+            print("Error!", e)
         finally:
             self.c.close()
         return exams
@@ -208,9 +214,44 @@ class StaticExamDao():
                 for result in results:
                     sta_ex_aps = Utils.str_to_array(result[1])
                     sta_ex_mls = Utils.str_to_array(result[2])
-                    sta_ex_date = Utils.str_to_datetime(result[3])
+                    # sta_ex_date = Utils.str_to_datetime(result[3])
+                    sta_ex_date = dt.datetime.strptime(result[3], '%d-%m-%Y %H:%M:%S').strftime('%d-%m-%Y %H:%M:%S')
                     exam = StaticExam(
                         result[0], sta_ex_aps, sta_ex_mls, sta_ex_date, result[4], result[5], result[6])
+                    exams.append(exam)
+        except:
+            print("Error!")
+        finally:
+            self.c.close()
+        return exams
+
+    def check(self, pat_cod: int, condition : str):
+        '''
+        This method reads an existent exam from Ethel's database.
+
+        Parameters
+        ----------
+        pat_cod : int
+                The patient cod
+
+        Returns
+        -------
+        bool or list
+                Whether the operation was successful or not
+        '''
+        exams = list()
+        sql = 'SELECT sta_ex_cod, sta_ex_aps, sta_ex_mls, sta_ex_date, sta_ex_type, usr_cod FROM static_exams WHERE pat_cod = ? AND sta_ex_type = ? ORDER BY sta_ex_date DESC'
+        try:
+            self.c.connect(self.db)
+            cursor = self.c.conn.execute(sql, [pat_cod, condition])
+            results = cursor.fetchall()
+            if results:
+                for result in results:
+                    sta_ex_aps = Utils.str_to_array(result[1])
+                    sta_ex_mls = Utils.str_to_array(result[2])
+                    sta_ex_date = Utils.str_to_datetime(result[3])
+                    exam = StaticExam(
+                        result[0], sta_ex_aps, sta_ex_mls, sta_ex_date, result[4], pat_cod, result[5])
                     exams.append(exam)
         except:
             print("Error!")

@@ -39,11 +39,11 @@ class Handler():
 		# Fill combobox
 		i = '-1'
 		mac = '00:00:00:00:00:00'
-		for d in self.device_list:
-			self.window.combo_box.insert(d.get_cod(),  str(d.get_cod()), d.get_name())
-			if d.get_is_default():
-				i = str(d.get_cod())
-				mac = d.get_mac()
+		for device in self.device_list:
+			self.window.combo_box.insert(device.cod,  str(device.cod), device.name)
+			if device.is_default:
+				i = str(device.cod)
+				mac = device.mac
 
 		# Set active id to the default device
 		self.window.combo_box.set_active_id(i)
@@ -60,9 +60,9 @@ class Handler():
 		'''
 		i = int(self.window.combo_box.get_active_id())
 		for dev in self.device_list:
-			if dev.get_cod() == i:
+			if dev.cod == i:
 				self.window.app.device = dev
-		self.window.mac.set_text(self.window.app.device.get_mac())
+		self.window.mac.set_text(self.window.app.device.mac)
 
 	def on_cancel_clicked(self, button):
 		'''
@@ -81,10 +81,10 @@ class Handler():
 		'''
 		This method get device calibrations
 		'''
-		cal_date, calibrations = self.device_dao.read_device_calibrations(self.window.app.device.get_cod())
+		cal_date, calibrations = self.device_dao.read_device_calibrations(self.window.app.device.cod)
 		if calibrations:
-			self.window.app.device.set_calibrations(calibrations)
-			self.window.app.device.set_calibration_date(cal_date)
+			self.window.app.device.calibrations = calibrations
+			self.window.app.device.calibration_date = cal_date
 		else:
 			print('Não calibrado')
 			calibration = self.window.app.wiimote.get_balance_cal()
@@ -93,11 +93,11 @@ class Handler():
 									'left_top'      : calibration[2],
 									'left_bottom'   : calibration[3]}
 			
-			self.window.app.device.set_calibrations(named_calibration)
-			self.window.app.device.set_calibration_date(datetime.now())
-			self.device_dao.create_device_calibrations(self.window.app.device.get_cod(), self.window.app.device.get_calibrations(), self.window.app.device.get_calibration_date())
+			self.window.app.device.calibrations = named_calibration
+			self.window.app.device.calibration_date = datetime.now()
+			self.device_dao.create_device_calibrations(self.window.app.device.cod, self.window.app.device.calibrations, self.window.app.device.calibration_date)
 
-		print(self.window.app.device.get_calibrations(), self.window.app.device.get_calibration_date())
+		print(self.window.app.device.calibrations, self.window.app.device.calibration_date)
 
 	def on_connect_clicked(self, button):
 		'''
@@ -113,15 +113,14 @@ class Handler():
 			Whether the operation was succesful
 		'''
 		i = int(self.window.combo_box.get_active_id())
-		for dev in self.device_list:
-			if dev.get_cod() == i:
+		for device in self.device_list:
+			if device.cod == i:
 				self.window.app.device = self.device_dao.read_device_by_cod(i)
 				break
 
-		self.window.app.wiimote = wbb.conecta(self.window.app.device.get_mac())
+		self.window.app.wiimote = wbb.conecta(self.window.app.device.mac)
 		self.get_calibrations()
 		self.window.app.connection_flags['device'] = True
-		# self.window.app.wiimote.led = 1
 		self.window.app.statusbar.set_text('Dispositivo conectado!')
 		self.window.app.main_window.edit_device.set_sensitive(True)
 		self.window.app.main_window.calibrate_device.set_sensitive(True)

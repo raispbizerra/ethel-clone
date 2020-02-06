@@ -31,7 +31,7 @@ class Handler():
 
         # Check if is modifying
         if self.window.app.change_flags['device']:
-            data = self.window.app.device.get_device()[1:]
+            data = [self.window.app.device.name, self.window.app.device.mac, self.window.app.device.is_default, self.window.app.device.calibrations, self.window.app.device.calibration_date]
             self.get_default(data[3])
             data.remove(data[2])
             for i, entry in enumerate([self.window.device_name, self.window.device_mac]):
@@ -87,18 +87,18 @@ class Handler():
 
         if self.window.app.change_flags['device']:
             # Update device
-            self.window.app.device.set_name(name)
-            self.window.app.device.set_mac(mac)
-            self.window.app.device.set_is_default(is_default)
+            self.window.app.device.name = name
+            self.window.app.device.mac = mac
+            self.window.app.device.is_default = is_default
             self.device_dao.update_device(self.window.app.device)
             # Show status
             self.window.app.statusbar.set_text('Dispositivo salvo.')
         else:
             for dev in self.device_list:
-                if dev.get_mac() == mac:
+                if dev.mac == mac:
                     self.window.statusbar.set_text('Dispositivo já existente!')
                     return
-            device = Device(dev_name=name, dev_mac=mac, dev_is_default=is_default)
+            device = Device(name=name, mac=mac, is_default=is_default)
             # Create device
             self.device_dao.create_device(device)
             # Show status

@@ -23,7 +23,7 @@ System for instrumentation of medical examinations, wii balance board version.
 ## REQUIREMENTS
 ### Packages
 ```bash
-sudo apt install flex bison libbluetooth-dev libcwiid-dev python-gobject python3-tk python3-dev at-spi2-core python3 python3-pip
+sudo apt install sox flex bison libbluetooth-dev libcwiid-dev python-gobject python3-tk python3-dev at-spi2-core python3 python3-pip
 ```
 
 #### Python3 modules

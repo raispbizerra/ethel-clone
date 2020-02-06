@@ -16,7 +16,7 @@ DT = 50
 MIN_REP = 1000
 MED_REP = 100
 MAX_REP = 10
-TESTING = True
+TESTING = False
 PAD = False
 
 
@@ -39,7 +39,7 @@ class Handler():
 				for i, sensor in enumerate(('right_top', 'right_bottom', 'left_top', 'left_bottom')):
 					self.window.app.calibration[sensor] = cal[i]
 			else:
-				self.window.app.calibration = self.window.app.device.get_calibrations()
+				self.window.app.calibration = self.window.app.device.calibrations
 
 		else:
 			self.window.test_button.hide()
@@ -59,8 +59,8 @@ class Handler():
 		self.window.calibration_button.set_label('Iniciar')
 		# Set saved and new calibration labels
 		self.window.new_calibration_label.set_text('')
-		self.window.saved_calibration_label.set_text(str(self.window.app.device.get_calibrations()))
-		self.window.saved_calibration_date_label.set_text('CALIBRAÇÃO SALVA ({}):'.format(utils.datetime_to_str(self.window.app.device.get_calibration_date())))
+		self.window.saved_calibration_label.set_text(str(self.window.app.device.calibrations))
+		self.window.saved_calibration_date_label.set_text('CALIBRAÇÃO SALVA ({}):'.format(utils.datetime_to_str(self.window.app.device.calibration_date)))
 		# Get and connect signal
 		if self.clicked_signal:
 			self.window.calibration_button.disconnect(self.clicked_signal)
@@ -188,7 +188,7 @@ class Handler():
 			# Compute sensor
 			self.current_sensor = (self.current_sensor + 1) % 4
 			if not self.current_sensor:
-				nome = f"iteracoes {self.window.app.device.get_mac()}.txt"
+				nome = f"iteracoes {self.window.app.device.mac}.txt"
 				f = open(nome, 'w')
 				cal = self.window.app.calibration
 				erro = 100.
@@ -295,7 +295,8 @@ class Handler():
 			The button
 		'''
 		# Update calibrations
-		self.device_dao.update_device_calibrations(self.window.app.device.get_cod(), self.window.app.calibration, datetime.now())
+		# self.device_dao.update_device_calibrations(self.window.app.device.cod, self.window.app.calibration, datetime.now())
+		self.device_dao.create_device_calibrations(self.window.app.device.cod, self.window.app.calibration, datetime.now())
 		# Show status
 		self.window.app.statusbar.set_text('Dispositivo calibrado!')
 		# Disconnect signal

@@ -49,8 +49,8 @@ class DeviceDao():
 			self.c.connect(self.db) 
 			cursor = self.c.conn.execute(sql)
 			dev_cod = cursor.fetchone()[0]
-			device.set_cod(dev_cod)
-			self.c.conn.execute(sql_, [device.get_cod(), device.get_name(), device.get_mac(), device.get_is_default()])
+			device.cod = dev_cod
+			self.c.conn.execute(sql_, [device.cod, device.name, device.mac, device.is_default])
 			self.c.conn.commit()
 			result = True
 		except:
@@ -138,7 +138,7 @@ class DeviceDao():
 			Whether the operation was successful or not
 		'''
 		cal_date, dev_calibrations = None, None
-		sql = 'SELECT c.cal_date, c.cal_right_top, c.cal_right_bottom, c.cal_left_top, c.cal_left_bottom FROM calibrations as c WHERE c.dev_cod = ?'
+		sql = 'SELECT c.cal_date, c.cal_right_top, c.cal_right_bottom, c.cal_left_top, c.cal_left_bottom FROM calibrations as c WHERE c.dev_cod = ? ORDER BY c.cal_date DESC LIMIT 1'
 		try:
 			self.c.connect(self.db)
 			cursor = self.c.conn.execute(sql, [dev_cod])
@@ -200,7 +200,7 @@ class DeviceDao():
 
 		try:
 			self.c.connect(self.db)
-			self.c.conn.execute(sql, [device.get_name(), device.get_mac(), device.get_is_default(), device.get_cod()])
+			self.c.conn.execute(sql, [device.name, device.mac, device.is_default, device.cod])
 			self.c.conn.commit()
 			result = True
 		except:

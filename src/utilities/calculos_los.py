@@ -87,7 +87,7 @@ def maximum_excursions(cop_x: np.array, cop_y: np.array, target_point: tuple):
     # # return distance_points((cop_x[index], cop_y[index]), CENTER) * .1
     # return distance_points((cop_x[index], cop_y[index]), CENTER)
     dist = cop_x**2 + cop_y**2
-
+    
     return sqrt(dist.max()) * .1
 
 def distance_point_line(a: tuple, b: tuple, p: tuple):
@@ -168,7 +168,7 @@ def computes_metrics(cop_x, cop_y, height, amplitude):
     metrics = dict()
     # metrics['i'] = np.zeros(8, dtype=int)
     metrics['reaction_time'] = np.zeros(8)
-    metrics['maximum_excursion'] = np.zeros(8, dtype=int)
+    metrics['maximum_excursion'] = np.zeros(8)
     metrics['directional_control'] = np.zeros(8)
 
     # LOS_DIRECTIONS
@@ -245,6 +245,3 @@ def computes_metrics(cop_x, cop_y, height, amplitude):
         metrics[key] = np.append(metrics[key][1:], metrics[key][0])
 
     return metrics
-
-if __name__ == '__main__':
-    computes_metrics()

@@ -31,6 +31,7 @@ class Monitor():
     def __str__(self):
         return f"width: {self.width}\nheight: {self.height}\n\nx: {self.x}\ny: {self.y}\n\nmm_size: {self.mm_size}\n\ncenter: {self.center}\n"
 
+
 class Position():
     """docstring for Position"""
     def __init__(self, x = 0, y = 0):
@@ -43,6 +44,7 @@ class Position():
     def get_pos(self):
         return (self.x, self.y)
 
+
 class ImageSurface():
     """docstring for ImageSurface"""
     def __init__(self, img):
@@ -53,19 +55,18 @@ class ImageSurface():
         self.pos.x = x - self.img.get_width()//2
         self.pos.y = y - self.img.get_height()//2
 
+
 class Handler():
     """This class implements Los Window Handler
     """
 
     def __init__(self, window):
         self.window = window
-        self.yellow = ImageSurface(cairo.ImageSurface.create_from_png("media/yellow_target.png"))
-        self.green = ImageSurface(cairo.ImageSurface.create_from_png("media/green_target.png"))
+        # self.yellow = ImageSurface(cairo.ImageSurface.create_from_png("media/yellow_target.png"))
+        self.yellow = ImageSurface(cairo.ImageSurface.create_from_png("media/yellow.png"))
+        # self.green = ImageSurface(cairo.ImageSurface.create_from_png("media/green_target.png"))
+        self.green = ImageSurface(cairo.ImageSurface.create_from_png("media/red.png"))
         self.target = ImageSurface(cairo.ImageSurface.create_from_png("media/ball.png"))
-
-        # self.yellow = ImageSurface(cairo.SVGSurface("media/yellow_target.svg", 25, 25))
-        # self.green = ImageSurface(cairo.SVGSurface("media/green_target.svg", 25, 25))
-        # self.target = ImageSurface(cairo.SVGSurface("media/ball.svg", 25, 25))
 
     def on_show(self, window):
         '''
@@ -86,13 +87,12 @@ class Handler():
         self.set_signals()
         self.init_los()
         self.a, self.b, self.r = self.window.app.amplitude
+        print("a = ", self.a, " b = ", self.b, " r = ", self.r)
+        
         # self.a *= 10
         # self.b *= 10
         # self.r *= 10
         self.center_counter = 0
-        print(f"a = {self.a}")
-        print(f"b = {self.b}")
-        print(f"r = {self.r}")
 
     def set_monitor(self):
         display = self.window.get_screen().get_display()
@@ -102,7 +102,6 @@ class Handler():
 
         self.monitor = monitors[-1]
         self.window.move(self.monitor.x, self.monitor.y)
-        print(self.monitor)
 
     def set_signals(self):
         self.window.drawing_area.connect('draw', self.on_draw)
@@ -111,6 +110,7 @@ class Handler():
     def on_key_press(self, widget, event):
         key = Gdk.keyval_name(event.keyval).upper()
         if key == 'ESCAPE':
+            self.window.app.wiimote.led = 0
             GLib.source_remove(self.id)
             self.window.app.statusbar.set_text('Exame interrompido.')
             self.window.hide()
@@ -147,7 +147,7 @@ class Handler():
             # Gets wbb readings
             readings = wbb.captura1(self.window.app.wiimote)
             # Gets CoP
-            cop_x, cop_y = wbb.calCoP(readings, self.window.app.device.get_calibrations(), wbb.escala_eu)
+            cop_x, cop_y = wbb.calCoP(readings, self.window.app.device.calibrations, wbb.escala_eu)
 
             self.x_mean += cop_x
             self.y_mean += cop_y
@@ -174,10 +174,10 @@ class Handler():
                 readings = wbb.captura1(self.window.app.wiimote)
 
                 # Gets CoP
-                cop_x, cop_y = wbb.calCoP(readings, self.window.app.device.get_calibrations(), wbb.escala_eu)
+                cop_x, cop_y = wbb.calCoP(readings, self.window.app.device.calibrations, wbb.escala_eu)
                 cop_x -= self.x_mean
                 cop_y -= self.y_mean
-                x_pos, y_pos = self.cop_to_pos(self.window.app.patient.get_height(), cop_x, cop_y)
+                x_pos, y_pos = self.cop_to_pos(self.window.app.patient.height, cop_x, cop_y)
                 self.green.set_position(x_pos, y_pos)
                 self.window.drawing_area.queue_draw()
 
@@ -191,7 +191,7 @@ class Handler():
                         print(cop_x, cop_y, math.sqrt(cop_x**2 + cop_y**2))
                         self.j = sample - 1
                 else:
-                    if calc_los.belongs_to_ellipsis(cop_x, cop_y, self.a, self.b, self.r):
+                    if calc_los.belongs_to_ellipsis(cop_x/10, cop_y/10, self.a, self.b, self.r):
                         self.center_counter += 1
                         if self.center_counter >= 20:
                             self.j = sample - 1
@@ -210,12 +210,12 @@ class Handler():
                 self.center_counter = 0
             return True
         else:
-            self.window.app.dynamic_exam.set_cop_x(self.dynamic_cop_x)
-            self.window.app.dynamic_exam.set_cop_y(self.dynamic_cop_y)
+            self.window.app.dynamic_exam.cop_x = self.dynamic_cop_x
+            self.window.app.dynamic_exam.cop_y = self.dynamic_cop_y
             self.window.app.main_window.handler.dynamic_metrics = calc_los.computes_metrics(
-                self.window.app.dynamic_exam.get_cop_x(),
-                self.window.app.dynamic_exam.get_cop_y(),
-                self.window.app.patient.get_height(), self.window.app.amplitude)
+                self.window.app.dynamic_exam.cop_x,
+                self.window.app.dynamic_exam.cop_y,
+                self.window.app.patient.height, self.window.app.amplitude)
             self.window.app.main_window.handler.show_dynamic_exam()
             self.window.hide()
             self.window.app.main_window.save_dynamic_exam_button.set_sensitive(True)
@@ -257,7 +257,8 @@ class Handler():
             cr.line_to(self.monitor.center.x, self.monitor.center.y)
             cr.stroke()
 
-        cr.set_source_rgb(0,0,1)
+        # cr.set_source_rgb(0,0,1)
+        cr.set_source_rgb(.035, .129, .196)
         cr.move_to(self.cur_line.x, self.cur_line.y)
         cr.line_to(self.monitor.center.x, self.monitor.center.y)
         cr.stroke()
@@ -272,14 +273,13 @@ class Handler():
             cr.set_source_surface(self.green.img, self.green.pos.x, self.green.pos.y)
             cr.paint()
 
-        a, b, r = self.window.app.amplitude
-        cog = calc_los.center_of_gravity(self.window.app.patient.get_height())
+        cog = calc_los.center_of_gravity(self.window.app.patient.height)
         angle = np.radians(8.)
-        R = cog*np.sin(angle)*10
+        R = cog*np.sin(angle)
 
-        r = (r/R) * self.monitor.center.y
-        a = (a/R) * self.monitor.center.y
-        b = (b/R) * self.monitor.center.y
+        r = (self.r/R) * self.monitor.center.y
+        a = (self.a/R) * self.monitor.center.y
+        b = (self.b/R) * self.monitor.center.y
 
         cr.save()
         cr.translate(self.monitor.center.x, self.monitor.center.y)

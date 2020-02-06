@@ -36,12 +36,12 @@ class ExamWindow(Gtk.ApplicationWindow):
     def __init__(self, app):
         # Init Gtk.Window class
         super(ExamWindow, self).__init__(application=app)
+        self.app = app
         self.set_modal(True)
         self.set_decorated(False)
         # self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_icon_from_file('media/logo_small.png')
-        self.app = app
         self.set_transient_for(self.app.main_window)
         
         self.open_eyes = True
@@ -56,6 +56,7 @@ class ExamWindow(Gtk.ApplicationWindow):
 
         # Connect signals
         self.connect('delete-event', self.on_delete_event)
+        self.connect('key-press-event', self.on_key_press)
         self.connect('show', self.on_show)
 
         self.fullscreen()
@@ -63,7 +64,7 @@ class ExamWindow(Gtk.ApplicationWindow):
     def on_show(self, window):
         self.set_monitor()  
         self.r, self.g, self.b = 1, .75, 0
-        self.time = 0
+        self.time = 3
         self.counting = True
         self.drawing_area.connect('draw', self.on_draw)
 
@@ -89,11 +90,11 @@ class ExamWindow(Gtk.ApplicationWindow):
         else:
             self.set_title('Static Posturography - Closed Eyes')
 
-        if self.counting:
-            cr.save()
-            cr.scale(5, 5)
+        if self.time:
             cr.set_source_rgb(1, 1, 1)
-            cr.move_to(self.monitor.center.x, self.monitor.center.y)
+            cr.move_to(self.monitor.center.x + 100, self.monitor.center.y)
+            cr.save()
+            cr.scale(10, 10)
             cr.show_text(f"{self.time}")
             cr.restore()
 
@@ -102,3 +103,11 @@ class ExamWindow(Gtk.ApplicationWindow):
         GLib.source_remove(self.app.main_window.method_id)
         self.hide()
         return True
+
+    def on_key_press(self, widget, event):
+        key = Gdk.keyval_name(event.keyval).upper()
+        if key == 'ESCAPE':
+            self.app.wiimote.led = 0
+            GLib.source_remove(self.app.main_window.method_id)
+            self.app.statusbar.set_text('Exame interrompido.')
+            self.hide()
