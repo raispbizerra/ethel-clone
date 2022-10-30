@@ -1,0 +1,30 @@
+name: check-file-formatting
+
+on: [push, pull_request]
+jobs:
+  check-file-formatting:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+    - name: Check out repository code 📋
+      uses: actions/checkout@v3
+    - name: Cache conda packages 🗃️
+      uses: actions/cache@v3
+      env:
+        CACHE_NUMBER: 0
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
+    - name: Setup miniconda 🐍
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: "latest"
+        activate-environment: ethel
+        environment-file: environment.yml
+        use-only-tar-bz2: true
+    - name: Run black for code formatting 🕵
+      run: |
+        conda activate ethel
+        black --check .
