@@ -1,0 +1,8 @@
+name: ethel
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - black
+  - pyside6
+  - pre-commit
