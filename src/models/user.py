@@ -1,5 +1,5 @@
-class User():
-    '''
+class User:
+    """
     This class represents a user
 
     Attributes
@@ -16,9 +16,11 @@ class User():
         User's email
     is_adm : bool
         User's is_adm
-    '''
+    """
 
-    def __init__(self, cod=None, name=None, username=None, password=None, email=None, is_adm=None):
+    def __init__(
+        self, cod=None, name=None, username=None, password=None, email=None, is_adm=None
+    ):
         self._cod = cod
         self._name = name
         self._username = username

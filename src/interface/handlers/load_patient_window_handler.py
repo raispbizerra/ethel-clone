@@ -9,14 +9,14 @@ import datetime as dt
 
 # Third party imports
 import gi
-gi.require_version('Gtk', '3.0')
+
+gi.require_version("Gtk", "3.0")
 
 # Local imports
 
 
-class Handler():
-    """This class implements Load Patient Window Handler
-    """
+class Handler:
+    """This class implements Load Patient Window Handler"""
 
     def __init__(self, window):
         self.window = window
@@ -67,9 +67,16 @@ class Handler():
 
         # Fill liststore with patients
         for patient in patients:
-            data = [patient.cod, patient.name, patient.sex, dt.datetime.strftime(
-                patient.birth, '%d-%m-%Y'), patient.height, patient.weight, patient.imc]
-            data.append(dt.datetime.strftime(patient.birth, '%Y-%m-%d'))
+            data = [
+                patient.cod,
+                patient.name,
+                patient.sex,
+                dt.datetime.strftime(patient.birth, "%d-%m-%Y"),
+                patient.height,
+                patient.weight,
+                patient.imc,
+            ]
+            data.append(dt.datetime.strftime(patient.birth, "%Y-%m-%d"))
             self.window.liststore.append(data)
 
     def on_show(self, window):
@@ -81,10 +88,10 @@ class Handler():
         window : Gtk.Window
             The window
         """
-        self.window.search.set_text('')
+        self.window.search.set_text("")
         self.window.search.grab_focus()
         self.patient_list = self.patient_dao.list_patients()  # Patient list
-        self.fill_liststore('')
+        self.fill_liststore("")
         self.window.load_button.set_sensitive(False)
         self.window.show_all()
 
@@ -138,25 +145,25 @@ class Handler():
 
         # Recover all exams from patient
         self.window.app.static_exam_list = self.static_exam_dao.read_exams_from_patient(
-            self.window.app.patient.cod)
+            self.window.app.patient.cod
+        )
 
         # Fill liststore with exams
         for exam in self.window.app.static_exam_list:
             data = list()
             data.append(exam.cod)
-            if exam.state == 'ON':
-                exam.state = 'OA'
-            elif exam.state == 'OF':
-                exam.state = 'OAE'
-            elif exam.state == 'CN':
-                exam.state = 'OF'
+            if exam.state == "ON":
+                exam.state = "OA"
+            elif exam.state == "OF":
+                exam.state = "OAE"
+            elif exam.state == "CN":
+                exam.state = "OF"
             else:
-                exam.state = 'OFE'
+                exam.state = "OFE"
             data.append(exam.state)
-            for d in dt.datetime.strftime(exam.date, '%d-%m-%Y %H:%M:%S').split(' '):
+            for d in dt.datetime.strftime(exam.date, "%d-%m-%Y %H:%M:%S").split(" "):
                 data.append(d)
-            data.append(dt.datetime.strptime(
-                data[-2], '%d-%m-%Y').strftime('%Y-%m-%d'))
+            data.append(dt.datetime.strptime(data[-2], "%d-%m-%Y").strftime("%Y-%m-%d"))
             # print(data)
             self.window.app.main_window.static_list_store.append(data)
 
@@ -164,14 +171,15 @@ class Handler():
         self.window.app.main_window.dynamic_list_store.clear()
 
         # Recover all exams from patient
-        self.window.app.dynamic_exam_list = self.dynamic_exam_dao.read_exams_from_patient(
-            self.window.app.patient.cod)
+        self.window.app.dynamic_exam_list = (
+            self.dynamic_exam_dao.read_exams_from_patient(self.window.app.patient.cod)
+        )
 
         # Fill liststore with exams
         for exam in self.window.app.dynamic_exam_list:
             data = list()
             data.append(exam.cod)
-            for d in dt.datetime.strftime(exam.date, '%d-%m-%Y %H:%M:%S').split(' '):
+            for d in dt.datetime.strftime(exam.date, "%d-%m-%Y %H:%M:%S").split(" "):
                 data.append(d)
             self.window.app.main_window.dynamic_list_store.append(data)
 
@@ -179,18 +187,15 @@ class Handler():
         grid_ap = self.window.app.main_window.exam_grid.get_child_at(1, top)
         grid_ml = self.window.app.main_window.exam_grid.get_child_at(2, top)
         grid_vm = self.window.app.main_window.exam_grid.get_child_at(3, top)
-        mean_ap, mean_ml, mean_vm = 0., 0., 0.
+        mean_ap, mean_ml, mean_vm = 0.0, 0.0, 0.0
         for i in range(3):
             metrics = calc.computes_metrics(condition[i].aps, condition[i].mls)
-            grid_ap.get_child_at(i, 0).set_text(
-                f"{round(metrics['amplitude_AP'], 2)}")
-            grid_ml.get_child_at(i, 0).set_text(
-                f"{round(metrics['amplitude_ML'], 2)}")
-            grid_vm.get_child_at(i, 0).set_text(
-                f"{round(metrics['mvelo_total'], 2)}")
-            mean_ap += metrics['amplitude_AP']
-            mean_ml += metrics['amplitude_ML']
-            mean_vm += metrics['mvelo_total']
+            grid_ap.get_child_at(i, 0).set_text(f"{round(metrics['amplitude_AP'], 2)}")
+            grid_ml.get_child_at(i, 0).set_text(f"{round(metrics['amplitude_ML'], 2)}")
+            grid_vm.get_child_at(i, 0).set_text(f"{round(metrics['mvelo_total'], 2)}")
+            mean_ap += metrics["amplitude_AP"]
+            mean_ml += metrics["amplitude_ML"]
+            mean_vm += metrics["mvelo_total"]
         mean_ap /= 3
         mean_ml /= 3
         mean_vm /= 3
@@ -207,21 +212,20 @@ class Handler():
             of = list()
             cf = list()
             for exam in self.window.app.static_exam_list:
-                if exam.state == 'ON':
+                if exam.state == "ON":
                     on.append(exam)
-                elif exam.state == 'CN':
+                elif exam.state == "CN":
                     cn.append(exam)
-                elif exam.state == 'OF':
+                elif exam.state == "OF":
                     of.append(exam)
                 else:
                     cf.append(exam)
 
             for i, c in enumerate((on, cn, of, cf)):
-                self.fill_grid(i+2, c)
+                self.fill_grid(i + 2, c)
 
     def get_patient_age(self):
-        age = int((dt.datetime.now().date() -
-                  self.window.app.patient.birth).days / 365)
+        age = int((dt.datetime.now().date() - self.window.app.patient.birth).days / 365)
         return f"{age} anos"
 
     def on_load_clicked(self, button: Gtk.Button):
@@ -234,13 +238,13 @@ class Handler():
             The button
         """
         # Assign patient
-        self.window.app.patient = self.patient_dao.read_patient(
-            self.patient_cod)
+        self.window.app.patient = self.patient_dao.read_patient(self.patient_cod)
 
         # txt = "Nome: {}\tAltura (cm): {}".format(self.window.app.patient.name, self.window.app.patient.height)
         # self.window.app.patient_label.set_text(txt)
         self.window.app.patient_label.set_text(
-            f"{self.window.app.patient.name}\t{self.get_patient_age()}")
+            f"{self.window.app.patient.name}\t{self.get_patient_age()}"
+        )
         self.window.app.statusbar.set_text("Paciente carregado.")
 
         self.window.app.main_window.edit_patient.set_sensitive(True)
@@ -255,11 +259,12 @@ class Handler():
         # self.fill_exams()
 
         self.window.app.main_window.handler.on_state_changed(
-            self.window.app.main_window.start_static_exam_button)
+            self.window.app.main_window.start_static_exam_button
+        )
         self.window.app.main_window.handler.get_exam()
 
         # Hiding the window
-        self.window.app.connection_flags['patient'] = True
+        self.window.app.connection_flags["patient"] = True
         self.window.hide()
 
     def on_patients_tree_button_press_event(self, treeview, event):

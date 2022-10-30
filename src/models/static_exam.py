@@ -1,11 +1,11 @@
-class StaticExam():
-    '''
+class StaticExam:
+    """
     This class represents a static exam .
 
     Attributes
     ----------
     cod : int
-        Exam's code at the database; 
+        Exam's code at the database;
     aps : list
         Exam's anteroposterior mensuration;
     mls : list
@@ -18,9 +18,18 @@ class StaticExam():
         Exam's user code;
     state : str
         Exam's state.
-    '''
+    """
 
-    def __init__(self, cod=None, aps=None, mls=None, date=None, state=None, pat_cod=None, usr_cod=None):
+    def __init__(
+        self,
+        cod=None,
+        aps=None,
+        mls=None,
+        date=None,
+        state=None,
+        pat_cod=None,
+        usr_cod=None,
+    ):
         self._cod = cod
         self._aps = aps
         self._mls = mls

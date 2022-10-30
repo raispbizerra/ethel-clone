@@ -23,7 +23,8 @@ import sys
 
 # Third party imports
 import gi
-gi.require_version('Gtk', '3.0')
+
+gi.require_version("Gtk", "3.0")
 
 # Local imports
 # Windows
@@ -40,9 +41,8 @@ class Ethel(Gtk.Application):
         self._static_exam = StaticExam()
         self._dynamic_exam = DynamicExam()
         self._wiimote = None
-        self._change_flags = {'patient': False, 'device': False, 'user': False}
-        self._connection_flags = {
-            'patient': False, 'device': False, 'user': False}
+        self._change_flags = {"patient": False, "device": False, "user": False}
+        self._connection_flags = {"patient": False, "device": False, "user": False}
         self.style()
 
     @property
@@ -200,14 +200,15 @@ class Ethel(Gtk.Application):
     def style(self):
         style_provider = Gtk.CssProvider()
         css = None
-        with open('src/interface/css/gtk.css', 'rb') as css_file:
+        with open("src/interface/css/gtk.css", "rb") as css_file:
             css = css_file.read()
 
         style_provider.load_from_data(css)
 
         Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), style_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            Gdk.Screen.get_default(),
+            style_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
 
     def get_windows(self):
@@ -257,7 +258,7 @@ class Ethel(Gtk.Application):
         GLib.timeout_add_seconds(1, self.main_window.verify_connection)
 
     def verify_connection_flags(self):
-        if self.connection_flags['device'] and self.connection_flags['patient']:
+        if self.connection_flags["device"] and self.connection_flags["patient"]:
             self.calibration_window.calibration_button.set_sensitive(True)
             self.main_window.start_static_exam_button.set_sensitive(True)
             self.main_window.start_dynamic_exam_button.set_sensitive(True)
@@ -267,6 +268,6 @@ class Ethel(Gtk.Application):
         return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = Ethel()
     app.run(sys.argv)

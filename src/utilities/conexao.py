@@ -10,8 +10,11 @@ def verifyConnection():
 
 def searchWBB():
     print("Start discovering....")
-    nearby_devices = [d for d in bluetooth.discover_devices(
-        duration=1, lookup_names=True) if 'Nintendo' in d[1]]
+    nearby_devices = [
+        d
+        for d in bluetooth.discover_devices(duration=1, lookup_names=True)
+        if "Nintendo" in d[1]
+    ]
 
     return nearby_devices
 
@@ -22,7 +25,7 @@ def connectToWBB(MAC):
     wiimote.request_status()
 
     i = 1
-    while wiimote.state['ext_type'] != cwiid.EXT_BALANCE:
+    while wiimote.state["ext_type"] != cwiid.EXT_BALANCE:
         try:
             wiimote = cwiid.Wiimote(MAC)
             wiimote.rpt_mode = cwiid.RPT_BALANCE | cwiid.RPT_BTN
@@ -34,7 +37,7 @@ def connectToWBB(MAC):
             print("attempt " + str(i))
             i += 1
 
-    battery = wiimote.state['battery'] / cwiid.BATTERY_MAX
+    battery = wiimote.state["battery"] / cwiid.BATTERY_MAX
 
     return wiimote, battery
 

@@ -1796,7 +1796,7 @@
                   <object class="GtkLabel" id="instructionslabel_in_saved">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Abra o compartimento de baterias e 
+                    <property name="label" translatable="yes">Abra o compartimento de baterias e
 pressione o botão vermelho "SYNC".</property>
                     <property name="justify">center</property>
                   </object>

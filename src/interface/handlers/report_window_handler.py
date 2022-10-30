@@ -8,16 +8,16 @@ import datetime
 
 # Third party imports
 import gi
-gi.require_version('Gtk', '3.0')
+
+gi.require_version("Gtk", "3.0")
 
 # Local imports
 
 LIMIT = 3
 
 
-class Handler():
-    """This class implements Load Patient Window Handler
-    """
+class Handler:
+    """This class implements Load Patient Window Handler"""
 
     def __init__(self, window):
         self.window = window
@@ -30,9 +30,8 @@ class Handler():
         patients = self.patient_dao.list_patients()
         for patient in patients:
             exams = {}
-            for condition in ('ON', 'CN', 'OF', 'CF'):
-                exams[condition] = self.static_exam_dao.check(
-                    patient.cod, condition)
+            for condition in ("ON", "CN", "OF", "CF"):
+                exams[condition] = self.static_exam_dao.check(patient.cod, condition)
                 if len(exams[condition]) >= LIMIT:
                     self.patients.append(patient)
                     break
@@ -80,11 +79,23 @@ class Handler():
 
     def fill_metrics(self):
         metrics = [
-            'AP_', 'ML_', 'dis_media', 'dis_mediaAP',
-            'dis_mediaML', 'dis_rms_total', 'dis_rms_AP',
-            'dis_rms_ML', 'totex_total', 'totex_AP', 'totex_ML',
-            'mvelo_total', 'mvelo_AP', 'mvelo_ML', 'amplitude_total',
-            'amplitude_AP', 'amplitude_ML'
+            "AP_",
+            "ML_",
+            "dis_media",
+            "dis_mediaAP",
+            "dis_mediaML",
+            "dis_rms_total",
+            "dis_rms_AP",
+            "dis_rms_ML",
+            "totex_total",
+            "totex_AP",
+            "totex_ML",
+            "mvelo_total",
+            "mvelo_AP",
+            "mvelo_ML",
+            "amplitude_total",
+            "amplitude_AP",
+            "amplitude_ML",
         ]
         self.window.metrics_liststore.clear()
         # Fill liststore
@@ -94,13 +105,12 @@ class Handler():
     def fill_patients(self):
         self.window.patients_liststore.clear()
         for patient in self.patients:
-            self.window.patients_liststore.append(
-                (False, patient.cod, patient.name))
+            self.window.patients_liststore.append((False, patient.cod, patient.name))
 
     def on_close(self, window):
 
         for pat_cod in self.window.patients_selection:
-            report = {'ON': [], 'CN': [], 'OF': [], 'CF': []}
+            report = {"ON": [], "CN": [], "OF": [], "CF": []}
             for condition in report.keys():
                 exams = self.static_exam_dao.check(pat_cod, condition)[:LIMIT]
                 for exam in exams:

@@ -14,8 +14,8 @@ except:
     print("e também o patch da Wii Balance Board.")
     sys.exit(1)
 
-escala_jp = 1700.  # Escala Japão 17 Kg * 2 = 34,0 Kg * 4 = 136 Kg
-escala_eu = 1875.  # Escala EUA 18,5 Kg * 2 = 37,5 Kg * 4 = 150 Kg
+escala_jp = 1700.0  # Escala Japão 17 Kg * 2 = 34,0 Kg * 4 = 136 Kg
+escala_eu = 1875.0  # Escala EUA 18,5 Kg * 2 = 37,5 Kg * 4 = 150 Kg
 
 
 def captura(wiimote, min=False, rep=100):
@@ -32,14 +32,14 @@ def captura(wiimote, min=False, rep=100):
     per = 0
     for i in range(rep):
         wiimote.request_status()
-        readings = wiimote.state['balance']
+        readings = wiimote.state["balance"]
         # weight = (calcweight(wiimote.state['balance'], named_calibration) / 100.0)
         # print(readings)
         # if (i%fat == 0):
         #    print(per, "%")
         #    per += 10
         j = 0
-        for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
+        for sensor in ("right_top", "right_bottom", "left_top", "left_bottom"):
             calibre[i, j] = readings[sensor]
             j += 1
 
@@ -51,7 +51,7 @@ def captura(wiimote, min=False, rep=100):
 
     saida = np.zeros(4)
     j = 0
-    for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
+    for sensor in ("right_top", "right_bottom", "left_top", "left_bottom"):
         if min:
             saida[j] = calibre[:, j].min()
         else:
@@ -63,7 +63,9 @@ def captura(wiimote, min=False, rep=100):
 
 def saida_(calibre, min=False):
     saida = np.zeros(4)
-    for j, sensor in enumerate(['right_top', 'right_bottom', 'left_top', 'left_bottom']):
+    for j, sensor in enumerate(
+        ["right_top", "right_bottom", "left_top", "left_bottom"]
+    ):
         if min:
             saida[j] = calibre[:, j].min()
         else:
@@ -74,7 +76,7 @@ def saida_(calibre, min=False):
 
 def captura1(wiimote):
     wiimote.request_status()
-    readings = wiimote.state['balance']
+    readings = wiimote.state["balance"]
 
     return readings
 
@@ -96,9 +98,11 @@ def conecta(mac=""):
     wiimote.rpt_mode = cwiid.RPT_BALANCE | cwiid.RPT_BTN
     wiimote.request_status()
 
-    while wiimote.state['ext_type'] != cwiid.EXT_BALANCE:
-        print('Este programa suporta apenas o Wii Balance Board')
-        print("Por favor, pressione o botão vermelho 'conectar' na Wii Balance Board (WBB), dentro do compartimento da bateria.")
+    while wiimote.state["ext_type"] != cwiid.EXT_BALANCE:
+        print("Este programa suporta apenas o Wii Balance Board")
+        print(
+            "Por favor, pressione o botão vermelho 'conectar' na Wii Balance Board (WBB), dentro do compartimento da bateria."
+        )
         print("Não pise na WBB.")
         wiimote.close()
         wiimote = cwiid.Wiimote(mac)
@@ -116,13 +120,16 @@ def gsc(readings, pos, calibrations, escala):
     if reading < calibration[1]:
         return escala * (reading - calibration[0]) / (calibration[1] - calibration[0])
     else:
-        return escala * (reading - calibration[1]) / (calibration[2] - calibration[1]) + escala
+        return (
+            escala * (reading - calibration[1]) / (calibration[2] - calibration[1])
+            + escala
+        )
 
 
 def calcWeight(readings, calibrations, escala):
     dx = np.zeros(4)
     j = 0
-    for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
+    for sensor in ("right_top", "right_bottom", "left_top", "left_bottom"):
         dx[j] = gsc(readings, sensor, calibrations, escala)
         j += 1
     peso = dx.sum()
@@ -136,20 +143,20 @@ def calPos(readings, calibrations, escala):
     lb = 3
     dx = np.zeros(4)
     j = 0
-    for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
+    for sensor in ("right_top", "right_bottom", "left_top", "left_bottom"):
         dx[j] = gsc(readings, sensor, calibrations, escala)
         j += 1
     x_balance = (dx[rt] + dx[rb]) / (dx[lt] + dx[lb])
     if x_balance > 1:
         x_balance = -1 * ((dx[lt] + dx[lb]) / (dx[rt] + dx[rb])) + 1
     else:
-        x_balance = x_balance - 1.
+        x_balance = x_balance - 1.0
 
     y_balance = (dx[lb] + dx[rb]) / (dx[lt] + dx[rt])
     if y_balance > 1:
         y_balance = -1 * ((dx[lt] + dx[rt]) / (dx[lb] + dx[rb])) + 1
     else:
-        y_balance = y_balance - 1.
+        y_balance = y_balance - 1.0
 
     return x_balance, y_balance
 
@@ -164,7 +171,7 @@ def calCoP(readings, calibrations, escala):
 
     F = np.zeros(4)
     j = 0
-    for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
+    for sensor in ("right_top", "right_bottom", "left_top", "left_bottom"):
         F[j] = gsc(readings, sensor, calibrations, escala)
         j += 1
 
@@ -195,121 +202,125 @@ def calCoP_(readings, calibrations, escala):
 def calibra_medios(wiimote, calibrations, sensor, sinal_RB, sinal_LT, sinal_LB, escala):
     print("Calibrando o sinal medio")
 
-    readings_RT = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_RB = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_LT = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_LB = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    for i, sensor in enumerate(['right_top', 'right_bottom', 'left_top', 'left_bottom']):
+    readings_RT = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_RB = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_LT = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_LB = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    for i, sensor in enumerate(
+        ["right_top", "right_bottom", "left_top", "left_bottom"]
+    ):
         readings_RT[sensor] = sinal_RT[i]
         readings_RB[sensor] = sinal_RB[i]
         readings_LT[sensor] = sinal_LT[i]
         readings_LB[sensor] = sinal_LB[i]
 
     for i in range(10):
-        P_res = gsc(readings_RT, 'right_bottom', calibrations, escala)
-        P_res += gsc(readings_RT, 'left_top', calibrations, escala)
-        P_res += gsc(readings_RT, 'left_bottom', calibrations, escala)
-        cal = (escala / (1070 - P_res)) * (readings_RT['right_top'] - calibrations['right_top'][0]) + \
-            calibrations['right_top'][0]
-        calibrations['right_top'][1] = cal
+        P_res = gsc(readings_RT, "right_bottom", calibrations, escala)
+        P_res += gsc(readings_RT, "left_top", calibrations, escala)
+        P_res += gsc(readings_RT, "left_bottom", calibrations, escala)
+        cal = (escala / (1070 - P_res)) * (
+            readings_RT["right_top"] - calibrations["right_top"][0]
+        ) + calibrations["right_top"][0]
+        calibrations["right_top"][1] = cal
 
-        P_res = gsc(readings_RB, 'right_top', calibrations, escala)
-        P_res += gsc(readings_RB, 'left_top', calibrations, escala)
-        P_res += gsc(readings_RB, 'left_bottom', calibrations, escala)
-        cal = (escala / (1070 - P_res)) * (readings_RB['right_bottom'] - calibrations['right_bottom'][0]) + \
-            calibrations['right_bottom'][0]
-        calibrations['right_bottom'][1] = cal
+        P_res = gsc(readings_RB, "right_top", calibrations, escala)
+        P_res += gsc(readings_RB, "left_top", calibrations, escala)
+        P_res += gsc(readings_RB, "left_bottom", calibrations, escala)
+        cal = (escala / (1070 - P_res)) * (
+            readings_RB["right_bottom"] - calibrations["right_bottom"][0]
+        ) + calibrations["right_bottom"][0]
+        calibrations["right_bottom"][1] = cal
 
-        P_res = gsc(readings_LT, 'right_top', calibrations, escala)
-        P_res += gsc(readings_LT, 'right_bottom', calibrations, escala)
-        P_res += gsc(readings_LT, 'left_bottom', calibrations, escala)
-        cal = (escala / (1070 - P_res)) * (readings_LT['left_top'] - calibrations['left_top'][0]) + \
-            calibrations['left_top'][0]
-        calibrations['left_top'][1] = cal
+        P_res = gsc(readings_LT, "right_top", calibrations, escala)
+        P_res += gsc(readings_LT, "right_bottom", calibrations, escala)
+        P_res += gsc(readings_LT, "left_bottom", calibrations, escala)
+        cal = (escala / (1070 - P_res)) * (
+            readings_LT["left_top"] - calibrations["left_top"][0]
+        ) + calibrations["left_top"][0]
+        calibrations["left_top"][1] = cal
 
-        P_res = gsc(readings_LB, 'right_top', calibrations, escala)
-        P_res += gsc(readings_LB, 'right_bottom', calibrations, escala)
-        P_res += gsc(readings_LB, 'left_top', calibrations, escala)
-        cal = (escala / (1070 - P_res)) * (readings_LB['left_bottom'] - calibrations['left_bottom'][0]) + \
-            calibrations['left_bottom'][0]
-        calibrations['left_bottom'][1] = cal
+        P_res = gsc(readings_LB, "right_top", calibrations, escala)
+        P_res += gsc(readings_LB, "right_bottom", calibrations, escala)
+        P_res += gsc(readings_LB, "left_top", calibrations, escala)
+        cal = (escala / (1070 - P_res)) * (
+            readings_LB["left_bottom"] - calibrations["left_bottom"][0]
+        ) + calibrations["left_bottom"][0]
+        calibrations["left_bottom"][1] = cal
 
     return calibrations
 
 
-def calibra_maximos(wiimote, calibrations, sinal_RT, sinal_RB, sinal_LT, sinal_LB, escala):
+def calibra_maximos(
+    wiimote, calibrations, sinal_RT, sinal_RB, sinal_LT, sinal_LB, escala
+):
     print("Calibrando o sinal máximo")
 
     j = 0
-    readings_RT = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_RB = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_LT = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_LB = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
+    readings_RT = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_RB = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_LT = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_LB = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    for sensor in ("right_top", "right_bottom", "left_top", "left_bottom"):
         readings_RT[sensor] = sinal_RT[j]
         readings_RB[sensor] = sinal_RB[j]
         readings_LT[sensor] = sinal_LT[j]
         readings_LB[sensor] = sinal_LB[j]
         j += 1
 
-    P_res = gsc(readings_RT, 'right_bottom', calibrations, escala)
-    P_res += gsc(readings_RT, 'left_top', calibrations, escala)
-    P_res += gsc(readings_RT, 'left_bottom', calibrations, escala)
+    P_res = gsc(readings_RT, "right_bottom", calibrations, escala)
+    P_res += gsc(readings_RT, "left_top", calibrations, escala)
+    P_res += gsc(readings_RT, "left_bottom", calibrations, escala)
     P_res = 3070 - P_res - escala
-    cal = (escala / P_res) * (readings_RT['right_top'] -
-                              calibrations['right_top'][1]) + calibrations['right_top'][1]
-    calibrations['right_top'][2] = cal
+    cal = (escala / P_res) * (
+        readings_RT["right_top"] - calibrations["right_top"][1]
+    ) + calibrations["right_top"][1]
+    calibrations["right_top"][2] = cal
 
-    P_res = gsc(readings_RB, 'right_top', calibrations, escala)
-    P_res += gsc(readings_RB, 'left_top', calibrations, escala)
-    P_res += gsc(readings_RB, 'left_bottom', calibrations, escala)
+    P_res = gsc(readings_RB, "right_top", calibrations, escala)
+    P_res += gsc(readings_RB, "left_top", calibrations, escala)
+    P_res += gsc(readings_RB, "left_bottom", calibrations, escala)
     P_res = 3070 - P_res - escala
-    cal = (escala / P_res) * (readings_RB['right_bottom'] - calibrations['right_bottom'][1]) + \
-        calibrations['right_bottom'][1]
-    calibrations['right_bottom'][2] = cal
+    cal = (escala / P_res) * (
+        readings_RB["right_bottom"] - calibrations["right_bottom"][1]
+    ) + calibrations["right_bottom"][1]
+    calibrations["right_bottom"][2] = cal
 
-    P_res = gsc(readings_LT, 'right_top', calibrations, escala)
-    P_res += gsc(readings_LT, 'right_bottom', calibrations, escala)
-    P_res += gsc(readings_LT, 'left_bottom', calibrations, escala)
+    P_res = gsc(readings_LT, "right_top", calibrations, escala)
+    P_res += gsc(readings_LT, "right_bottom", calibrations, escala)
+    P_res += gsc(readings_LT, "left_bottom", calibrations, escala)
     P_res = 3070 - P_res - escala
-    cal = (escala / P_res) * (readings_LT['left_top'] -
-                              calibrations['left_top'][1]) + calibrations['left_top'][1]
-    calibrations['left_top'][2] = cal
+    cal = (escala / P_res) * (
+        readings_LT["left_top"] - calibrations["left_top"][1]
+    ) + calibrations["left_top"][1]
+    calibrations["left_top"][2] = cal
 
-    P_res = gsc(readings_LB, 'right_top', calibrations, escala)
-    P_res += gsc(readings_LB, 'right_bottom', calibrations, escala)
-    P_res += gsc(readings_LB, 'left_top', calibrations, escala)
+    P_res = gsc(readings_LB, "right_top", calibrations, escala)
+    P_res += gsc(readings_LB, "right_bottom", calibrations, escala)
+    P_res += gsc(readings_LB, "left_top", calibrations, escala)
     P_res = 3070 - P_res - escala
-    cal = (escala / P_res) * (readings_LB['left_bottom'] - calibrations['left_bottom'][1]) + \
-        calibrations['left_bottom'][1]
-    calibrations['left_bottom'][2] = cal
+    cal = (escala / P_res) * (
+        readings_LB["left_bottom"] - calibrations["left_bottom"][1]
+    ) + calibrations["left_bottom"][1]
+    calibrations["left_bottom"][2] = cal
 
     return calibrations
 
 
 def p_res(readings, sensor, calibrations, escala, peso, signal, max=False):
-    res_weight = 0.
-    sensors = ['right_top', 'right_bottom', 'left_top', 'left_bottom']
+    res_weight = 0.0
+    sensors = ["right_top", "right_bottom", "left_top", "left_bottom"]
     sensors.remove(sensor)
     for s in sensors:
         res_weight += gsc(readings, s, calibrations, escala)
     if max:
         res_weight = peso - res_weight - escala
-        cal = (escala / res_weight) * \
-            (readings[sensor] - calibrations[sensor]
-             [signal-1]) + calibrations[sensor][signal-1]
+        cal = (escala / res_weight) * (
+            readings[sensor] - calibrations[sensor][signal - 1]
+        ) + calibrations[sensor][signal - 1]
     else:
-        cal = (escala / (peso - res_weight)) * \
-            (readings[sensor] - calibrations[sensor]
-             [signal-1]) + calibrations[sensor][signal-1]
+        cal = (escala / (peso - res_weight)) * (
+            readings[sensor] - calibrations[sensor][signal - 1]
+        ) + calibrations[sensor][signal - 1]
     calibrations[sensor][signal] = cal
 
 
@@ -334,9 +345,8 @@ def main():
     Medio = Minimos + escala
     Maximos = Medio + escala
     j = 0
-    calibrations = {'right_top': 0, 'right_bottom': 0,
-                    'left_top': 0, 'left_bottom': 0}
-    for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
+    calibrations = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    for sensor in ("right_top", "right_bottom", "left_top", "left_bottom"):
         calibrations[sensor] = [Minimos[j], Medio[j], Maximos[j]]
         j += 1
 
@@ -368,15 +378,11 @@ def main():
     print("sinal_LB = ", sinal_LB)
 
     j = 0
-    readings_RT = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_RB = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_LT = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_LB = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
+    readings_RT = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_RB = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_LT = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_LB = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    for sensor in ("right_top", "right_bottom", "left_top", "left_bottom"):
         readings_RT[sensor] = sinal_RT[j]
         readings_RB[sensor] = sinal_RB[j]
         readings_LT[sensor] = sinal_LT[j]
@@ -384,33 +390,37 @@ def main():
         j += 1
 
     for i in range(10):
-        P_res = gsc(readings_RT, 'right_bottom', calibrations, escala)
-        P_res += gsc(readings_RT, 'left_top', calibrations, escala)
-        P_res += gsc(readings_RT, 'left_bottom', calibrations, escala)
-        cal = (escala / (1070 - P_res)) * (readings_RT['right_top'] - calibrations['right_top'][0]) + \
-            calibrations['right_top'][0]
-        calibrations['right_top'][1] = cal
+        P_res = gsc(readings_RT, "right_bottom", calibrations, escala)
+        P_res += gsc(readings_RT, "left_top", calibrations, escala)
+        P_res += gsc(readings_RT, "left_bottom", calibrations, escala)
+        cal = (escala / (1070 - P_res)) * (
+            readings_RT["right_top"] - calibrations["right_top"][0]
+        ) + calibrations["right_top"][0]
+        calibrations["right_top"][1] = cal
 
-        P_res = gsc(readings_RB, 'right_top', calibrations, escala)
-        P_res += gsc(readings_RB, 'left_top', calibrations, escala)
-        P_res += gsc(readings_RB, 'left_bottom', calibrations, escala)
-        cal = (escala / (1070 - P_res)) * (readings_RB['right_bottom'] - calibrations['right_bottom'][0]) + \
-            calibrations['right_bottom'][0]
-        calibrations['right_bottom'][1] = cal
+        P_res = gsc(readings_RB, "right_top", calibrations, escala)
+        P_res += gsc(readings_RB, "left_top", calibrations, escala)
+        P_res += gsc(readings_RB, "left_bottom", calibrations, escala)
+        cal = (escala / (1070 - P_res)) * (
+            readings_RB["right_bottom"] - calibrations["right_bottom"][0]
+        ) + calibrations["right_bottom"][0]
+        calibrations["right_bottom"][1] = cal
 
-        P_res = gsc(readings_LT, 'right_top', calibrations, escala)
-        P_res += gsc(readings_LT, 'right_bottom', calibrations, escala)
-        P_res += gsc(readings_LT, 'left_bottom', calibrations, escala)
-        cal = (escala / (1070 - P_res)) * (readings_LT['left_top'] - calibrations['left_top'][0]) + \
-            calibrations['left_top'][0]
-        calibrations['left_top'][1] = cal
+        P_res = gsc(readings_LT, "right_top", calibrations, escala)
+        P_res += gsc(readings_LT, "right_bottom", calibrations, escala)
+        P_res += gsc(readings_LT, "left_bottom", calibrations, escala)
+        cal = (escala / (1070 - P_res)) * (
+            readings_LT["left_top"] - calibrations["left_top"][0]
+        ) + calibrations["left_top"][0]
+        calibrations["left_top"][1] = cal
 
-        P_res = gsc(readings_LB, 'right_top', calibrations, escala)
-        P_res += gsc(readings_LB, 'right_bottom', calibrations, escala)
-        P_res += gsc(readings_LB, 'left_top', calibrations, escala)
-        cal = (escala / (1070 - P_res)) * (readings_LB['left_bottom'] - calibrations['left_bottom'][0]) + \
-            calibrations['left_bottom'][0]
-        calibrations['left_bottom'][1] = cal
+        P_res = gsc(readings_LB, "right_top", calibrations, escala)
+        P_res += gsc(readings_LB, "right_bottom", calibrations, escala)
+        P_res += gsc(readings_LB, "left_top", calibrations, escala)
+        cal = (escala / (1070 - P_res)) * (
+            readings_LB["left_bottom"] - calibrations["left_bottom"][0]
+        ) + calibrations["left_bottom"][0]
+        calibrations["left_bottom"][1] = cal
 
         # print("Calibração :", calibrations)
 
@@ -446,52 +456,52 @@ def main():
     print("sinal_LB = ", sinal_LB)
 
     j = 0
-    readings_RT = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_RB = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_LT = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    readings_LB = {'right_top': 0, 'right_bottom': 0,
-                   'left_top': 0, 'left_bottom': 0}
-    for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
+    readings_RT = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_RB = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_LT = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    readings_LB = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    for sensor in ("right_top", "right_bottom", "left_top", "left_bottom"):
         readings_RT[sensor] = sinal_RT[j]
         readings_RB[sensor] = sinal_RB[j]
         readings_LT[sensor] = sinal_LT[j]
         readings_LB[sensor] = sinal_LB[j]
         j += 1
 
-    P_res = gsc(readings_RT, 'right_bottom', calibrations, escala)
-    P_res += gsc(readings_RT, 'left_top', calibrations, escala)
-    P_res += gsc(readings_RT, 'left_bottom', calibrations, escala)
+    P_res = gsc(readings_RT, "right_bottom", calibrations, escala)
+    P_res += gsc(readings_RT, "left_top", calibrations, escala)
+    P_res += gsc(readings_RT, "left_bottom", calibrations, escala)
     P_res = 3070 - P_res - escala
-    cal = (escala / P_res) * (readings_RT['right_top'] -
-                              calibrations['right_top'][1]) + calibrations['right_top'][1]
-    calibrations['right_top'][2] = cal
+    cal = (escala / P_res) * (
+        readings_RT["right_top"] - calibrations["right_top"][1]
+    ) + calibrations["right_top"][1]
+    calibrations["right_top"][2] = cal
 
-    P_res = gsc(readings_RB, 'right_top', calibrations, escala)
-    P_res += gsc(readings_RB, 'left_top', calibrations, escala)
-    P_res += gsc(readings_RB, 'left_bottom', calibrations, escala)
+    P_res = gsc(readings_RB, "right_top", calibrations, escala)
+    P_res += gsc(readings_RB, "left_top", calibrations, escala)
+    P_res += gsc(readings_RB, "left_bottom", calibrations, escala)
     P_res = 3070 - P_res - escala
-    cal = (escala / P_res) * (readings_RB['right_bottom'] - calibrations['right_bottom'][1]) + \
-        calibrations['right_bottom'][1]
-    calibrations['right_bottom'][2] = cal
+    cal = (escala / P_res) * (
+        readings_RB["right_bottom"] - calibrations["right_bottom"][1]
+    ) + calibrations["right_bottom"][1]
+    calibrations["right_bottom"][2] = cal
 
-    P_res = gsc(readings_LT, 'right_top', calibrations, escala)
-    P_res += gsc(readings_LT, 'right_bottom', calibrations, escala)
-    P_res += gsc(readings_LT, 'left_bottom', calibrations, escala)
+    P_res = gsc(readings_LT, "right_top", calibrations, escala)
+    P_res += gsc(readings_LT, "right_bottom", calibrations, escala)
+    P_res += gsc(readings_LT, "left_bottom", calibrations, escala)
     P_res = 3070 - P_res - escala
-    cal = (escala / P_res) * (readings_LT['left_top'] -
-                              calibrations['left_top'][1]) + calibrations['left_top'][1]
-    calibrations['left_top'][2] = cal
+    cal = (escala / P_res) * (
+        readings_LT["left_top"] - calibrations["left_top"][1]
+    ) + calibrations["left_top"][1]
+    calibrations["left_top"][2] = cal
 
-    P_res = gsc(readings_LB, 'right_top', calibrations, escala)
-    P_res += gsc(readings_LB, 'right_bottom', calibrations, escala)
-    P_res += gsc(readings_LB, 'left_top', calibrations, escala)
+    P_res = gsc(readings_LB, "right_top", calibrations, escala)
+    P_res += gsc(readings_LB, "right_bottom", calibrations, escala)
+    P_res += gsc(readings_LB, "left_top", calibrations, escala)
     P_res = 3070 - P_res - escala
-    cal = (escala / P_res) * (readings_LB['left_bottom'] - calibrations['left_bottom'][1]) + \
-        calibrations['left_bottom'][1]
-    calibrations['left_bottom'][2] = cal
+    cal = (escala / P_res) * (
+        readings_LB["left_bottom"] - calibrations["left_bottom"][1]
+    ) + calibrations["left_bottom"][1]
+    calibrations["left_bottom"][2] = cal
 
     print("Calibração :", calibrations)
 
@@ -500,9 +510,8 @@ def main():
     sinal = captura(wiimote, False, 10)
     dx = np.zeros(4)
     j = 0
-    readings = {'right_top': 0, 'right_bottom': 0,
-                'left_top': 0, 'left_bottom': 0}
-    for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
+    readings = {"right_top": 0, "right_bottom": 0, "left_top": 0, "left_bottom": 0}
+    for sensor in ("right_top", "right_bottom", "left_top", "left_bottom"):
         readings[sensor] = sinal[j]
         dx[j] = gsc(readings, sensor, calibrations, escala)
         j += 1

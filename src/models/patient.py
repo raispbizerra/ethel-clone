@@ -1,11 +1,11 @@
-class Patient():
-    '''
+class Patient:
+    """
     This class represents a patient
 
     Attributes
     ----------
     cod : int
-        Patient's code at the database 
+        Patient's code at the database
     name : str
         Patient's name
     sex : str
@@ -18,9 +18,18 @@ class Patient():
         Patient's weight
     imc : float
         Patient's imc
-    '''
+    """
 
-    def __init__(self, cod=None, name=None, sex=None, birth=None, height=None, weight=None, imc=None):
+    def __init__(
+        self,
+        cod=None,
+        name=None,
+        sex=None,
+        birth=None,
+        height=None,
+        weight=None,
+        imc=None,
+    ):
         self._cod = cod
         self._name = name
         self._sex = sex

@@ -4,7 +4,7 @@ from src.models.patient import Patient
 import src.utilities.utils as Utils
 
 
-class PatientDao():
+class PatientDao:
     """
     This class communicates Ethel's database to create, read and update patients
 
@@ -14,7 +14,7 @@ class PatientDao():
             Path to the database
     """
 
-    def __init__(self, database='src/database/ethel.db'):
+    def __init__(self, database="src/database/ethel.db"):
         self.__c = Connection()
         self.__db = database
 
@@ -27,7 +27,7 @@ class PatientDao():
         return self.__db
 
     def create_patient(self, patient: Patient):
-        '''
+        """
         This method creates a new patient into Ethel's database.
 
         Parameters
@@ -39,18 +39,28 @@ class PatientDao():
         -------
         bool
                 Whether the operation was successful or not
-        '''
+        """
         result = False
-        sql = 'SELECT COUNT(*)+1 FROM patients'
-        sql_ = 'INSERT INTO patients (pat_cod, pat_name, pat_sex, pat_birth, pat_height, pat_weight, pat_imc) values (?,?,?,?,?,?,?)'
+        sql = "SELECT COUNT(*)+1 FROM patients"
+        sql_ = "INSERT INTO patients (pat_cod, pat_name, pat_sex, pat_birth, pat_height, pat_weight, pat_imc) values (?,?,?,?,?,?,?)"
         try:
             self.c.connect(self.db)
             cursor = self.c.conn.execute(sql)
             pat_cod = cursor.fetchone()[0]
             patient.cod = pat_cod
             pat_birth = Utils.date_to_str(patient.birth)
-            self.c.conn.execute(sql_, [patient.cod, patient.name, patient.sex,
-                                pat_birth, patient.height, patient.weight, patient.imc])
+            self.c.conn.execute(
+                sql_,
+                [
+                    patient.cod,
+                    patient.name,
+                    patient.sex,
+                    pat_birth,
+                    patient.height,
+                    patient.weight,
+                    patient.imc,
+                ],
+            )
             self.c.conn.commit()
             result = True
         except:
@@ -60,7 +70,7 @@ class PatientDao():
         return result
 
     def read_patient(self, pat_cod: int):
-        '''
+        """
         This method reads an existent patient from Ethel's database.
 
         Parameters
@@ -72,9 +82,9 @@ class PatientDao():
         -------
         False or patient
                 Whether the operation was successful or not
-        '''
+        """
         patient = False
-        sql = 'SELECT pat_name, pat_sex, pat_birth, pat_height, pat_weight, pat_imc FROM patients WHERE pat_cod = ?'
+        sql = "SELECT pat_name, pat_sex, pat_birth, pat_height, pat_weight, pat_imc FROM patients WHERE pat_cod = ?"
         try:
             self.c.connect(self.db)
             cursor = self.c.conn.execute(sql, [pat_cod])
@@ -82,7 +92,14 @@ class PatientDao():
             if result:
                 pat_birth = Utils.str_to_date(result[2])
                 patient = Patient(
-                    pat_cod, result[0], result[1], pat_birth, result[3], result[4], result[5])
+                    pat_cod,
+                    result[0],
+                    result[1],
+                    pat_birth,
+                    result[3],
+                    result[4],
+                    result[5],
+                )
         except:
             print("Error!")
         finally:
@@ -90,7 +107,7 @@ class PatientDao():
         return patient
 
     def update_patient(self, patient: Patient):
-        '''
+        """
         This method updates an existent patient into Ethel's database.
 
         Parameters
@@ -102,14 +119,24 @@ class PatientDao():
         -------
         bool
                 Whether the operation was successful or not
-        '''
+        """
         result = False
-        sql = 'UPDATE patients SET pat_name = ?, pat_sex = ?, pat_birth = ?, pat_height = ?, pat_weight = ?, pat_imc = ? WHERE pat_cod = ?'
+        sql = "UPDATE patients SET pat_name = ?, pat_sex = ?, pat_birth = ?, pat_height = ?, pat_weight = ?, pat_imc = ? WHERE pat_cod = ?"
         try:
             self.c.connect(self.db)
             pat_birth = Utils.date_to_str(patient.birth)
-            self.c.conn.execute(sql, [patient.name, patient.sex, pat_birth,
-                                patient.height, patient.weight, patient.imc, patient.cod])
+            self.c.conn.execute(
+                sql,
+                [
+                    patient.name,
+                    patient.sex,
+                    pat_birth,
+                    patient.height,
+                    patient.weight,
+                    patient.imc,
+                    patient.cod,
+                ],
+            )
             self.c.conn.commit()
             result = True
         except:
@@ -119,16 +146,16 @@ class PatientDao():
         return result
 
     def list_patients(self):
-        '''
+        """
         This method lists all patients from Ethel's database.
 
         Returns
         -------
         bool or list
                 Whether the operation was successful or not
-        '''
+        """
         patients = False
-        sql = 'SELECT pat_cod, pat_name, pat_sex, pat_birth, pat_height, pat_weight, pat_imc FROM patients'
+        sql = "SELECT pat_cod, pat_name, pat_sex, pat_birth, pat_height, pat_weight, pat_imc FROM patients"
         try:
             self.c.connect(self.db)
             cursor = self.c.conn.execute(sql)
@@ -138,7 +165,14 @@ class PatientDao():
                 for result in results:
                     pat_birth = Utils.str_to_date(result[3])
                     patient = Patient(
-                        result[0], result[1], result[2], pat_birth, result[4], result[5], result[6])
+                        result[0],
+                        result[1],
+                        result[2],
+                        pat_birth,
+                        result[4],
+                        result[5],
+                        result[6],
+                    )
                     patients.append(patient)
         except Exception as e:
             print("Error!", e)

@@ -1,11 +1,11 @@
-class DynamicExam():
-    '''
+class DynamicExam:
+    """
     This class represents a dynamic exam (limits of stability).
 
     Attributes
     ----------
     cod : int
-        Exam's code at the database; 
+        Exam's code at the database;
     cop_x: numpy.array
         Exam's center of pressure x_axis;
     cop_y: numpy.array
@@ -16,9 +16,11 @@ class DynamicExam():
         Exam's patient code;
     usr_cod : int
         Exam's user code;
-    '''
+    """
 
-    def __init__(self, cod=None, cop_x=None, cop_y=None, date=None, pat_cod=None, usr_cod=None):
+    def __init__(
+        self, cod=None, cop_x=None, cop_y=None, date=None, pat_cod=None, usr_cod=None
+    ):
         self._cod = cod
         self._cop_x = cop_x
         self._cop_y = cop_y

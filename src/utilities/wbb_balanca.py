@@ -36,10 +36,12 @@ def main():
     #                'left_bottom': [4039.0, 6051.2591790830556, 8075.457648501033]}
 
     # WBB_DEV - calibração padrão
-    calibrations = {'right_top': [5251, 7001, 8764],
-                    'right_bottom': [19881, 21714, 23556],
-                    'left_top': [2255, 4019, 5795],
-                    'left_bottom': [17203, 18889, 20582]}
+    calibrations = {
+        "right_top": [5251, 7001, 8764],
+        "right_bottom": [19881, 21714, 23556],
+        "left_top": [2255, 4019, 5795],
+        "left_bottom": [17203, 18889, 20582],
+    }
 
     # WBB_DEV
     # calibrations = {'right_top': [5129.0, 7000.2527202635247, 8673.753146324183],
@@ -54,7 +56,7 @@ def main():
     wiimote, bateria = wbb.conecta(mac)
 
     escala = wbb.escala_eu
-    '''rep = 0
+    """rep = 0
                 while(rep < 5):
                     print(rep, " - Pronto para aferir o peso!")
                     time.sleep(10)
@@ -65,22 +67,22 @@ def main():
                     for sensor in ('right_top', 'right_bottom', 'left_top', 'left_bottom'):
                         readings[sensor] = sinal[j]
                         j += 1
-            
+
                     peso = wbb.calcWeight(readings, calibrations, escala)
                     print("right_top : ",readings['right_top'])
                     print("right_bottom : ",readings['right_bottom'])
                     print("left_top : ",readings['left_top'])
                     print("right_bottom : ",readings['right_bottom'])
                     print("Peso = ", peso)
-            
+
                     x,y = wbb.calPos(readings, calibrations, escala)
                     print("X = ", x*(433/2))
                     print("Y = ", y*(238/2))
-            
+
                     CoP_x, CoP_y =  wbb.calCoP(readings, calibrations, escala)
                     print("CoP_x = ", CoP_x)
                     print("CoP_y = ", CoP_y)
-                    rep += 1'''
+                    rep += 1"""
 
     return
 

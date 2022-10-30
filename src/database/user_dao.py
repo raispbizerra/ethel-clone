@@ -4,7 +4,7 @@ from src.models.user import User
 import src.utilities.utils as Utils
 
 
-class UserDao():
+class UserDao:
     """
     This class communicates Ethel's database to create, read and update users
 
@@ -14,7 +14,7 @@ class UserDao():
             Path to the database
     """
 
-    def __init__(self, database='src/database/ethel.db'):
+    def __init__(self, database="src/database/ethel.db"):
         self.__c = Connection()
         self.__db = database
 
@@ -27,7 +27,7 @@ class UserDao():
         return self.__db
 
     def create_user(self, user: User):
-        '''
+        """
         This method creates a new User into Ethel's database.
 
         Parameters
@@ -39,13 +39,21 @@ class UserDao():
         -------
         bool
                 Whether the operation was successful or not
-        '''
+        """
         result = False
-        sql = 'INSERT INTO users (usr_name, usr_username, usr_password, usr_email, usr_is_adm) values (?,?,?,?,?)'
+        sql = "INSERT INTO users (usr_name, usr_username, usr_password, usr_email, usr_is_adm) values (?,?,?,?,?)"
         try:
             self.c.connect(self.db)
-            self.c.conn.execute(sql, [user.get_name(), user.get_username(
-            ), user.get_password(), user.get_email(), user.get_is_adm()])
+            self.c.conn.execute(
+                sql,
+                [
+                    user.get_name(),
+                    user.get_username(),
+                    user.get_password(),
+                    user.get_email(),
+                    user.get_is_adm(),
+                ],
+            )
             self.c.conn.commit()
             result = True
         except:
@@ -55,7 +63,7 @@ class UserDao():
         return result
 
     def read_user(self, usr_username: str, usr_password: str):
-        '''
+        """
         This method reads an existent User from Ethel's database.
 
         Parameters
@@ -69,16 +77,22 @@ class UserDao():
         -------
         False or User
                 Whether the operation was successful or not
-        '''
+        """
         user = False
-        sql = 'SELECT usr_cod, usr_name, usr_email, usr_is_adm FROM users WHERE usr_username = ? AND usr_password = ?'
+        sql = "SELECT usr_cod, usr_name, usr_email, usr_is_adm FROM users WHERE usr_username = ? AND usr_password = ?"
         try:
             self.c.connect(self.db)
             cursor = self.c.conn.execute(sql, [usr_username, usr_password])
             result = cursor.fetchone()
             if result:
-                user = User(result[0], result[1], usr_username,
-                            usr_password, result[2], result[3])
+                user = User(
+                    result[0],
+                    result[1],
+                    usr_username,
+                    usr_password,
+                    result[2],
+                    result[3],
+                )
         except:
             print("Error!")
         finally:
@@ -86,7 +100,7 @@ class UserDao():
         return user
 
     def update_user(self, user: User):
-        '''
+        """
         This method updates an existent User into Ethel's database.
 
         Parameters
@@ -98,13 +112,22 @@ class UserDao():
         -------
         bool
                 Whether the operation was successful or not
-        '''
+        """
         result = False
-        sql = 'UPDATE users SET usr_name = ?, usr_username = ?, usr_password = ?, usr_email = ?, usr_is_adm = ? WHERE usr_cod = ?'
+        sql = "UPDATE users SET usr_name = ?, usr_username = ?, usr_password = ?, usr_email = ?, usr_is_adm = ? WHERE usr_cod = ?"
         try:
             self.c.connect(self.db)
-            self.c.conn.execute(sql, [user.get_name(), user.get_username(
-            ), user.get_password(), user.get_email(), user.get_is_adm(), user.get_cod()])
+            self.c.conn.execute(
+                sql,
+                [
+                    user.get_name(),
+                    user.get_username(),
+                    user.get_password(),
+                    user.get_email(),
+                    user.get_is_adm(),
+                    user.get_cod(),
+                ],
+            )
             self.c.conn.commit()
             result = True
         except:
@@ -114,16 +137,16 @@ class UserDao():
         return result
 
     def list_users(self):
-        '''
+        """
         This method lists all users from Ethel's database.
 
         Returns
         -------
         bool or list
                 Whether the operation was successful or not
-        '''
+        """
         users = False
-        sql = 'SELECT usr_cod, usr_name, usr_username, usr_password, usr_email, usr_is_adm FROM users'
+        sql = "SELECT usr_cod, usr_name, usr_username, usr_password, usr_email, usr_is_adm FROM users"
         try:
             self.c.connect(self.db)
             cursor = self.c.conn.execute(sql)
@@ -131,8 +154,9 @@ class UserDao():
             if results:
                 users = list()
                 for result in results:
-                    user = User(result[0], result[1], result[2],
-                                result[3], result[4], result[5])
+                    user = User(
+                        result[0], result[1], result[2], result[3], result[4], result[5]
+                    )
                     users.append(user)
         except:
             print("Error!")

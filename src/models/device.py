@@ -1,11 +1,11 @@
-class Device():
-    '''
+class Device:
+    """
     This class represents a device
 
     Attributes
     ----------
     cod : int
-        Device's code at the database 
+        Device's code at the database
     name : str
         Device's name
     mac : str
@@ -16,9 +16,17 @@ class Device():
         Device's calibrations
     calibration_date : datetime.date
         Device's calibrations date
-    '''
+    """
 
-    def __init__(self, cod=None, name=None, mac=None, is_default=None, calibrations=None, calibration_date=None):
+    def __init__(
+        self,
+        cod=None,
+        name=None,
+        mac=None,
+        is_default=None,
+        calibrations=None,
+        calibration_date=None,
+    ):
         self._cod = cod
         self._name = name
         self._mac = mac

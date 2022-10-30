@@ -1,9 +1,9 @@
 CREATE TABLE users(
-    usr_cod         INTEGER PRIMARY KEY AUTOINCREMENT, 
-    usr_name        TEXT NOT NULL, 
-    usr_username    TEXT NOT NULL, 
-    usr_password    TEXT NOT NULL, 
-    usr_email       TEXT NOT NULL, 
+    usr_cod         INTEGER PRIMARY KEY AUTOINCREMENT,
+    usr_name        TEXT NOT NULL,
+    usr_username    TEXT NOT NULL,
+    usr_password    TEXT NOT NULL,
+    usr_email       TEXT NOT NULL,
     usr_is_adm      INTEGER DEFAULT 0
 );
 
@@ -25,7 +25,7 @@ CREATE TABLE static_exams(
     sta_ex_lb       TEXT,
     sta_ex_date     TEXT,
     sta_ex_type     TEXT,
-    usr_cod         INTEGER,   
+    usr_cod         INTEGER,
     pat_cod         INTEGER,
     dev_cod         INTEGER,
     FOREIGN KEY(usr_cod) REFERENCES users(usr_cod),

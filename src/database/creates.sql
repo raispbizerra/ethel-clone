@@ -1,9 +1,9 @@
 CREATE TABLE users(
-    usr_cod         INTEGER PRIMARY KEY AUTOINCREMENT, 
-    usr_name        TEXT NOT NULL, 
-    usr_username    TEXT NOT NULL, 
-    usr_password    TEXT NOT NULL, 
-    usr_email       TEXT NOT NULL, 
+    usr_cod         INTEGER PRIMARY KEY AUTOINCREMENT,
+    usr_name        TEXT NOT NULL,
+    usr_username    TEXT NOT NULL,
+    usr_password    TEXT NOT NULL,
+    usr_email       TEXT NOT NULL,
     usr_is_adm      INTEGER DEFAULT 0
 );
 
@@ -23,7 +23,7 @@ CREATE TABLE static_exams(
     sta_ex_mls  TEXT,
     sta_ex_date TEXT,
     sta_ex_type TEXT,
-    usr_cod INTEGER,   
+    usr_cod INTEGER,
     pat_cod INTEGER,
     FOREIGN KEY(usr_cod) REFERENCES users(usr_cod),
     FOREIGN KEY(pat_cod) REFERENCES patients(pat_cod)
@@ -34,7 +34,7 @@ CREATE TABLE dynamic_exams(
     dyn_ex_cop_x  TEXT,
     dyn_ex_cop_y  TEXT,
     dyn_ex_date TEXT,
-    usr_cod INTEGER,   
+    usr_cod INTEGER,
     pat_cod INTEGER,
     FOREIGN KEY(usr_cod) REFERENCES users(usr_cod),
     FOREIGN KEY(pat_cod) REFERENCES patients(pat_cod)
