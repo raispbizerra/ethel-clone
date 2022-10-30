@@ -7,4 +7,5 @@ dependencies:
   - pyside6=6.4.0
   - pre-commit=2.20.0
   - mypy=0.910
-  - numpy = 1.23.3
+  - numpy=1.23.3
+  - pytest=7.1.2

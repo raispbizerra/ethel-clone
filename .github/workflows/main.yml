@@ -25,8 +25,10 @@ jobs:
         environment-file: environment.yml
         use-only-tar-bz2: true
     - name: Run black to check code formatting 🕵
-      run: |
-        black --check .
+      run: black --check .
     - name: Run mypy to check type-hints 💡
+      run: mypy .
+    - name: Run tests with pytest 📝
       run: |
-        mypy .
+        export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+        pytest .
