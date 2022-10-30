@@ -1,11 +1,12 @@
 # Third party imports
+from src.interface.handlers.load_device_window_handler import Handler
+from src.interface.builder import Builder
+from gi.repository import Gtk, Gdk
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
 
 # Local imports
-from src.interface.builder import Builder
-from src.interface.handlers.load_device_window_handler import Handler
+
 
 class LoadDeviceWindow(Gtk.ApplicationWindow):
     """This class implements load Device Window
@@ -13,7 +14,8 @@ class LoadDeviceWindow(Gtk.ApplicationWindow):
 
     def __init__(self, app):
         # Init Gtk.Window class
-        super(LoadDeviceWindow, self).__init__(title='Selecionar dispositivo salvo', application=app)
+        super(LoadDeviceWindow, self).__init__(
+            title='Selecionar dispositivo salvo', application=app)
         self.set_modal(True)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -34,7 +36,7 @@ class LoadDeviceWindow(Gtk.ApplicationWindow):
         # Assign handler
         handler = Handler(self)
         builder.connect_signals(handler)
-        
+
         # Connect signals
         self.connect('show', handler.on_show)
         self.connect('delete-event', self.app.on_delete_event)

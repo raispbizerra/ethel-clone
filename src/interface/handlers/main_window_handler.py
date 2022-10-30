@@ -1,4 +1,5 @@
 # Third party imports
+from gi.repository import Gtk, GLib, Gdk
 import os
 from src.database.patient_dao import PatientDao
 from src.database.device_dao import DeviceDao
@@ -16,7 +17,6 @@ from cwiid import BATTERY_MAX
 import gi
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GLib, Gdk
 
 DT = 40
 STATIC_SAMPLE = 768
@@ -33,7 +33,8 @@ class Handler:
         self.device_dao = DeviceDao()
         self.patient_dao = PatientDao()
         self.exam_counter = {'ON': 0, 'CN': 0, 'OF': 0, 'CF': 0}
-        self.exams = {'ON': [None]*3, 'CN': [None]*3, 'OF': [None]*3, 'CF': [None]*3}
+        self.exams = {'ON': [None]*3, 'CN': [None]
+                      * 3, 'OF': [None]*3, 'CF': [None]*3}
         self.dynamic_metrics = dict()
         self.static_metrics = dict()
         self.static_exam_cod = -1
@@ -59,7 +60,8 @@ class Handler:
 
     def on_state_changed(self, button):
         self.exam_counter = {'ON': 0, 'CN': 0, 'OF': 0, 'CF': 0}
-        self.exams = {'ON': [None]*3, 'CN': [None]*3, 'OF': [None]*3, 'CF': [None]*3}
+        self.exams = {'ON': [None]*3, 'CN': [None]
+                      * 3, 'OF': [None]*3, 'CF': [None]*3}
         self.window.app.static_exam = None
         self.get_exam()
 
@@ -83,10 +85,10 @@ class Handler:
         j = self.exam_counter[ex_type]
 
         for k in range(1, 4):
-            context = self.window.exam_grid.get_child_at(k, i + 2).get_child_at(j, 0).get_style_context()
+            context = self.window.exam_grid.get_child_at(
+                k, i + 2).get_child_at(j, 0).get_style_context()
             self.current_exam_labels.append(context)
             context.add_class("yellow")
-
 
     def on_row_selection_static_changed(self, selection):
         """
@@ -140,7 +142,7 @@ class Handler:
             for j in range(4):
                 grid.get_child_at(j, 0).set_text('0.0')
 
-        # VM 
+        # VM
         for i in range(2, 6):
             grid = self.window.app.main_window.exam_grid.get_child_at(3, i)
             for j in range(4):
@@ -379,24 +381,33 @@ class Handler:
 
             ln = len(metrics) + 1
             for x in range(1, ln):
-                self.window.metrics_grid.get_child_at(1, x).set_text(f"{round(metrics[x - 1], 2)}")
+                self.window.metrics_grid.get_child_at(
+                    1, x).set_text(f"{round(metrics[x - 1], 2)}")
 
-            self.axis_0.set_xlim(-self.static_metrics['max_absoluto'], self.static_metrics['max_absoluto'])
-            self.axis_0.set_ylim(-self.static_metrics['max_absoluto'], self.static_metrics['max_absoluto'])
+            self.axis_0.set_xlim(-self.static_metrics['max_absoluto'],
+                                 self.static_metrics['max_absoluto'])
+            self.axis_0.set_ylim(-self.static_metrics['max_absoluto'],
+                                 self.static_metrics['max_absoluto'])
             self.axis_0.plot(self.static_metrics['MLs_Processado'], self.static_metrics['APs_Processado'], '.-',
                              label='CoP')
             self.axis_0.legend()
             self.canvas_0.draw()
 
-            self.axis_1.set_ylim(-self.static_metrics['maximo'], self.static_metrics['maximo'])
-            self.axis_1.set_xlim(self.static_metrics['tempo'][0], self.static_metrics['tempo'][-1])
-            self.axis_1.plot(self.static_metrics['tempo'], self.static_metrics['APs_Processado'], '-', label='APs')
-            self.axis_1.plot(self.static_metrics['tempo'], self.static_metrics['MLs_Processado'], '--', label='MLs')
-            self.axis_1.plot(self.static_metrics['tempo'], self.static_metrics['dis_resultante_total'], ':', label='DRT')
+            self.axis_1.set_ylim(-self.static_metrics['maximo'],
+                                 self.static_metrics['maximo'])
+            self.axis_1.set_xlim(
+                self.static_metrics['tempo'][0], self.static_metrics['tempo'][-1])
+            self.axis_1.plot(
+                self.static_metrics['tempo'], self.static_metrics['APs_Processado'], '-', label='APs')
+            self.axis_1.plot(
+                self.static_metrics['tempo'], self.static_metrics['MLs_Processado'], '--', label='MLs')
+            self.axis_1.plot(
+                self.static_metrics['tempo'], self.static_metrics['dis_resultante_total'], ':', label='DRT')
             self.axis_1.legend()
             self.canvas_1.draw()
         except ValueError as e:
-            self.window.app.statusbar.set_text("Erro na aquisição, tente novamente.")
+            self.window.app.statusbar.set_text(
+                "Erro na aquisição, tente novamente.")
             raise(e)
 
     def on_load_static_exam_button_clicked(self, button):
@@ -412,9 +423,11 @@ class Handler:
         #     context = col.get_cell_renderers()[0].get_style_context()
         #     context.remove_class('blue')
 
-        self.window.app.static_exam = self.static_exam_dao.read_exam(self.static_exam_cod)
+        self.window.app.static_exam = self.static_exam_dao.read_exam(
+            self.static_exam_cod)
         self.clear_static_charts()
-        self.static_metrics = calc.computes_metrics(self.window.app.static_exam.aps, self.window.app.static_exam.mls)
+        self.static_metrics = calc.computes_metrics(
+            self.window.app.static_exam.aps, self.window.app.static_exam.mls)
         self.show_static_exam()
         self.window.static_notebook.set_current_page(1)
         self.window.app.statusbar.set_text('Exame carregado')
@@ -440,9 +453,11 @@ class Handler:
         self.canvas_2.draw()
 
     def get_amplitude(self):
-        exams = self.static_exam_dao.read_last_exams_from_patient(self.window.app.patient.cod)
+        exams = self.static_exam_dao.read_last_exams_from_patient(
+            self.window.app.patient.cod)
         if len(exams) < 3:
-            self.window.app.statusbar.set_text('Realize mais exames estáticos!')
+            self.window.app.statusbar.set_text(
+                'Realize mais exames estáticos!')
             self.window.notebook.set_current_page(0)
             self.window.app.amplitude = (self.static_metrics['amplitude_AP'] * 2 / 3,
                                          self.static_metrics['amplitude_AP'] / 3,
@@ -452,7 +467,8 @@ class Handler:
         amplitude_ap = np.zeros(3)
         amplitude_ml = np.zeros(3)
         for i, exam in enumerate(exams):
-            amplitude_ap[i], amplitude_ml[i] = calc.get_amplitude(exam.aps, exam.mls)
+            amplitude_ap[i], amplitude_ml[i] = calc.get_amplitude(
+                exam.aps, exam.mls)
 
         self.window.app.amplitude = (amplitude_ap.mean() * 2 / 3,
                                      amplitude_ap.mean() / 3,
@@ -504,7 +520,8 @@ class Handler:
             duration = .08  # second
             freq = 440  # Hz
             for _ in range(3):
-                os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq))
+                os.system(
+                    'play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq))
             self.window.app.wiimote.led = 0
             self.weight /= STATIC_SAMPLE
             self.weight = round(self.weight, 2)
@@ -527,7 +544,8 @@ class Handler:
                                                      mls=self.static_cop_x,
                                                      date=date, pat_cod=self.window.app.patient.cod,
                                                      state=ex_type)
-            self.static_metrics = calc.computes_metrics(self.static_cop_y, self.static_cop_x)
+            self.static_metrics = calc.computes_metrics(
+                self.static_cop_y, self.static_cop_x)
             self.window.app.exam_window.hide()
             self.show_static_exam()
             self.fill_grid()
@@ -570,16 +588,19 @@ class Handler:
             self.window.app.exam_window.time -= 1
             duration = .1  # second
             freq = 440  # Hz
-            os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq))
+            os.system(
+                'play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq))
             return True
         else:
             duration = .5  # second
             freq = 440  # Hz
-            os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq))
+            os.system(
+                'play --no-show-progress --null --channels 1 synth %s sine %f' % (duration, freq))
             self.window.app.exam_window.counting = False
             self.window.app.exam_window.r, self.window.app.exam_window.g, self.window.app.exam_window.b = .3, .73, .09
             GLib.source_remove(self.window.method_id)
-            self.window.method_id = GLib.timeout_add(DT, self.static_posturography)
+            self.window.method_id = GLib.timeout_add(
+                DT, self.static_posturography)
         return False
 
     def fill_grid(self):
@@ -589,7 +610,7 @@ class Handler:
 
         # metrics = (self.static_metrics['amplitude_AP'], self.static_metrics['amplitude_ML'], self.static_metrics['mvelo_total'])
         # metrics = (self.static_metrics['dis_mediaAP'], self.static_metrics['dis_mediaML'], self.static_metrics['mvelo_total'])
-        
+
         # self.current_exam_labels = list()
         # for k in range(1, 4):
         #     self.current_exam_labels.append(self.window.exam_grid.get_child_at(k, i + 2).get_child_at(j, 0))
@@ -606,7 +627,8 @@ class Handler:
         # self.current_exam_labels.append(self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0))
         # self.current_exam_labels.append(self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0))
 
-        context = self.window.exam_grid.get_child_at(1, i + 2).get_child_at(j, 0).get_style_context()
+        context = self.window.exam_grid.get_child_at(
+            1, i + 2).get_child_at(j, 0).get_style_context()
         self.current_exam_labels.append(context)
         context.add_class("orange")
 
@@ -614,31 +636,39 @@ class Handler:
             f"{round(self.static_metrics['dis_mediaAP'], 2)}")
         m = 0.
         for l in range(j + 1):
-            m += float(self.window.exam_grid.get_child_at(1, i + 2).get_child_at(l, 0).get_text())
+            m += float(self.window.exam_grid.get_child_at(1,
+                       i + 2).get_child_at(l, 0).get_text())
         m /= j + 1
-        self.window.exam_grid.get_child_at(1, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+        self.window.exam_grid.get_child_at(
+            1, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
 
-        context = self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0).get_style_context()
+        context = self.window.exam_grid.get_child_at(
+            2, i + 2).get_child_at(j, 0).get_style_context()
         self.current_exam_labels.append(context)
         context.add_class("orange")
         self.window.exam_grid.get_child_at(2, i + 2).get_child_at(j, 0).set_text(
             f"{round(self.static_metrics['dis_mediaML'], 2)}")
         m = 0.
         for l in range(j + 1):
-            m += float(self.window.exam_grid.get_child_at(2, i + 2).get_child_at(l, 0).get_text())
+            m += float(self.window.exam_grid.get_child_at(2,
+                       i + 2).get_child_at(l, 0).get_text())
         m /= j + 1
-        self.window.exam_grid.get_child_at(2, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+        self.window.exam_grid.get_child_at(
+            2, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
 
-        context = self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0).get_style_context()
+        context = self.window.exam_grid.get_child_at(
+            3, i + 2).get_child_at(j, 0).get_style_context()
         self.current_exam_labels.append(context)
         context.add_class("orange")
         self.window.exam_grid.get_child_at(3, i + 2).get_child_at(j, 0).set_text(
             f"{round(self.static_metrics['mvelo_total'], 2)}")
         m = 0.
         for l in range(j + 1):
-            m += float(self.window.exam_grid.get_child_at(3, i + 2).get_child_at(l, 0).get_text())
+            m += float(self.window.exam_grid.get_child_at(3,
+                       i + 2).get_child_at(l, 0).get_text())
         m /= j + 1
-        self.window.exam_grid.get_child_at(3, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
+        self.window.exam_grid.get_child_at(
+            3, i + 2).get_child_at(3, 0).set_text(f"{round(m, 2)}")
 
     def on_save_static_exam_button_clicked(self, button):
         """
@@ -665,7 +695,8 @@ class Handler:
                 self.patient_dao.update_patient(self.window.app.patient)
             self.static_exam_dao.create_exam(self.window.app.static_exam)
             print('\n\nsave\n')
-        self.exams[self.window.app.static_exam.state][self.exam_counter[self.window.app.static_exam.state]] = self.window.app.static_exam
+        self.exams[self.window.app.static_exam.state][self.exam_counter[self.window.app.static_exam.state]
+                                                      ] = self.window.app.static_exam
         self.window.statusbar.set_text('Exame salvo!')
         # self.window.save_static_exam_button.set_sensitive(False)
         self.window.app.load_patient_window.handler.load_static_exams()
@@ -673,7 +704,7 @@ class Handler:
             # context = label.get_style_context()
             context.remove_class("orange")
         self.exam_counter[self.window.app.static_exam.state] = (self.exam_counter[
-                                                                    self.window.app.static_exam.state] + 1) % 3
+            self.window.app.static_exam.state] + 1) % 3
         self.get_exam()
 
     def on_start_dynamic_exam_button_clicked(self, button):
@@ -715,8 +746,10 @@ class Handler:
         button : Gtk.Button
                 The button
         """
-        self.window.metrics_grid.set_visible(not self.window.metrics_grid.get_visible())
-        self.window.exams_list.set_visible(not self.window.exams_list.get_visible())
+        self.window.metrics_grid.set_visible(
+            not self.window.metrics_grid.get_visible())
+        self.window.exams_list.set_visible(
+            not self.window.exams_list.get_visible())
 
     def on_report_select(self, item):
         self.window.app.report_window.show_all()
@@ -728,13 +761,17 @@ class Handler:
         if self.window.app.wiimote:
             try:
                 self.window.app.wiimote.request_status()
-                battery = (self.window.app.wiimote.state['battery'] * 100) // BATTERY_MAX
-                self.window.battery_label.set_text("Bateria: " + str(battery) + "%")
+                battery = (
+                    self.window.app.wiimote.state['battery'] * 100) // BATTERY_MAX
+                self.window.battery_label.set_text(
+                    "Bateria: " + str(battery) + "%")
                 self.window.connection_label.set_text("Conectado")
-                self.window.connection_image.set_from_file("media/bluetooth_connect.png")
+                self.window.connection_image.set_from_file(
+                    "media/bluetooth_connect.png")
             except RuntimeError:
                 self.nullify_device()
-                self.window.statusbar.set_text('Perda de conexão, tente novamente.')
+                self.window.statusbar.set_text(
+                    'Perda de conexão, tente novamente.')
                 return False
         else:
             return False
@@ -742,19 +779,22 @@ class Handler:
 
     def on_static_exams_tree_row_activated(self, tree, path, column):
         if tree.get_columns().index(column) == 3:
-            self.static_exam = self.static_exam_dao.read_exam(tree.get_model()[path][0])
-            self.window.dialog.format_secondary_text(f'{self.static_exam.cod} do paciente {self.window.app.patient.name}')
+            self.static_exam = self.static_exam_dao.read_exam(
+                tree.get_model()[path][0])
+            self.window.dialog.format_secondary_text(
+                f'{self.static_exam.cod} do paciente {self.window.app.patient.name}')
             self.window.dialog.show()
 
     def on_static_exams_tree_button_press_event(self, treeview, event):
         if event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS and event.button == 1:
             selection = treeview.get_selection()
             model, i = selection.get_selected()
-            if i == None: #note 3
+            if i == None:  # note 3
                 return True
             model = treeview.get_model()
             self.static_exam_cod = model[i][0]
-            self.on_load_static_exam_button_clicked(self.window.load_static_exam_button)
+            self.on_load_static_exam_button_clicked(
+                self.window.load_static_exam_button)
 
     def on_dialog_response(self, dialog, response):
         if response == Gtk.ResponseType.YES:

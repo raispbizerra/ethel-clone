@@ -19,15 +19,16 @@ class Patient():
     imc : float
         Patient's imc
     '''
-    def __init__(self, cod = None, name = None, sex = None, birth = None, height = None, weight = None, imc = None):
-        self._cod       =   cod
-        self._name      =   name
-        self._sex       =   sex
-        self._birth     =   birth
-        self._height    =   height
-        self._weight    =   weight
-        self._imc       =   imc
-    
+
+    def __init__(self, cod=None, name=None, sex=None, birth=None, height=None, weight=None, imc=None):
+        self._cod = cod
+        self._name = name
+        self._sex = sex
+        self._birth = birth
+        self._height = height
+        self._weight = weight
+        self._imc = imc
+
     @property
     def cod(self):
         return self._cod

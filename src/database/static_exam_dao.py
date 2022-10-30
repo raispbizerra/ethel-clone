@@ -4,6 +4,7 @@ from src.models.static_exam import StaticExam
 import src.utilities.utils as Utils
 import datetime as dt
 
+
 class StaticExamDao():
     """
     This class communicates Ethel's database to create, read and update exams
@@ -51,8 +52,8 @@ class StaticExamDao():
             cursor = self.c.conn.execute(sql_)
             sta_ex_cod = cursor.fetchone()[0]
             exam.cod = sta_ex_cod + 1
-            self.c.conn.execute(sql, [exam.cod, sta_ex_aps, sta_ex_mls, exam.date, exam.state, 
-                exam.pat_cod, exam.usr_cod])
+            self.c.conn.execute(sql, [exam.cod, sta_ex_aps, sta_ex_mls, exam.date, exam.state,
+                                      exam.pat_cod, exam.usr_cod])
             self.c.conn.commit()
             result = True
         except Exception as e:
@@ -85,7 +86,8 @@ class StaticExamDao():
                 sta_ex_aps = Utils.str_to_array(result[0])
                 sta_ex_mls = Utils.str_to_array(result[1])
                 # sta_ex_date = Utils.str_to_datetime(result[2])
-                sta_ex_date = dt.datetime.strptime(result[2], '%d-%m-%Y %H:%M:%S.%f')
+                sta_ex_date = dt.datetime.strptime(
+                    result[2], '%d-%m-%Y %H:%M:%S.%f')
                 exam = StaticExam(sta_ex_cod, sta_ex_aps, sta_ex_mls,
                                   sta_ex_date, result[3], result[4], result[5])
         except Exception as e:
@@ -116,7 +118,7 @@ class StaticExamDao():
             sta_ex_mls = Utils.list_to_str(exam.mls)
             # sta_ex_date = Utils.datetime_to_str(exam.date)
             self.c.conn.execute(sql, [sta_ex_aps, sta_ex_mls, exam.date, exam.state,
-                exam.pat_cod, exam.usr_cod, exam.cod])
+                                      exam.pat_cod, exam.usr_cod, exam.cod])
             self.c.conn.commit()
             result = True
         except Exception as e:
@@ -150,7 +152,8 @@ class StaticExamDao():
                     sta_ex_aps = Utils.str_to_array(result[1])
                     sta_ex_mls = Utils.str_to_array(result[2])
                     # sta_ex_date = Utils.str_to_datetime(result[3])
-                    sta_ex_date = dt.datetime.strptime(result[3], '%d-%m-%Y %H:%M:%S.%f')
+                    sta_ex_date = dt.datetime.strptime(
+                        result[3], '%d-%m-%Y %H:%M:%S.%f')
                     exam = StaticExam(
                         result[0], sta_ex_aps, sta_ex_mls, sta_ex_date, result[4], pat_cod, result[5])
                     exams.append(exam)
@@ -215,7 +218,8 @@ class StaticExamDao():
                     sta_ex_aps = Utils.str_to_array(result[1])
                     sta_ex_mls = Utils.str_to_array(result[2])
                     # sta_ex_date = Utils.str_to_datetime(result[3])
-                    sta_ex_date = dt.datetime.strptime(result[3], '%d-%m-%Y %H:%M:%S').strftime('%d-%m-%Y %H:%M:%S')
+                    sta_ex_date = dt.datetime.strptime(
+                        result[3], '%d-%m-%Y %H:%M:%S').strftime('%d-%m-%Y %H:%M:%S')
                     exam = StaticExam(
                         result[0], sta_ex_aps, sta_ex_mls, sta_ex_date, result[4], result[5], result[6])
                     exams.append(exam)
@@ -225,7 +229,7 @@ class StaticExamDao():
             self.c.close()
         return exams
 
-    def check(self, pat_cod: int, condition : str):
+    def check(self, pat_cod: int, condition: str):
         '''
         This method reads an existent exam from Ethel's database.
 

@@ -1,11 +1,12 @@
 # Third party imports
+from src.interface.handlers.device_window_handler import Handler
+from src.interface.builder import Builder
+from gi.repository import Gtk, Gdk
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
 
 # Local imports
-from src.interface.builder import Builder
-from src.interface.handlers.device_window_handler import Handler
+
 
 class DeviceWindow(Gtk.ApplicationWindow):
     """This class implements add Device Window
@@ -13,7 +14,8 @@ class DeviceWindow(Gtk.ApplicationWindow):
 
     def __init__(self, app):
         # Init Gtk.Window class
-        super(DeviceWindow, self).__init__(title='Dispositivo', application=app)
+        super(DeviceWindow, self).__init__(
+            title='Dispositivo', application=app)
         self.set_modal(True)
         self.set_decorated(True)
         self.set_resizable(False)
@@ -24,7 +26,7 @@ class DeviceWindow(Gtk.ApplicationWindow):
 
         # Assign builder
         builder = Builder('src/interface/glade/device_window.glade')
-        
+
         # Get glade objects
         box = builder.get_object('box')
         self.device_name = builder.get_object('device_name')
@@ -36,7 +38,7 @@ class DeviceWindow(Gtk.ApplicationWindow):
         # Assign handler
         handler = Handler(self)
         builder.connect_signals(handler)
-        
+
         # Connect signals
         self.connect('delete-event', self.app.on_delete_event)
         self.connect('show', handler.on_show)

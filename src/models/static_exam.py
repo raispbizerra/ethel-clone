@@ -19,14 +19,15 @@ class StaticExam():
     state : str
         Exam's state.
     '''
-    def __init__(self, cod = None, aps = None, mls = None, date = None, state = None, pat_cod = None, usr_cod = None):
-        self._cod       = cod
-        self._aps       = aps
-        self._mls       = mls
-        self._date      = date
-        self._state     = state
-        self._pat_cod   = pat_cod
-        self._usr_cod   = usr_cod
+
+    def __init__(self, cod=None, aps=None, mls=None, date=None, state=None, pat_cod=None, usr_cod=None):
+        self._cod = cod
+        self._aps = aps
+        self._mls = mls
+        self._date = date
+        self._state = state
+        self._pat_cod = pat_cod
+        self._usr_cod = usr_cod
 
     @property
     def cod(self):

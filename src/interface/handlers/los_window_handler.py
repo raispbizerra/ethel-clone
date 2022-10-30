@@ -1,4 +1,9 @@
 # Default library imports
+import src.utilities.calculos_los as calc_los
+import src.utilities.wbb_calitera as wbb
+from random import shuffle
+import numpy as np
+from gi.repository import Gtk, Gdk, GLib
 import sys
 import math
 import cairo
@@ -6,13 +11,8 @@ import cairo
 # Third party imports
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib
-import numpy as np
-from random import shuffle
 
 # Local imports
-import src.utilities.wbb_calitera as wbb
-import src.utilities.calculos_los as calc_los
 
 RADIUS = 15
 LOS_SAMPLE = 200
@@ -20,8 +20,10 @@ MEAN_SAMPLE = LOS_SAMPLE // 2
 RETURN_SAMPLE = 25
 DT = 40
 
+
 class Monitor():
     """docstring for Monitor"""
+
     def __init__(self, monitor):
         self.width, self.height = monitor.get_geometry().width, monitor.get_geometry().height
         self.x, self.y = monitor.get_geometry().x, monitor.get_geometry().y
@@ -34,7 +36,8 @@ class Monitor():
 
 class Position():
     """docstring for Position"""
-    def __init__(self, x = 0, y = 0):
+
+    def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
 
@@ -47,6 +50,7 @@ class Position():
 
 class ImageSurface():
     """docstring for ImageSurface"""
+
     def __init__(self, img):
         self.img = img
         self.pos = Position()
@@ -63,10 +67,13 @@ class Handler():
     def __init__(self, window):
         self.window = window
         # self.yellow = ImageSurface(cairo.ImageSurface.create_from_png("media/yellow_target.png"))
-        self.yellow = ImageSurface(cairo.ImageSurface.create_from_png("media/yellow.png"))
+        self.yellow = ImageSurface(
+            cairo.ImageSurface.create_from_png("media/yellow.png"))
         # self.green = ImageSurface(cairo.ImageSurface.create_from_png("media/green_target.png"))
-        self.green = ImageSurface(cairo.ImageSurface.create_from_png("media/red.png"))
-        self.target = ImageSurface(cairo.ImageSurface.create_from_png("media/ball.png"))
+        self.green = ImageSurface(
+            cairo.ImageSurface.create_from_png("media/red.png"))
+        self.target = ImageSurface(
+            cairo.ImageSurface.create_from_png("media/ball.png"))
 
     def on_show(self, window):
         '''
@@ -88,7 +95,7 @@ class Handler():
         self.init_los()
         self.a, self.b, self.r = self.window.app.amplitude
         print("a = ", self.a, " b = ", self.b, " r = ", self.r)
-        
+
         # self.a *= 10
         # self.b *= 10
         # self.r *= 10
@@ -121,17 +128,17 @@ class Handler():
         catetus = radius//math.sqrt(2)
         self.diff2 = radius - catetus
 
-        front_left  = Position(0 + diff + self.diff2, self.diff2)
-        front       = Position(width//2, 0)
+        front_left = Position(0 + diff + self.diff2, self.diff2)
+        front = Position(width//2, 0)
         front_right = Position(width - diff - self.diff2, self.diff2)
-        right       = Position(width - diff, radius)
-        rear_right  = Position(width - diff - self.diff2*2, height-self.diff2*2)
-        rear        = Position(width//2, height-self.diff2*2)
-        rear_left   = Position(0 + diff + self.diff2*2, height-self.diff2*2)
-        left        = Position(0 + diff, radius)
+        right = Position(width - diff, radius)
+        rear_right = Position(width - diff - self.diff2*2, height-self.diff2*2)
+        rear = Position(width//2, height-self.diff2*2)
+        rear_left = Position(0 + diff + self.diff2*2, height-self.diff2*2)
+        left = Position(0 + diff, radius)
 
         self.line_pos = list()
-        for pos in [front_left,front,front_right,right,rear_right,rear,rear_left,left]:
+        for pos in [front_left, front, front_right, right, rear_right, rear, rear_left, left]:
             self.line_pos.append(pos)
 
     def init_los(self):
@@ -147,7 +154,8 @@ class Handler():
             # Gets wbb readings
             readings = wbb.captura1(self.window.app.wiimote)
             # Gets CoP
-            cop_x, cop_y = wbb.calCoP(readings, self.window.app.device.calibrations, wbb.escala_eu)
+            cop_x, cop_y = wbb.calCoP(
+                readings, self.window.app.device.calibrations, wbb.escala_eu)
 
             self.x_mean += cop_x
             self.y_mean += cop_y
@@ -174,19 +182,23 @@ class Handler():
                 readings = wbb.captura1(self.window.app.wiimote)
 
                 # Gets CoP
-                cop_x, cop_y = wbb.calCoP(readings, self.window.app.device.calibrations, wbb.escala_eu)
+                cop_x, cop_y = wbb.calCoP(
+                    readings, self.window.app.device.calibrations, wbb.escala_eu)
                 cop_x -= self.x_mean
                 cop_y -= self.y_mean
-                x_pos, y_pos = self.cop_to_pos(self.window.app.patient.height, cop_x, cop_y)
+                x_pos, y_pos = self.cop_to_pos(
+                    self.window.app.patient.height, cop_x, cop_y)
                 self.green.set_position(x_pos, y_pos)
                 self.window.drawing_area.queue_draw()
 
                 if cur_pos != 8:
                     self.dynamic_cop_x[cur_pos][self.j], self.dynamic_cop_y[cur_pos][self.j] = cop_x, cop_y
-                    self.target.set_position(self.line_pos[cur_pos].x, self.line_pos[cur_pos].y)
+                    self.target.set_position(
+                        self.line_pos[cur_pos].x, self.line_pos[cur_pos].y)
                     self.cur_line = self.line_pos[cur_pos]
                     # Progressbar fraction
-                    self.window.app.main_window.progressbar.set_fraction(self.k / (sample * 8))
+                    self.window.app.main_window.progressbar.set_fraction(
+                        self.k / (sample * 8))
                     if calc_los.distance_points((x_pos, y_pos), self.cur_line.get_pos()) <= RADIUS:
                         print(cop_x, cop_y, math.sqrt(cop_x**2 + cop_y**2))
                         self.j = sample - 1
@@ -199,8 +211,10 @@ class Handler():
                         self.center_counter = 0
                         self.j = 0
                     #print(self.center_counter, self.j, cop_x, cop_y)
-                    self.target.set_position(self.monitor.center.x, self.monitor.center.y)
-                    self.cur_line = Position(self.monitor.center.x, self.monitor.center.y)
+                    self.target.set_position(
+                        self.monitor.center.x, self.monitor.center.y)
+                    self.cur_line = Position(
+                        self.monitor.center.x, self.monitor.center.y)
                 # Converts cop to screen pos
                 # x_pos, y_pos = self.cop_to_pos(cop_x, cop_y, self.x_mean, self.y_mean)
                 self.j += 1
@@ -218,7 +232,8 @@ class Handler():
                 self.window.app.patient.height, self.window.app.amplitude)
             self.window.app.main_window.handler.show_dynamic_exam()
             self.window.hide()
-            self.window.app.main_window.save_dynamic_exam_button.set_sensitive(True)
+            self.window.app.main_window.save_dynamic_exam_button.set_sensitive(
+                True)
             self.window.app.wiimote.led = 0
             return False
 
@@ -229,7 +244,8 @@ class Handler():
         cr.paint()
 
         cr.set_source_rgb(.75, .75, .75)
-        cr.rectangle(self.line_pos[7].x, 0, self.monitor.height, self.monitor.height)
+        cr.rectangle(self.line_pos[7].x, 0,
+                     self.monitor.height, self.monitor.height)
         cr.fill()
 
         # cr.save()
@@ -239,12 +255,13 @@ class Handler():
         # cr.restore()
         # cr.scale(1, 2)
 
-        cr.arc(self.monitor.center.x, self.monitor.center.y, self.monitor.center.y, 0, 2*math.pi)
-        cr.set_source_rgb(.7,.7,.7)
+        cr.arc(self.monitor.center.x, self.monitor.center.y,
+               self.monitor.center.y, 0, 2*math.pi)
+        cr.set_source_rgb(.7, .7, .7)
         cr.fill()
 
         cr.set_line_width(25)
-        cr.set_source_rgb(.5,.5,.5)
+        cr.set_source_rgb(.5, .5, .5)
         for i, pos in enumerate(self.line_pos):
             if i == 4:
                 cr.move_to(pos.x+self.diff2, pos.y+self.diff2)
@@ -263,14 +280,17 @@ class Handler():
         cr.line_to(self.monitor.center.x, self.monitor.center.y)
         cr.stroke()
 
-        cr.set_source_surface(self.target.img, self.target.pos.x, self.target.pos.y)
+        cr.set_source_surface(
+            self.target.img, self.target.pos.x, self.target.pos.y)
         cr.paint()
 
         if self.mean:
-            cr.set_source_surface(self.yellow.img, self.yellow.pos.x, self.yellow.pos.y)
+            cr.set_source_surface(
+                self.yellow.img, self.yellow.pos.x, self.yellow.pos.y)
             cr.paint()
         else:
-            cr.set_source_surface(self.green.img, self.green.pos.x, self.green.pos.y)
+            cr.set_source_surface(
+                self.green.img, self.green.pos.x, self.green.pos.y)
             cr.paint()
 
         cog = calc_los.center_of_gravity(self.window.app.patient.height)
@@ -285,10 +305,10 @@ class Handler():
         cr.translate(self.monitor.center.x, self.monitor.center.y)
         cr.scale(1, a/r)
         cr.arc(0., 0., r, math.pi, 2 * math.pi)
-        cr.set_source_rgb(.25,.25,.25)
+        cr.set_source_rgb(.25, .25, .25)
         cr.set_line_width(1)
         cr.stroke()
-        #cr.fill()
+        # cr.fill()
         cr.restore()
 
         # cr.save()
@@ -302,13 +322,13 @@ class Handler():
         cr.translate(self.monitor.center.x, self.monitor.center.y)
         cr.scale(1, b/r)
         cr.arc(0, 0, r, 0, math.pi)
-        cr.set_source_rgb(.25,.25,.25)
+        cr.set_source_rgb(.25, .25, .25)
         cr.set_line_width(1)
         cr.stroke()
-        #cr.fill()
+        # cr.fill()
         cr.restore()
 
-    def cop_to_pos(self, height, x, y, x_med = 0, y_med = 0):
+    def cop_to_pos(self, height, x, y, x_med=0, y_med=0):
         '''Converts center of pressure (cop) to screen position
 
         Parameters
@@ -337,8 +357,8 @@ class Handler():
         #xpos = (( x - x_med ) / R ) * self.monitor.center.x + self.monitor.center.x
         #ypos = (( y - y_med ) / (-1*R) ) * self.monitor.center.y + self.monitor.center.y
 
-        xpos = (x  / R ) * self.monitor.center.y + self.monitor.center.x
-        ypos = (y  / (-1*R) ) * self.monitor.center.y + self.monitor.center.y
+        xpos = (x / R) * self.monitor.center.y + self.monitor.center.x
+        ypos = (y / (-1*R)) * self.monitor.center.y + self.monitor.center.y
 
         diff = (self.monitor.width-self.monitor.height)//2
         if xpos > self.monitor.width - diff:

@@ -1,10 +1,11 @@
 # Third party imports
+from src.interface.handlers.report_window_handler import Handler
+from src.interface.builder import Builder
+from gi.repository import Gtk, Gdk, GLib
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib
 # Local imports
-from src.interface.builder import Builder
-from src.interface.handlers.report_window_handler import Handler
+
 
 class ReportWindow(Gtk.Assistant):
     """This class implements Report Window
@@ -12,7 +13,8 @@ class ReportWindow(Gtk.Assistant):
 
     def __init__(self, app):
         # Init Gtk.Window class
-        super(ReportWindow, self).__init__(title='Report Window', use_header_bar=True, application=app)
+        super(ReportWindow, self).__init__(
+            title='Report Window', use_header_bar=True, application=app)
         self.set_modal(True)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -22,18 +24,18 @@ class ReportWindow(Gtk.Assistant):
 
         # Assign builder
         builder = Builder('src/interface/glade/report.glade')
-        
+
         # Get glade objects
-        ## Boxes
+        # Boxes
         self.patient_box = builder.get_object('patient_box')
         self.metrics_box = builder.get_object('metrics_box')
-        ## TreeViews
+        # TreeViews
         self.patients_treeview = builder.get_object('patients_treeview')
         self.metrics_treeview = builder.get_object('metrics_treeview')
-        ## Liststores
+        # Liststores
         self.patients_liststore = builder.get_object('patients_liststore')
         self.metrics_liststore = builder.get_object('metrics_liststore')
-        ## Checkbuttons
+        # Checkbuttons
         self.patients_checkbutton = builder.get_object('patients_checkbutton')
         self.metrics_checkbutton = builder.get_object('metrics_checkbutton')
 
@@ -47,7 +49,6 @@ class ReportWindow(Gtk.Assistant):
         self.append_page(self.metrics_box)
         self.set_page_type(self.metrics_box, Gtk.AssistantPageType.CONFIRM)
         self.set_page_title(self.metrics_box, 'Selecionar Métricas')
-
 
         handler = Handler(self)
         builder.connect_signals(handler)

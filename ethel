@@ -2,33 +2,33 @@
 # -*- coding: utf-8 -*-
 
 # Default library imports
+from src.models.user import User
+from src.models.dynamic_exam import DynamicExam
+from src.models.static_exam import StaticExam
+from src.models.device import Device
+from src.models.patient import Patient
+from src.interface.windows.report_window import ReportWindow
+from src.interface.windows.calibration_test_window import CalibrationTestWindow
+from src.interface.windows.calibration_window import CalibrationWindow
+from src.interface.windows.exam_window import ExamWindow
+from src.interface.windows.los_window import LosWindow
+from src.interface.windows.load_patient_window import LoadPatientWindow
+from src.interface.windows.search_device_window import SearchDeviceWindow
+from src.interface.windows.load_device_window import LoadDeviceWindow
+from src.interface.windows.device_window import DeviceWindow
+from src.interface.windows.patient_window import PatientWindow
+from src.interface.windows.main_window import MainWindow
+from gi.repository import Gtk, GLib, Gdk
 import sys
 
 # Third party imports
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GLib, Gdk
 
 # Local imports
-## Windows
-from src.interface.windows.main_window import MainWindow
-from src.interface.windows.patient_window import PatientWindow
-from src.interface.windows.device_window import DeviceWindow
-from src.interface.windows.load_device_window import LoadDeviceWindow
-from src.interface.windows.search_device_window import SearchDeviceWindow
-from src.interface.windows.load_patient_window import LoadPatientWindow
-from src.interface.windows.los_window import LosWindow
-from src.interface.windows.exam_window import ExamWindow
-from src.interface.windows.calibration_window import CalibrationWindow
-from src.interface.windows.calibration_test_window import CalibrationTestWindow
-from src.interface.windows.report_window import ReportWindow
+# Windows
 
-## Models
-from src.models.patient import Patient
-from src.models.device import Device
-from src.models.static_exam import StaticExam
-from src.models.dynamic_exam import DynamicExam
-from src.models.user import User
+# Models
 
 
 class Ethel(Gtk.Application):
@@ -41,7 +41,8 @@ class Ethel(Gtk.Application):
         self._dynamic_exam = DynamicExam()
         self._wiimote = None
         self._change_flags = {'patient': False, 'device': False, 'user': False}
-        self._connection_flags = {'patient': False, 'device': False, 'user': False}
+        self._connection_flags = {
+            'patient': False, 'device': False, 'user': False}
         self.style()
 
     @property

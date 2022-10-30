@@ -6,9 +6,11 @@ import itertools
 import datetime
 
 # Style
-STYLE = xlwt.Style.easyxf('font: colour white, bold on; align: wrap on, vert centre, horiz center; pattern: pattern solid, fore-colour ocean_blue;')
+STYLE = xlwt.Style.easyxf(
+    'font: colour white, bold on; align: wrap on, vert centre, horiz center; pattern: pattern solid, fore-colour ocean_blue;')
 
-def fill_sheet(worksheet : xlwt.Worksheet, exams : list):
+
+def fill_sheet(worksheet: xlwt.Worksheet, exams: list):
     """
     This function fills a worksheet with the given exams
 
@@ -26,7 +28,7 @@ def fill_sheet(worksheet : xlwt.Worksheet, exams : list):
     """
 
     # Header
-    header = ['MÉTRICA','MÉDIA','DESVPAD']
+    header = ['MÉTRICA', 'MÉDIA', 'DESVPAD']
 
     # Redefine HEADER
     for i in range(len(exams)):
@@ -35,7 +37,6 @@ def fill_sheet(worksheet : xlwt.Worksheet, exams : list):
     # Fill header
     for i, item in enumerate(header):
         worksheet.write(0, i, item, style=STYLE)
-
 
     # Fill metrics
     for i, metrics in enumerate(exams):
@@ -54,14 +55,15 @@ def fill_sheet(worksheet : xlwt.Worksheet, exams : list):
         worksheet.write(i+1, ncols+2, xlwt.Formula(f"STDEV(B{i+2}:D{i+2})"))
 
     # Change cell size
-    col_width = 256 * 15 # 20 characters wide
+    col_width = 256 * 15  # 20 characters wide
     try:
         for i in itertools.count():
             worksheet.col(i).width = col_width
     except ValueError:
         pass
 
-def generate_report(name : str, exams : dict, date : str):
+
+def generate_report(name: str, exams: dict, date: str):
     """
     This function generates a report with the given exams
 
@@ -83,7 +85,8 @@ def generate_report(name : str, exams : dict, date : str):
     # Init Workbook
     workbook = xlwt.Workbook()
 
-    keys = [t.replace('O', 'OA').replace('F', 'E').replace('C', 'OF').replace('N', '') for t in list(exams.keys())]
+    keys = [t.replace('O', 'OA').replace('F', 'E').replace(
+        'C', 'OF').replace('N', '') for t in list(exams.keys())]
 
     for i, key in enumerate(exams.keys()):
         worksheet = workbook.add_sheet(keys[i])
@@ -91,22 +94,24 @@ def generate_report(name : str, exams : dict, date : str):
 
     workbook.save(f"reports/{name} ({date}).xls")
 
+
 if __name__ == '__main__':
     import numpy as np
     metrics = dict()
     keys = [
-        'AP_', 'ML_', 'dis_media', 'dis_mediaAP', \
-        'dis_mediaML', 'dis_rms_total', 'dis_rms_AP', \
-        'dis_rms_ML', 'totex_total', 'totex_AP', 'totex_ML', \
-        'mvelo_total', 'mvelo_AP', 'mvelo_ML', 'amplitude_total', \
+        'AP_', 'ML_', 'dis_media', 'dis_mediaAP',
+        'dis_mediaML', 'dis_rms_total', 'dis_rms_AP',
+        'dis_rms_ML', 'totex_total', 'totex_AP', 'totex_ML',
+        'mvelo_total', 'mvelo_AP', 'mvelo_ML', 'amplitude_total',
         'amplitude_AP', 'amplitude_ML'
-        ]
+    ]
     values = np.random.random_sample(len(keys))
     for i, key in enumerate(keys):
         metrics[key] = values[i]
 
     name = "Raí"
-    exams = {'OA':[metrics, metrics, metrics], 'OF':[metrics, metrics, metrics], 'OAE':[metrics, metrics, metrics], 'OFE':[metrics, metrics, metrics]}
+    exams = {'OA': [metrics, metrics, metrics], 'OF': [metrics, metrics, metrics], 'OAE': [
+        metrics, metrics, metrics], 'OFE': [metrics, metrics, metrics]}
     date = datetime.date.today().isoformat()
 
     generate_report(name, exams, date)

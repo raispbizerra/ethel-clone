@@ -3,13 +3,15 @@
 import cwiid
 import bluetooth
 
+
 def verifyConnection():
     pass
 
 
 def searchWBB():
     print("Start discovering....")
-    nearby_devices = [d for d in bluetooth.discover_devices(duration=1, lookup_names=True) if 'Nintendo' in d[1]]
+    nearby_devices = [d for d in bluetooth.discover_devices(
+        duration=1, lookup_names=True) if 'Nintendo' in d[1]]
 
     return nearby_devices
 
@@ -19,7 +21,7 @@ def connectToWBB(MAC):
     wiimote.rpt_mode = cwiid.RPT_BALANCE | cwiid.RPT_BTN
     wiimote.request_status()
 
-    i = 1;
+    i = 1
     while wiimote.state['ext_type'] != cwiid.EXT_BALANCE:
         try:
             wiimote = cwiid.Wiimote(MAC)

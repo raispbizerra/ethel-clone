@@ -1,11 +1,12 @@
 # Third party imports
+from src.interface.handlers.calibration_test_window_handler import Handler
+from src.interface.builder import Builder
+from gi.repository import Gtk, Gdk
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
 
 # Local imports
-from src.interface.builder import Builder
-from src.interface.handlers.calibration_test_window_handler import Handler
+
 
 class CalibrationTestWindow(Gtk.ApplicationWindow):
     """This class implements Calibration Test Window
@@ -13,7 +14,8 @@ class CalibrationTestWindow(Gtk.ApplicationWindow):
 
     def __init__(self, app):
         # Init Gtk.Window class
-        super(CalibrationTestWindow, self).__init__(title='Calibration Test', application=app)
+        super(CalibrationTestWindow, self).__init__(
+            title='Calibration Test', application=app)
         self.set_modal(True)
         self.set_decorated(False)
         # self.set_resizable(False)
@@ -24,7 +26,7 @@ class CalibrationTestWindow(Gtk.ApplicationWindow):
 
         # Assign builder
         builder = Builder('src/interface/glade/calibration_test_window.glade')
-        
+
         # Get glade objects
         box = builder.get_object('box')
         self.drawing_area = builder.get_object('drawing_area')
@@ -34,7 +36,7 @@ class CalibrationTestWindow(Gtk.ApplicationWindow):
         # # Assign handler
         handler = Handler(self)
         builder.connect_signals(handler)
-        
+
         # Connect signals
         # self.connect('delete-event', self.app.on_delete_event)
         self.connect('delete-event', handler.on_delete_event)

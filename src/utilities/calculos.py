@@ -4,6 +4,7 @@ from math import sqrt
 import numpy as np
 from src.utilities.calculos_los import distance_points
 
+
 def distanciaMedia(RD):
     # return sum(list(lista_valores)) / len(lista_valores)
     return RD.mean()
@@ -68,7 +69,7 @@ def geraAP_ML(valy, valx):
     ML_barra = valx.mean()
     print(f'AP_: {AP_barra}')
     print(f'ML_: {ML_barra}')
-    
+
     valores_AP = valy - AP_barra
     valores_ML = valx - ML_barra
     # for i in range(len(valy)):
@@ -113,17 +114,20 @@ def valorAbsoluto(minimo, maximo):
     else:
         return abs(maximo)
 
+
 def amplitude(aps, mls):
-	a = 0.
-	l = len(aps)
-	for i in range(l-1):
-		d = distance_points((mls[i], aps[i]), (mls[i+1], aps[i+1]))
-		if d > a:
-			a = d
-	return a
+    a = 0.
+    l = len(aps)
+    for i in range(l-1):
+        d = distance_points((mls[i], aps[i]), (mls[i+1], aps[i+1]))
+        if d > a:
+            a = d
+    return a
+
 
 def amplitude_parcial(ap_ou_ml):
-	return ap_ou_ml.max() - ap_ou_ml.min()
+    return ap_ou_ml.max() - ap_ou_ml.min()
+
 
 def get_amplitude(aps, mls):
     aps = aps * .1
@@ -131,11 +135,12 @@ def get_amplitude(aps, mls):
     APs_Processado, MLs_Processado, _, _ = geraAP_ML(aps, mls)
 
     # AMPLITUDE_AP
-    amplitude_AP = amplitude_parcial(APs_Processado) 
+    amplitude_AP = amplitude_parcial(APs_Processado)
     # AMPLITUDE_ML
-    amplitude_ML = amplitude_parcial(MLs_Processado) 
+    amplitude_ML = amplitude_parcial(MLs_Processado)
 
     return amplitude_AP, amplitude_ML
+
 
 def computes_metrics(cop_y, cop_x):
     metrics = dict()
@@ -147,7 +152,7 @@ def computes_metrics(cop_y, cop_x):
     metrics['dt'] = 0.040
     metrics['tTotal'] = len(aps) * metrics['dt']
     metrics['tempo'] = np.arange(0, metrics['tTotal'], metrics['dt'])
-    
+
     # Processamento do sinal
     metrics['APs_Processado'], metrics['MLs_Processado'], metrics['AP_'], metrics['ML_'] = geraAP_ML(
         aps, mls)

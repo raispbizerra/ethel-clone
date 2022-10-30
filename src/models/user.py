@@ -17,14 +17,15 @@ class User():
     is_adm : bool
         User's is_adm
     '''
-    def __init__(self, cod = None, name = None, username = None, password = None, email = None, is_adm = None):
-        self._cod       =  cod
-        self._name      =  name
-        self._username  =  username
-        self._password  =  password
-        self._email     =  email
-        self._is_adm    =  is_adm
-    
+
+    def __init__(self, cod=None, name=None, username=None, password=None, email=None, is_adm=None):
+        self._cod = cod
+        self._name = name
+        self._username = username
+        self._password = password
+        self._email = email
+        self._is_adm = is_adm
+
     # Getters and Setters
     @property
     def cod(self):

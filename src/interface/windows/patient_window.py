@@ -1,11 +1,12 @@
 # Third party imports
+from src.interface.handlers.patient_window_handler import Handler
+from src.interface.builder import Builder
+from gi.repository import Gtk, Gdk
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
 
 # Local imports
-from src.interface.builder import Builder
-from src.interface.handlers.patient_window_handler import Handler
+
 
 class PatientWindow(Gtk.ApplicationWindow):
     """This class implements Patient Window
@@ -13,7 +14,8 @@ class PatientWindow(Gtk.ApplicationWindow):
 
     def __init__(self, app):
         # Init Gtk.Window class
-        super(PatientWindow, self).__init__(title='Dados do paciente', application=app)
+        super(PatientWindow, self).__init__(
+            title='Dados do paciente', application=app)
         self.set_modal(True)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -23,7 +25,7 @@ class PatientWindow(Gtk.ApplicationWindow):
 
         # Assigning builder
         builder = Builder('src/interface/glade/patient_window1.glade')
-        
+
         # Getting glade objects
         box = builder.get_object('box')
         self.popover = builder.get_object('popover')

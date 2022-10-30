@@ -1,4 +1,8 @@
 # Default library imports
+import src.utilities.wiimotelib as wbblib
+import src.utilities.wbb_calitera as wbb
+import numpy as np
+from gi.repository import Gtk, Gdk, GLib
 import sys
 import math
 import cairo
@@ -6,19 +10,17 @@ import cairo
 # Third party imports
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib
-import numpy as np
 
 # Local imports
-import src.utilities.wbb_calitera as wbb
-import src.utilities.wiimotelib as wbblib
 
 DT = 50
 SAMPLE = 100
 MEAN_SAMPLE = 100
 
+
 class Monitor():
     """docstring for Monitor"""
+
     def __init__(self, monitor):
         self.width, self.height = monitor.get_geometry().width, monitor.get_geometry().height
         self.x, self.y = monitor.get_geometry().x, monitor.get_geometry().y
@@ -31,7 +33,8 @@ class Monitor():
 
 class Position():
     """docstring for Position"""
-    def __init__(self, x = 0, y = 0):
+
+    def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
 
@@ -41,6 +44,7 @@ class Position():
 
 class ImageSurface():
     """docstring for ImageSurface"""
+
     def __init__(self, img):
         self.img = img
         self.pos = Position()
@@ -56,11 +60,13 @@ class ImageSurface():
 class Handler():
     """This class implements Los Window Handler
     """
-    
+
     def __init__(self, window):
         self.window = window
-        self.default_target = ImageSurface(cairo.ImageSurface.create_from_png("media/target.png"))
-        self.calibrated_target = ImageSurface(cairo.ImageSurface.create_from_png("media/target1.png"))
+        self.default_target = ImageSurface(
+            cairo.ImageSurface.create_from_png("media/target.png"))
+        self.calibrated_target = ImageSurface(
+            cairo.ImageSurface.create_from_png("media/target1.png"))
         self.default_weight = 0.
         self.calibrated_weight = 0.
         self.history = np.zeros(100)
@@ -105,12 +111,12 @@ class Handler():
             self.window.hide()
 
     def set_line_pos(self, width, height):
-        front       = Position(width//2, 0)
-        right       = Position(width, self.monitor.center.y)
-        rear        = Position(width//2, height)
-        left        = Position(0, self.monitor.center.y)
+        front = Position(width//2, 0)
+        right = Position(width, self.monitor.center.y)
+        rear = Position(width//2, height)
+        left = Position(0, self.monitor.center.y)
 
-        self.line_pos = [front,right,rear,left]
+        self.line_pos = [front, right, rear, left]
 
     def get_tara(self):
         dx = np.zeros(4)
@@ -130,10 +136,13 @@ class Handler():
             # Gets wbb readings
             readings = wbb.captura1(self.window.app.wiimote)
             # Gets CoP
-            cop_x, cop_y = wbb.calCoP(readings, self.window.app.device.calibrations, wbb.escala_eu)
+            cop_x, cop_y = wbb.calCoP(
+                readings, self.window.app.device.calibrations, wbb.escala_eu)
 
-            self.default_weight += wbb.calcWeight(readings, self.calibrations, wbb.escala_eu)
-            self.calibrated_weight += wbb.calcWeight(readings, self.window.app.calibration, wbb.escala_eu)
+            self.default_weight += wbb.calcWeight(
+                readings, self.calibrations, wbb.escala_eu)
+            self.calibrated_weight += wbb.calcWeight(
+                readings, self.window.app.calibration, wbb.escala_eu)
 
             self.x_mean += cop_x
             self.y_mean += cop_y
@@ -155,11 +164,15 @@ class Handler():
         # Get wbb readings
         readings = wbb.captura1(self.window.app.wiimote)
         # Get CoP
-        def_cop_x, def_cop_y = wbb.calCoP_(readings, self.calibrations, wbb.escala_eu)
-        cal_cop_x, cal_cop_y = wbb.calCoP_(readings, self.window.app.calibration, wbb.escala_eu)
+        def_cop_x, def_cop_y = wbb.calCoP_(
+            readings, self.calibrations, wbb.escala_eu)
+        cal_cop_x, cal_cop_y = wbb.calCoP_(
+            readings, self.window.app.calibration, wbb.escala_eu)
         # Convert cop to screen pos
-        def_cop_x, def_cop_y = self.cop_to_pos(def_cop_x, def_cop_y, self.x_mean, self.y_mean)
-        cal_cop_x, cal_cop_y = self.cop_to_pos(cal_cop_x, cal_cop_y, self.x_mean, self.y_mean)
+        def_cop_x, def_cop_y = self.cop_to_pos(
+            def_cop_x, def_cop_y, self.x_mean, self.y_mean)
+        cal_cop_x, cal_cop_y = self.cop_to_pos(
+            cal_cop_x, cal_cop_y, self.x_mean, self.y_mean)
         self.default_target.set_position(def_cop_x, def_cop_y)
         self.calibrated_target.set_position(cal_cop_x, cal_cop_y)
         self.window.drawing_area.queue_draw()
@@ -172,28 +185,30 @@ class Handler():
         cr.paint()
 
         cr.set_line_width(5)
-        cr.set_source_rgb(.25,.25,.25)
+        cr.set_source_rgb(.25, .25, .25)
         for pos in self.line_pos:
             cr.move_to(pos.x, pos.y)
             cr.line_to(self.monitor.center.x, self.monitor.center.y)
             cr.stroke()
 
-        cr.set_source_surface(self.default_target.img, self.default_target.pos.x, self.default_target.pos.y)
+        cr.set_source_surface(
+            self.default_target.img, self.default_target.pos.x, self.default_target.pos.y)
         cr.paint()
 
-        cr.set_source_surface(self.calibrated_target.img, self.calibrated_target.pos.x, self.calibrated_target.pos.y)
+        cr.set_source_surface(self.calibrated_target.img,
+                              self.calibrated_target.pos.x, self.calibrated_target.pos.y)
         cr.paint()
 
         if not self.on_mean:
-            cr.set_source_rgb(1,0,0)
+            cr.set_source_rgb(1, 0, 0)
             cr.move_to(self.monitor.width - 100, self.monitor.height - 110)
             cr.show_text(str(self.calibrated_weight))
 
-            cr.set_source_rgb(0,0,0)
+            cr.set_source_rgb(0, 0, 0)
             cr.move_to(self.monitor.width - 100, self.monitor.height - 100)
             cr.show_text(str(self.default_weight))
 
-    def cop_to_pos(self, x, y, x_med = 0, y_med = 0):
+    def cop_to_pos(self, x, y, x_med=0, y_med=0):
         '''Converts center of pressure (cop) to screen position
 
         Parameters
@@ -208,11 +223,13 @@ class Handler():
         tuple
             cop position on the screen 
         '''
-        X = 433 / 2 # mm
-        Y = -1 * 238 / 2 # mm
+        X = 433 / 2  # mm
+        Y = -1 * 238 / 2  # mm
 
-        xpos = (( x - x_med ) / X ) * self.monitor.center.x + self.monitor.center.x
-        ypos = (( y - y_med ) / Y ) * self.monitor.center.y + self.monitor.center.y
+        xpos = ((x - x_med) / X) * self.monitor.center.x + \
+            self.monitor.center.x
+        ypos = ((y - y_med) / Y) * self.monitor.center.y + \
+            self.monitor.center.y
 
         return (xpos, ypos)
 
@@ -222,7 +239,7 @@ class Handler():
         window.hide()
         return True
 
-    def on_reset_button_clicked(self, button : Gtk.Button):
+    def on_reset_button_clicked(self, button: Gtk.Button):
         '''
         This method handles reset button click
 
@@ -241,8 +258,8 @@ class Handler():
     def connect_balance_board(self, was_just_connected, readings):
         self.zeroed_weight = 0.
         if was_just_connected:
-            count_max = 100  
-        else: 
+            count_max = 100
+        else:
             count_max = 50
         for init_weight_count in range(1, count_max+1):
             weight = wbblib.calcWeight(readings, calibrations)
@@ -278,23 +295,25 @@ class Handler():
             return
 
         # Cursor do histórico (índice)
-        self.history_cursor+=1
+        self.history_cursor += 1
         # Preenche o array de histórico com o peso corrente
         self.history[self.history_cursor % len(self.history)] = kg
 
         # Percorre o vetor de histórico
         for self.history_best in range(len(self.history)):
-            history_entry = self.history[(self.history_cursor + len(self.history) - self.history_best) % len(self.history)]
-            if abs(max_hist - history_entry) > 1.: 
+            history_entry = self.history[(
+                self.history_cursor + len(self.history) - self.history_best) % len(self.history)]
+            if abs(max_hist - history_entry) > 1.:
                 break
-            if abs(min_hist - history_entry) > 1.: 
+            if abs(min_hist - history_entry) > 1.:
                 break
-            if history_entry > max_hist: 
+            if history_entry > max_hist:
                 max_hist = history_entry
             if history_entry < min_hist:
                 min_hist = history_entry
 
-            diff = max(abs(history_entry - kg), abs((history_sum + history_entry) / (self.history_best + 1) - kg))
+            diff = max(abs(history_entry - kg), abs((history_sum +
+                       history_entry) / (self.history_best + 1) - kg))
             if diff > max_diff:
                 max_diff = diff
             if diff > 1.:

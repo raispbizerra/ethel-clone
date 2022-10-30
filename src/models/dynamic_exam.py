@@ -17,13 +17,14 @@ class DynamicExam():
     usr_cod : int
         Exam's user code;
     '''
-    def __init__(self, cod = None, cop_x = None, cop_y = None, date = None, pat_cod = None, usr_cod = None):
-        self._cod       = cod
-        self._cop_x     = cop_x
-        self._cop_y     = cop_y
-        self._date      = date
-        self._pat_cod   = pat_cod
-        self._usr_cod   = usr_cod
+
+    def __init__(self, cod=None, cop_x=None, cop_y=None, date=None, pat_cod=None, usr_cod=None):
+        self._cod = cod
+        self._cop_x = cop_x
+        self._cop_y = cop_y
+        self._date = date
+        self._pat_cod = pat_cod
+        self._usr_cod = usr_cod
 
     @property
     def cod(self):

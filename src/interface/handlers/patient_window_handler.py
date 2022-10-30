@@ -1,20 +1,22 @@
 # Default imports
+import src.utilities.utils as utils
+from src.database.patient_dao import PatientDao
+from src.models.patient import Patient
+from bluetooth.btcommon import is_valid_address as iva
+from gi.repository import Gtk
 import datetime as dt
 
 # Third party imports
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-from bluetooth.btcommon import is_valid_address as iva
 
 # Local imports
-from src.models.patient import Patient
-from src.database.patient_dao import PatientDao
-import src.utilities.utils as utils
+
 
 class Handler():
     """This class implements Patient Window Handler
     """
+
     def __init__(self, window):
         self.window = window
         self.patient_dao = PatientDao()
@@ -22,7 +24,7 @@ class Handler():
     def on_birth_activate(self, widget):
         print('activated')
 
-    def set_sex(self, sex : str):
+    def set_sex(self, sex: str):
         '''
         This method set sex from patient
         '''
@@ -30,7 +32,7 @@ class Handler():
             if button.get_label().upper() == sex:
                 button.set_active(True)
 
-    def on_show(self, window : Gtk.Window):
+    def on_show(self, window: Gtk.Window):
         '''
         This method handles the show event
 
@@ -44,7 +46,8 @@ class Handler():
 
         # Modifying
         if self.window.app.change_flags['patient']:
-            data = [self.window.app.patient.name, self.window.app.patient.sex, self.window.app.patient.birth, self.window.app.patient.height, self.window.app.patient.weight, self.window.app.patient.imc]
+            data = [self.window.app.patient.name, self.window.app.patient.sex, self.window.app.patient.birth,
+                    self.window.app.patient.height, self.window.app.patient.weight, self.window.app.patient.imc]
             self.set_sex(data[1])
             data[2] = dt.datetime.strftime(data[2], '%d-%m-%Y')
             data.remove(data[1])
@@ -72,7 +75,7 @@ class Handler():
         event : Gdk.Event
             The event
         '''
-        #Popup the popover
+        # Popup the popover
         self.window.popover.popup()
 
     def on_height_changed(self, entry):
@@ -99,7 +102,7 @@ class Handler():
         '''
         # Getting date from calendar
         y, m, d = self.window.calendar.get_date()
-        
+
         # Formating date to show
         m += 1
         birth = dt.datetime(y, m, d).date()
@@ -108,7 +111,7 @@ class Handler():
         if birth > dt.datetime.today().date():
             self.window.statusbar.set_text('Data inválida!')
             return
-        
+
         self.window.statusbar.set_text('')
 
         # Setting entry text
@@ -152,21 +155,23 @@ class Handler():
         '''
 
         # Checking if any entry is empty
-        label   = 0
+        label = 0
         article = 1
-        entry   = 2
+        entry = 2
         for data in [('Nome', 'o', self.window.name), ('Data de Nascimento', 'a', self.window.birth), ('Altura', 'a', self.window.height)]:
             if data[entry].get_text() == '':
-                self.window.statusbar.set_text(f"{data[label]} inválid{data[article]}!")
+                self.window.statusbar.set_text(
+                    f"{data[label]} inválid{data[article]}!")
                 data[entry].grab_focus()
                 return
 
         # Getting values
-        name    = self.window.name.get_text().upper()
-        birth   = dt.datetime.strptime(self.window.birth.get_text(), '%d-%m-%Y').date()
-        height  = int(self.window.height.get_text())
-        sex     = self.get_sex()
-        
+        name = self.window.name.get_text().upper()
+        birth = dt.datetime.strptime(
+            self.window.birth.get_text(), '%d-%m-%Y').date()
+        height = int(self.window.height.get_text())
+        sex = self.get_sex()
+
         # Clearing statusbar
         self.window.statusbar.set_text('')
 
@@ -180,7 +185,8 @@ class Handler():
             # Update patient
             self.patient_dao.update_patient(self.window.app.patient)
             # Assigning patient statusbar
-            self.window.app.patient_label.set_text(f"{self.window.app.patient.name}\t{self.get_patient_age()}")
+            self.window.app.patient_label.set_text(
+                f"{self.window.app.patient.name}\t{self.get_patient_age()}")
         else:
             # Create patient
             patient = Patient(name=name, birth=birth, sex=sex, height=height)
@@ -200,7 +206,8 @@ class Handler():
         for entry in [self.window.name, self.window.birth, self.window.height, self.window.weight, self.window.imc]:
             entry.set_text('')
 
-        self.window.combobox_month.set_active_id(str(self.window.calendar.get_date()[1]+1))
+        self.window.combobox_month.set_active_id(
+            str(self.window.calendar.get_date()[1]+1))
         self.window.sex.get_children()[2].set_active(True)
         self.window.statusbar.set_text('')
 
@@ -250,5 +257,5 @@ class Handler():
         entry : Gtk.Entry
             The entry
         '''
-        #Popup the popover
+        # Popup the popover
         self.window.popover.popup()
