@@ -3,6 +3,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - black
-  - pyside6
-  - pre-commit
+  - black=22.10.0
+  - pyside6=6.4.0
+  - pre-commit=2.20.0
+  - mypy=0.910
+  - numpy = 1.23.3

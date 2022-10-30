@@ -1,0 +1,273 @@
+# #!/usr/bin/python3
+# # -*- coding: utf-8 -*-
+
+# # Default library imports
+# from ethel.models.user import User
+# from ethel.models.dynamic_exam import DynamicExam
+# from ethel.models.static_exam import StaticExam
+# from ethel.models.device import Device
+# from ethel.models.patient import Patient
+# from ethel.interface.windows.report_window import ReportWindow
+# from ethel.interface.windows.calibration_test_window import CalibrationTestWindow
+# from ethel.interface.windows.calibration_window import CalibrationWindow
+# from ethel.interface.windows.exam_window import ExamWindow
+# from ethel.interface.windows.los_window import LosWindow
+# from ethel.interface.windows.load_patient_window import LoadPatientWindow
+# from ethel.interface.windows.search_device_window import SearchDeviceWindow
+# from ethel.interface.windows.load_device_window import LoadDeviceWindow
+# from ethel.interface.windows.device_window import DeviceWindow
+# from ethel.interface.windows.patient_window import PatientWindow
+# from ethel.interface.windows.main_window import MainWindow
+# from gi.repository import Gtk, GLib, Gdk
+# import sys
+
+# # Third party imports
+# import gi
+
+# gi.require_version("Gtk", "3.0")
+
+# # Local imports
+# # Windows
+
+# # Models
+
+
+# class Ethel(Gtk.Application):
+#     def __init__(self):
+#         Gtk.Application.__init__(self)
+#         self._patient = Patient()
+#         self._device = Device()
+#         self._user = User()
+#         self._static_exam = StaticExam()
+#         self._dynamic_exam = DynamicExam()
+#         self._wiimote = None
+#         self._change_flags = {"patient": False, "device": False, "user": False}
+#         self._connection_flags = {"patient": False, "device": False, "user": False}
+#         self.style()
+
+#     @property
+#     def patient(self):
+#         return self._patient
+
+#     @property
+#     def device(self):
+#         return self._device
+
+#     @property
+#     def user(self):
+#         return self._user
+
+#     @property
+#     def static_exam(self):
+#         return self._static_exam
+
+#     @property
+#     def dynamic_exam(self):
+#         return self._dynamic_exam
+
+#     @property
+#     def wiimote(self):
+#         return self._wiimote
+
+#     @property
+#     def change_flags(self):
+#         return self._change_flags
+
+#     @property
+#     def connection_flags(self):
+#         return self._connection_flags
+
+#     @property
+#     def main_window(self):
+#         return self._main_window
+
+#     @property
+#     def device_window(self):
+#         return self._device_window
+
+#     @property
+#     def load_device_window(self):
+#         return self._load_device_window
+
+#     @property
+#     def search_device_window(self):
+#         return self._search_device_window
+
+#     @property
+#     def patient_window(self):
+#         return self._patient_window
+
+#     @property
+#     def load_patient_window(self):
+#         return self._load_patient_window
+
+#     @property
+#     def los_window(self):
+#         return self._los_window
+
+#     @property
+#     def exam_window(self):
+#         return self._exam_window
+
+#     @property
+#     def calibration_window(self):
+#         return self._calibration_window
+
+#     @property
+#     def calibration_test_window(self):
+#         return self._calibration_test_window
+
+#     @property
+#     def report_window(self):
+#         return self._report_window
+
+#     @patient.setter
+#     def patient(self, value):
+#         self._patient = value
+
+#     @device.setter
+#     def device(self, value):
+#         self._device = value
+
+#     @user.setter
+#     def user(self, value):
+#         self._user = value
+
+#     @static_exam.setter
+#     def static_exam(self, value):
+#         self._static_exam = value
+
+#     @dynamic_exam.setter
+#     def dynamic_exam(self, value):
+#         self._dynamic_exam = value
+
+#     @wiimote.setter
+#     def wiimote(self, value):
+#         self._wiimote = value
+
+#     @change_flags.setter
+#     def change_flags(self, value):
+#         self._change_flags = value
+
+#     @connection_flags.setter
+#     def connection_flags(self, value):
+#         self._connection_flags = value
+
+#     @main_window.setter
+#     def main_window(self, value):
+#         self._main_window = value
+
+#     @device_window.setter
+#     def device_window(self, value):
+#         self._device_window = value
+
+#     @load_device_window.setter
+#     def load_device_window(self, value):
+#         self._load_device_window = value
+
+#     @search_device_window.setter
+#     def search_device_window(self, value):
+#         self._search_device_window = value
+
+#     @patient_window.setter
+#     def patient_window(self, value):
+#         self._patient_window = value
+
+#     @load_patient_window.setter
+#     def load_patient_window(self, value):
+#         self._load_patient_window = value
+
+#     @los_window.setter
+#     def los_window(self, value):
+#         self._los_window = value
+
+#     @exam_window.setter
+#     def exam_window(self, value):
+#         self._exam_window = value
+
+#     @calibration_window.setter
+#     def calibration_window(self, value):
+#         self._calibration_window = value
+
+#     @calibration_test_window.setter
+#     def calibration_test_window(self, value):
+#         self._calibration_test_window = value
+
+#     @report_window.setter
+#     def report_window(self, value):
+#         self._report_window = value
+
+#     def style(self):
+#         style_provider = Gtk.CssProvider()
+#         css = None
+#         with open("src/interface/css/gtk.css", "rb") as css_file:
+#             css = css_file.read()
+
+#         style_provider.load_from_data(css)
+
+#         Gtk.StyleContext.add_provider_for_screen(
+#             Gdk.Screen.get_default(),
+#             style_provider,
+#             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+#         )
+
+#     def get_windows(self):
+#         self._main_window = MainWindow(self)
+#         self._device_window = DeviceWindow(self)
+#         self._load_device_window = LoadDeviceWindow(self)
+#         self._search_device_window = SearchDeviceWindow(self)
+#         self._patient_window = PatientWindow(self)
+#         self._load_patient_window = LoadPatientWindow(self)
+#         self._los_window = LosWindow(self)
+#         self._exam_window = ExamWindow(self)
+#         self._calibration_window = CalibrationWindow(self)
+#         self._calibration_test_window = CalibrationTestWindow(self)
+#         self._report_window = ReportWindow(self)
+
+#     def add_windows(self):
+#         self.add_window(self.main_window)
+#         self.add_window(self.patient_window)
+#         self.add_window(self.load_patient_window)
+#         self.add_window(self.device_window)
+#         self.add_window(self.load_device_window)
+#         self.add_window(self.search_device_window)
+#         self.add_window(self.los_window)
+#         self.add_window(self.exam_window)
+#         self.add_window(self.calibration_window)
+#         self.add_window(self.calibration_test_window)
+#         self.add_window(self.report_window)
+
+#     def do_activate(self):
+#         # self.pull()
+#         self.get_windows()
+#         self.add_windows()
+#         self.statusbar = self.main_window.statusbar
+#         self.patient_label = self.main_window.patient_label
+#         GLib.timeout_add_seconds(1, self.verify_connection_flags)
+#         self.main_window.present()
+
+#     def on_quit(self, widget):
+#         # self.push()
+#         self.quit()
+
+#     def on_delete_event(self, window, event):
+#         window.hide()
+#         return True
+
+#     def on_verify_connection(self):
+#         GLib.timeout_add_seconds(1, self.main_window.verify_connection)
+
+#     def verify_connection_flags(self):
+#         if self.connection_flags["device"] and self.connection_flags["patient"]:
+#             self.calibration_window.calibration_button.set_sensitive(True)
+#             self.main_window.start_static_exam_button.set_sensitive(True)
+#             self.main_window.start_dynamic_exam_button.set_sensitive(True)
+#         else:
+#             self.main_window.start_static_exam_button.set_sensitive(False)
+#             self.main_window.start_dynamic_exam_button.set_sensitive(False)
+#         return True
+
+
+# if __name__ == "__main__":
+#     app = Ethel()
+#     app.run(sys.argv)
