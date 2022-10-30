@@ -24,7 +24,9 @@ jobs:
         activate-environment: ethel
         environment-file: environment.yml
         use-only-tar-bz2: true
-    - name: Run black for code formatting 🕵
+    - name: Run black to check code formatting 🕵
       run: |
-        conda activate ethel
         black --check .
+    - name: Run mypy to check type-hints 💡
+      run: |
+        mypy .
