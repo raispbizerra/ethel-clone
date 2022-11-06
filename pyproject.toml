@@ -1,2 +1,21 @@
+[tool.black]
+line_length = 88
+check = true
+
 [tool.mypy]
 strict = true
+show_absolute_path = true
+show_error_codes = true
+ignore_missing_imports = true
+allow_subclassing_any = true
+
+[tool.pylint]
+extension-pkg-whitelist = ["PySide6"]
+disable = ["C0114"] # missing-module-docstring
+recursive = true
+
+[tool.pydocstyle]
+ignore=["D100", "D104", "D107", "D203"]
+
+[tool.pytest.ini_options]
+python_files = ["test_*.py"]

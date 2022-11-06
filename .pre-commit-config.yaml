@@ -13,7 +13,26 @@ repos:
     rev: v0.982
     hooks:
     -   id: mypy
+-   repo: https://github.com/pre-commit/mirrors-pylint
+    rev: v3.0.0a5
+    hooks:
+    -   id: pylint
+        language: system
+        types: [python]
+        args:
+            [
+                "--extension-pkg-whitelist=PySide6",
+                "--disable=C0114"
+            ]
 -   repo: https://github.com/pycqa/isort
     rev: 5.10.1
     hooks:
       - id: isort
+-   repo: https://github.com/pycqa/pydocstyle
+    rev: 6.1.1
+    hooks:
+    -   id: pydocstyle
+        args:
+            [
+                "--ignore=D100,D104,D107,D203"
+            ]
